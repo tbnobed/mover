@@ -50,7 +50,7 @@ interface FileListProps {
 
 export function FileList({ onFileSelect, filter }: FileListProps) {
   const { data: files, isLoading, error } = useQuery<File[]>({
-    queryKey: ["/api/files", filter],
+    queryKey: filter ? ["/api/files", filter] : ["/api/files"],
   });
 
   if (error) {

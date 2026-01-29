@@ -5,8 +5,8 @@ A multi-site automated file routing and processing pipeline for video color corr
 
 ## Tech Stack
 - **Frontend**: React + Vite + TanStack Query + Tailwind CSS + Shadcn UI
-- **Backend**: Express.js + TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
+- **Backend**: Python FastAPI + asyncpg (proxied through Express for dev server)
+- **Database**: PostgreSQL with asyncpg
 - **State Management**: React Query for server state
 - **Routing**: Wouter
 
@@ -33,13 +33,17 @@ client/
 │   │   ├── audit.tsx
 │   │   └── settings.tsx
 │   └── App.tsx          # Main app with routing
+server_python/
+├── main.py              # FastAPI application with all routes
+├── database.py          # asyncpg connection pool
+├── storage.py           # Data access layer
+└── models.py            # Pydantic models
 server/
-├── db.ts                # Database connection
-├── routes.ts            # API endpoints
-├── storage.ts           # Data access layer
-└── index.ts             # Express server
+├── index.ts             # Express dev server (spawns Python, proxies /api)
+├── vite.ts              # Vite dev server setup
+└── static.ts            # Static file serving
 shared/
-└── schema.ts            # Database schema + types
+└── schema.ts            # Database schema + types (Drizzle)
 ```
 
 ## Database Schema
@@ -58,7 +62,7 @@ colorist_assigned → in_progress → delivered_to_mam → archived
                                                     └→ rejected
 ```
 
-## API Endpoints
+## API Endpoints (Python FastAPI)
 
 ### Files
 - `GET /api/files` - List all files
@@ -90,7 +94,10 @@ colorist_assigned → in_progress → delivered_to_mam → archived
 ```bash
 npm run dev
 ```
-The app runs on port 5000.
+This starts Express on port 5000 which:
+1. Spawns Python FastAPI server on port 5001
+2. Proxies /api/* requests to Python
+3. Serves Vite dev server for frontend
 
 ### Database Migrations
 ```bash
@@ -107,3 +114,9 @@ Visit `POST /api/seed` to populate demo data:
 - Dark mode enabled by default
 - Modern, clean UI with professional aesthetic
 - Color scheme: Blue primary (#0ea5e9), dark sidebar
+
+## Recent Changes
+- 2026-01-29: Migrated backend from Express.js to Python FastAPI
+  - All API endpoints now handled by FastAPI
+  - Express serves as dev server and proxy to Python
+  - asyncpg for database connections

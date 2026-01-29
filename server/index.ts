@@ -1,10 +1,39 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { spawn, ChildProcess } from "child_process";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 const app = express();
 const httpServer = createServer(app);
+
+let pythonProcess: ChildProcess | null = null;
+
+function startPythonServer() {
+  const pythonPath = process.env.PYTHONPATH || "./server_python";
+  pythonProcess = spawn("python", ["server_python/main.py"], {
+    env: { ...process.env, PYTHONPATH: pythonPath },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  
+  pythonProcess.stdout?.on("data", (data) => {
+    console.log(`[python] ${data.toString().trim()}`);
+  });
+  
+  pythonProcess.stderr?.on("data", (data) => {
+    console.error(`[python] ${data.toString().trim()}`);
+  });
+  
+  pythonProcess.on("close", (code) => {
+    console.log(`[python] process exited with code ${code}`);
+  });
+}
+
+process.on("exit", () => {
+  if (pythonProcess) {
+    pythonProcess.kill();
+  }
+});
 
 declare module "http" {
   interface IncomingMessage {
@@ -60,7 +89,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
+  startPythonServer();
+  
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  app.use("/api", createProxyMiddleware({
+    target: "http://localhost:5001/api",
+    changeOrigin: true,
+  }));
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
