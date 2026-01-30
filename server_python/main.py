@@ -526,8 +526,10 @@ async def delete_site(site_id: str, _user: dict = Depends(get_current_user)):
     return {"message": "Site deleted successfully"}
 
 @app.post("/api/sites/{site_id}/heartbeat")
-async def site_heartbeat(site_id: str, _auth: dict = Depends(get_daemon_or_user_auth)):
-    site = await storage.update_site_heartbeat(site_id)
+async def site_heartbeat(site_id: str, auth: dict = Depends(get_daemon_or_user_auth)):
+    # Only auto-create sites for daemon heartbeats, not UI button clicks
+    is_daemon = auth.get("daemon", False)
+    site = await storage.update_site_heartbeat(site_id, auto_create=is_daemon)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
     return snake_to_camel(site)
