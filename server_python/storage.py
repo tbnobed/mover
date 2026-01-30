@@ -72,9 +72,17 @@ async def get_sites() -> List[Dict[str, Any]]:
 async def update_site_heartbeat(site_id: str) -> Optional[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
-        await conn.execute("UPDATE sites SET last_heartbeat = NOW() WHERE id = $1", site_id)
-        row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1", site_id)
-        return dict(row) if row else None
+        row = await conn.fetchrow("SELECT * FROM sites WHERE name = $1", site_id)
+        if not row:
+            try:
+                row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1::uuid", site_id)
+            except:
+                return None
+        if row:
+            await conn.execute("UPDATE sites SET last_heartbeat = NOW() WHERE id = $1", row["id"])
+            row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1", row["id"])
+            return dict(row) if row else None
+        return None
 
 async def get_audit_logs() -> List[Dict[str, Any]]:
     pool = await get_pool()

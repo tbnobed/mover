@@ -94,8 +94,19 @@ app.use((req, res, next) => {
   await new Promise(resolve => setTimeout(resolve, 2000));
   
   app.use("/api", createProxyMiddleware({
-    target: "http://localhost:5001/api",
+    target: "http://localhost:5001",
     changeOrigin: true,
+    pathRewrite: (path: string) => path.startsWith('/api') ? path : `/api${path}`,
+    on: {
+      proxyReq: (proxyReq, req: any) => {
+        if (req.body && Object.keys(req.body).length > 0) {
+          const bodyData = JSON.stringify(req.body);
+          proxyReq.setHeader('Content-Type', 'application/json');
+          proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+          proxyReq.write(bodyData);
+        }
+      }
+    }
   }));
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
