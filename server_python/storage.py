@@ -214,7 +214,7 @@ async def get_user_count() -> int:
         row = await conn.fetchrow("SELECT COUNT(*) as count FROM users")
         return row["count"] if row else 0
 
-async def update_site_heartbeat(site_id: str) -> Optional[Dict[str, Any]]:
+async def update_site_heartbeat(site_id: str, auto_create: bool = True) -> Optional[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
         # Try case-insensitive name match first
@@ -223,12 +223,21 @@ async def update_site_heartbeat(site_id: str) -> Optional[Dict[str, Any]]:
             try:
                 row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1::uuid", site_id)
             except:
-                return None
-        if row:
+                pass
+        
+        # Auto-create site if it doesn't exist
+        if not row and auto_create:
+            row = await conn.fetchrow(
+                """INSERT INTO sites (name, export_path, last_heartbeat) 
+                   VALUES ($1, $2, NOW()) 
+                   RETURNING *""",
+                site_id, f"/data/exports/{site_id.lower()}/"
+            )
+        elif row:
             await conn.execute("UPDATE sites SET last_heartbeat = NOW() WHERE id = $1", row["id"])
             row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1", row["id"])
-            return dict(row) if row else None
-        return None
+        
+        return dict(row) if row else None
 
 async def get_audit_logs() -> List[Dict[str, Any]]:
     pool = await get_pool()
