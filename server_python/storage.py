@@ -217,7 +217,8 @@ async def get_user_count() -> int:
 async def update_site_heartbeat(site_id: str) -> Optional[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
-        row = await conn.fetchrow("SELECT * FROM sites WHERE name = $1", site_id)
+        # Try case-insensitive name match first
+        row = await conn.fetchrow("SELECT * FROM sites WHERE LOWER(name) = LOWER($1)", site_id)
         if not row:
             try:
                 row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1::uuid", site_id)
