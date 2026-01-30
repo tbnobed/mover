@@ -210,8 +210,6 @@ async def create_file(file_data: FileCreate, _auth: dict = Depends(get_daemon_or
     })
     return snake_to_camel(file)
 
-ALLOWED_SITES = {"tustin", "nashville", "dallas"}
-
 @app.post("/api/files/upload")
 async def upload_file(
     request: Request,
@@ -221,8 +219,11 @@ async def upload_file(
 ):
     """Upload a file from a site daemon"""
     await get_daemon_or_user_auth(request)
-    if source_site not in ALLOWED_SITES:
-        raise HTTPException(status_code=400, detail=f"Invalid site: {source_site}")
+    # Sites are now dynamic - verify site exists in database
+    sites = await storage.get_sites()
+    site_names = {s["name"].lower() for s in sites}
+    if source_site.lower() not in site_names:
+        raise HTTPException(status_code=400, detail=f"Unknown site: {source_site}. Site must register via heartbeat first.")
     
     safe_filename = os.path.basename(file.filename or "unnamed")
     if not safe_filename or ".." in safe_filename or "/" in safe_filename or "\\" in safe_filename:
@@ -559,12 +560,16 @@ async def get_storage_settings(_user: dict = Depends(get_current_user)):
     """Get storage configuration and disk usage"""
     import shutil
     
+    # Get dynamic site list from database
+    sites = await storage.get_sites()
+    site_names = [s["name"] for s in sites]
+    
     total_size = 0
     file_count = 0
     site_stats = {}
     
-    for site in ALLOWED_SITES:
-        site_path = os.path.join(STORAGE_PATH, site)
+    for site in site_names:
+        site_path = os.path.join(STORAGE_PATH, site.lower())
         site_size = 0
         site_files = 0
         
@@ -597,7 +602,7 @@ async def get_storage_settings(_user: dict = Depends(get_current_user)):
     
     return {
         "storagePath": STORAGE_PATH,
-        "allowedSites": list(ALLOWED_SITES),
+        "registeredSites": site_names,
         "totalFiles": file_count,
         "totalSize": total_size,
         "siteStats": site_stats,
