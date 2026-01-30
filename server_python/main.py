@@ -111,11 +111,13 @@ async def login(login_data: LoginRequest, response: Response):
         raise HTTPException(status_code=401, detail="Invalid username or password")
     
     token = await storage.create_session(user["id"])
+    # Only set secure=True when HTTPS is configured (set HTTPS_ENABLED=true in .env)
+    use_secure = os.getenv("HTTPS_ENABLED", "false").lower() == "true"
     response.set_cookie(
         key="session_token",
         value=token,
         httponly=True,
-        secure=is_production(),
+        secure=use_secure,
         max_age=7 * 24 * 60 * 60,
         samesite="lax"
     )
