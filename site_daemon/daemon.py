@@ -256,8 +256,7 @@ def main():
     parser.add_argument(
         "--site", "-s",
         required=True,
-        choices=["tustin", "nashville", "dallas"],
-        help="Site ID (tustin, nashville, or dallas)"
+        help="Site ID (e.g., tustin, nashville, studio-a)"
     )
     parser.add_argument(
         "--watch", "-w",

@@ -1,0 +1,19 @@
+obtv-admin@tust-daemon1:~$ sudo journalctl -u color-routing-daemon -f
+Jan 30 22:16:30 tust-daemon1 systemd[1]: color-routing-daemon.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+Jan 30 22:16:30 tust-daemon1 systemd[1]: color-routing-daemon.service: Failed with result 'exit-code'.
+Jan 30 22:16:40 tust-daemon1 systemd[1]: color-routing-daemon.service: Scheduled restart job, restart counter is at 4.
+Jan 30 22:16:40 tust-daemon1 systemd[1]: Started color-routing-daemon.service - Color Routing System Site Daemon (Tustin).
+Jan 30 22:16:40 tust-daemon1 python[3039]: usage: daemon.py [-h] --site {tustin,nashville,dallas} [--watch WATCH]
+Jan 30 22:16:40 tust-daemon1 python[3039]:                  [--orchestrator ORCHESTRATOR] [--metadata-only]
+Jan 30 22:16:40 tust-daemon1 python[3039]:                  [--api-key API_KEY]
+Jan 30 22:16:40 tust-daemon1 python[3039]: daemon.py: error: argument --site/-s: invalid choice: 'Tustin' (choose from 'tustin', 'nashville', 'dallas')
+Jan 30 22:16:40 tust-daemon1 systemd[1]: color-routing-daemon.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+Jan 30 22:16:40 tust-daemon1 systemd[1]: color-routing-daemon.service: Failed with result 'exit-code'.
+Jan 30 22:16:50 tust-daemon1 systemd[1]: color-routing-daemon.service: Scheduled restart job, restart counter is at 5.
+Jan 30 22:16:50 tust-daemon1 systemd[1]: Started color-routing-daemon.service - Color Routing System Site Daemon (Tustin).
+Jan 30 22:16:50 tust-daemon1 python[3046]: usage: daemon.py [-h] --site {tustin,nashville,dallas} [--watch WATCH]
+Jan 30 22:16:50 tust-daemon1 python[3046]:                  [--orchestrator ORCHESTRATOR] [--metadata-only]
+Jan 30 22:16:50 tust-daemon1 python[3046]:                  [--api-key API_KEY]
+Jan 30 22:16:50 tust-daemon1 python[3046]: daemon.py: error: argument --site/-s: invalid choice: 'Tustin' (choose from 'tustin', 'nashville', 'dallas')
+Jan 30 22:16:50 tust-daemon1 systemd[1]: color-routing-daemon.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+Jan 30 22:16:50 tust-daemon1 systemd[1]: color-routing-daemon.service: Failed with result 'exit-code'.
