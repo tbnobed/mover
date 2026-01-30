@@ -1,0 +1,57 @@
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo npm run db:push
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/color-routing-orchestrator/drizzle.config.ts'
+DATABASE_URL, ensure the database is provisioned
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ cat /opt/color-routing-orchestrator/.env
+PYTHON_BIN=/opt/color-routing-orchestrator/venv/bin/python3
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo tee /opt/color-routing-orchestrator/.env << EOF
+DATABASE_URL=postgresql://color_routing:YOUR_DB_PASSWORD@localhost:5432/color_routing
+SESSION_SECRET=YOUR_SESSION_SECRET
+STORAGE_PATH=/data/incoming
+PYTHON_BIN=/opt/color-routing-orchestrator/venv/bin/python3
+NODE_ENV=production
+PORT=5000
+EOF
+DATABASE_URL=postgresql://color_routing:YOUR_DB_PASSWORD@localhost:5432/color_routing
+SESSION_SECRET=YOUR_SESSION_SECRET
+STORAGE_PATH=/data/incoming
+PYTHON_BIN=/opt/color-routing-orchestrator/venv/bin/python3
+NODE_ENV=production
+PORT=5000
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo npm run db:push
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/color-routing-orchestrator/drizzle.config.ts'
+Using 'pg' driver for database querying
+[⣷] Pulling schema from database...
+error: password authentication failed for user "color_routing"
+    at /opt/color-routing-orchestrator/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/opt/color-routing-orchestrator/node_modules/drizzle-kit/bin.cjs:80622:26)
+    at async fromDatabase2 (/opt/color-routing-orchestrator/node_modules/drizzle-kit/bin.cjs:19276:25) {
+  length: 109,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '331',
+  routine: 'auth_failed'
+}
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ 
