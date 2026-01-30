@@ -44,7 +44,29 @@ server/
 └── static.ts            # Static file serving
 shared/
 └── schema.ts            # Database schema + types (Drizzle)
+site_daemon/
+└── daemon.py            # Python site daemon for file detection
 ```
+
+## Site Daemon
+
+The site daemon runs at each physical location (Tustin, Nashville, Dallas) to detect and report files to the central orchestrator.
+
+### Running the Site Daemon
+```bash
+python site_daemon/daemon.py --site tustin --watch /path/to/watch
+```
+
+### CLI Options
+- `--site`: Site identifier (tustin, nashville, dallas)
+- `--watch`: Directory path to monitor for new files
+- `--orchestrator`: URL of central orchestrator (default: http://localhost:5000)
+
+### Features
+- File detection using watchdog library
+- SHA256 hash computation for file validation
+- Automatic heartbeat reporting every 30 seconds
+- Async queue processing for detected files
 
 ## Database Schema
 
@@ -116,6 +138,11 @@ Visit `POST /api/seed` to populate demo data:
 - Color scheme: Blue primary (#0ea5e9), dark sidebar
 
 ## Recent Changes
+- 2026-01-30: Added Python site daemon for file detection
+  - Watches directories for new video files
+  - Computes SHA256 hashes for validation
+  - Reports detected files to central orchestrator
+  - Sends periodic heartbeats to maintain site status
 - 2026-01-29: Migrated backend from Express.js to Python FastAPI
   - All API endpoints now handled by FastAPI
   - Express serves as dev server and proxy to Python
