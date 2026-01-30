@@ -178,10 +178,10 @@ async def seed_data():
         user2_id = str(uuid.uuid4())
         user3_id = str(uuid.uuid4())
         await conn.execute("""
-            INSERT INTO users (id, username, email, role, is_active, created_at) VALUES
-            ($1, 'jsmith', 'jsmith@studio.com', 'colorist', true, NOW()),
-            ($2, 'mwilson', 'mwilson@studio.com', 'colorist', true, NOW()),
-            ($3, 'admin', 'admin@studio.com', 'admin', true, NOW())
+            INSERT INTO users (id, username, display_name, email, role, created_at) VALUES
+            ($1, 'jsmith', 'John Smith', 'jsmith@studio.com', 'colorist', NOW()),
+            ($2, 'mwilson', 'Mary Wilson', 'mwilson@studio.com', 'colorist', NOW()),
+            ($3, 'admin', 'System Admin', 'admin@studio.com', 'admin', NOW())
         """, user1_id, user2_id, user3_id)
         
         file1_id = str(uuid.uuid4())
