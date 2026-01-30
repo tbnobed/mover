@@ -16,7 +16,7 @@ export const fileStateEnum = pgEnum("file_state", [
   "rejected"
 ]);
 
-export const siteEnum = pgEnum("site", ["tustin", "nashville", "dallas"]);
+// Site names are now dynamic - no enum restriction
 
 export const userRoleEnum = pgEnum("user_role", ["admin", "colorist", "engineer", "readonly"]);
 
@@ -32,7 +32,7 @@ export const users = pgTable("users", {
 
 export const sites = pgTable("sites", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: siteEnum("name").notNull().unique(),
+  name: text("name").notNull().unique(),
   exportPath: text("export_path").notNull(),
   isActive: text("is_active").notNull().default("true"),
   lastHeartbeat: timestamp("last_heartbeat")
@@ -41,7 +41,7 @@ export const sites = pgTable("sites", {
 export const files = pgTable("files", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   filename: text("filename").notNull(),
-  sourceSite: siteEnum("source_site").notNull(),
+  sourceSite: text("source_site").notNull(),
   sourcePath: text("source_path").notNull(),
   fileSize: bigint("file_size", { mode: "number" }).notNull(),
   sha256Hash: text("sha256_hash").notNull(),
