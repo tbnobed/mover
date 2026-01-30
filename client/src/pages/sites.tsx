@@ -58,6 +58,7 @@ export default function SitesPage() {
   
   const { data: sites, isLoading, isRefetching, refetch } = useQuery<Site[]>({
     queryKey: ["/api/sites"],
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   const heartbeatMutation = useMutation({

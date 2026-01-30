@@ -40,6 +40,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from datetime import datetime
+
 def snake_to_camel(data):
     if isinstance(data, dict):
         return {
@@ -48,6 +50,9 @@ def snake_to_camel(data):
         }
     elif isinstance(data, list):
         return [snake_to_camel(item) for item in data]
+    elif isinstance(data, datetime):
+        # Ensure timestamps are returned with UTC timezone indicator
+        return data.isoformat() + 'Z' if data.tzinfo is None else data.isoformat()
     return data
 
 async def get_current_user(request: Request):
