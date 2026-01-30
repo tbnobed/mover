@@ -217,15 +217,18 @@ async def get_user_count() -> int:
 async def update_site_heartbeat(site_id: str, auto_create: bool = True) -> Optional[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
-        # Try case-insensitive name match first
-        row = await conn.fetchrow("SELECT * FROM sites WHERE LOWER(name) = LOWER($1)", site_id)
-        if not row:
-            try:
-                row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1::uuid", site_id)
-            except:
-                pass
+        row = None
+        # Try ID lookup first (for UI heartbeat button which uses UUID)
+        try:
+            row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1::uuid", site_id)
+        except:
+            pass
         
-        # Auto-create site if it doesn't exist
+        # Then try case-insensitive name match (for daemon heartbeats)
+        if not row:
+            row = await conn.fetchrow("SELECT * FROM sites WHERE LOWER(name) = LOWER($1)", site_id)
+        
+        # Auto-create site if it doesn't exist (only for daemons, not UI)
         if not row and auto_create:
             row = await conn.fetchrow(
                 """INSERT INTO sites (name, export_path, last_heartbeat) 
