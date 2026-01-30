@@ -19,7 +19,7 @@ import aiohttp
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
-from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
 ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:5000")
@@ -206,7 +206,7 @@ class SiteDaemon:
     def start_watcher(self):
         event_handler = FileDetector(self.site_id, self.watch_path, self.orchestrator_url, self.pending_queue)
         self.file_detector = event_handler
-        self.observer = Observer()
+        self.observer = PollingObserver(timeout=5)  # Poll every 5 seconds for network mount compatibility
         self.observer.schedule(event_handler, self.watch_path, recursive=False)
         self.observer.start()
         print(f"[{datetime.now().isoformat()}] File watcher started for {self.watch_path}")
