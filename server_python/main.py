@@ -4,7 +4,7 @@ import hashlib
 import aiofiles
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Response
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 STORAGE_PATH = os.environ.get("STORAGE_PATH", "./data/incoming")
@@ -49,6 +49,35 @@ def snake_to_camel(data):
         return [snake_to_camel(item) for item in data]
     return data
 
+async def get_current_user(request: Request):
+    token = request.cookies.get("session_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    session = await storage.get_session(token)
+    if not session:
+        raise HTTPException(status_code=401, detail="Session expired")
+    
+    return session
+
+def is_production():
+    return os.environ.get("NODE_ENV") == "production" or os.environ.get("PRODUCTION") == "true"
+
+DAEMON_API_KEY = os.environ.get("DAEMON_API_KEY", "")
+
+async def get_daemon_or_user_auth(request: Request):
+    api_key = request.headers.get("X-API-Key")
+    if DAEMON_API_KEY and api_key == DAEMON_API_KEY:
+        return {"type": "daemon", "daemon": True}
+    
+    token = request.cookies.get("session_token")
+    if token:
+        session = await storage.get_session(token)
+        if session:
+            return {"type": "user", **session}
+    
+    raise HTTPException(status_code=401, detail="Authentication required")
+
 @app.post("/api/auth/login")
 async def login(login_data: LoginRequest, response: Response):
     user = await storage.verify_password(login_data.username, login_data.password)
@@ -60,6 +89,7 @@ async def login(login_data: LoginRequest, response: Response):
         key="session_token",
         value=token,
         httponly=True,
+        secure=is_production(),
         max_age=7 * 24 * 60 * 60,
         samesite="lax"
     )
@@ -102,7 +132,7 @@ async def get_current_user(request: Request):
     }
 
 @app.get("/api/stats")
-async def get_stats():
+async def get_stats(_user: dict = Depends(get_current_user)):
     stats = await storage.get_stats()
     return {
         "totalFiles": stats["total_files"],
@@ -119,19 +149,19 @@ async def get_stats():
     }
 
 @app.get("/api/files")
-async def get_files():
+async def get_files(_user: dict = Depends(get_current_user)):
     files = await storage.get_files()
     return [snake_to_camel(f) for f in files]
 
 @app.get("/api/files/{file_id}")
-async def get_file(file_id: str):
+async def get_file(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
     return snake_to_camel(file)
 
 @app.post("/api/files")
-async def create_file(file_data: FileCreate):
+async def create_file(file_data: FileCreate, _auth: dict = Depends(get_daemon_or_user_auth)):
     file = await storage.create_file({
         "filename": file_data.filename,
         "source_site": file_data.source_site,
@@ -151,11 +181,13 @@ ALLOWED_SITES = {"tustin", "nashville", "dallas"}
 
 @app.post("/api/files/upload")
 async def upload_file(
+    request: Request,
     file: UploadFile = File(...),
     source_site: str = Form(...),
     source_path: str = Form(...)
 ):
     """Upload a file from a site daemon"""
+    await get_daemon_or_user_auth(request)
     if source_site not in ALLOWED_SITES:
         raise HTTPException(status_code=400, detail=f"Invalid site: {source_site}")
     
@@ -200,7 +232,7 @@ async def upload_file(
     })
 
 @app.get("/api/settings")
-async def get_settings():
+async def get_settings(_user: dict = Depends(get_current_user)):
     """Get current storage settings"""
     return {
         "storagePath": STORAGE_PATH,
@@ -208,7 +240,7 @@ async def get_settings():
     }
 
 @app.post("/api/files/{file_id}/validate")
-async def validate_file(file_id: str):
+async def validate_file(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -225,7 +257,7 @@ async def validate_file(file_id: str):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/queue")
-async def queue_file(file_id: str):
+async def queue_file(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -242,7 +274,7 @@ async def queue_file(file_id: str):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/start-transfer")
-async def start_transfer(file_id: str):
+async def start_transfer(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -259,7 +291,7 @@ async def start_transfer(file_id: str):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/complete-transfer")
-async def complete_transfer(file_id: str):
+async def complete_transfer(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -280,7 +312,7 @@ async def complete_transfer(file_id: str):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/assign")
-async def assign_file(file_id: str, request: Optional[AssignRequest] = None):
+async def assign_file(file_id: str, request: Optional[AssignRequest] = None, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -312,7 +344,7 @@ async def assign_file(file_id: str, request: Optional[AssignRequest] = None):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/start")
-async def start_work(file_id: str):
+async def start_work(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -329,7 +361,7 @@ async def start_work(file_id: str):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/deliver")
-async def deliver_file(file_id: str):
+async def deliver_file(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -346,7 +378,7 @@ async def deliver_file(file_id: str):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/archive")
-async def archive_file(file_id: str):
+async def archive_file(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -363,7 +395,7 @@ async def archive_file(file_id: str):
     return snake_to_camel(updated)
 
 @app.post("/api/files/{file_id}/reject")
-async def reject_file(file_id: str, request: Optional[RejectRequest] = None):
+async def reject_file(file_id: str, request: Optional[RejectRequest] = None, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -383,17 +415,17 @@ async def reject_file(file_id: str, request: Optional[RejectRequest] = None):
     return snake_to_camel(updated)
 
 @app.get("/api/files/{file_id}/audit")
-async def get_file_audit(file_id: str):
+async def get_file_audit(file_id: str, _user: dict = Depends(get_current_user)):
     logs = await storage.get_file_audit_logs(file_id)
     return [snake_to_camel(log) for log in logs]
 
 @app.get("/api/users")
-async def get_users():
+async def get_users(_user: dict = Depends(get_current_user)):
     users = await storage.get_users()
     return [snake_to_camel(u) for u in users]
 
 @app.post("/api/users")
-async def create_user(user_data: UserCreate):
+async def create_user(user_data: UserCreate, _user: dict = Depends(get_current_user)):
     user = await storage.create_user({
         "username": user_data.username,
         "display_name": user_data.displayName,
@@ -404,7 +436,7 @@ async def create_user(user_data: UserCreate):
     return snake_to_camel(user)
 
 @app.put("/api/users/{user_id}")
-async def update_user(user_id: str, user_data: UserUpdate):
+async def update_user(user_id: str, user_data: UserUpdate, _user: dict = Depends(get_current_user)):
     data = {}
     if user_data.username is not None:
         data["username"] = user_data.username
@@ -423,31 +455,31 @@ async def update_user(user_id: str, user_data: UserUpdate):
     return snake_to_camel(user)
 
 @app.delete("/api/users/{user_id}")
-async def delete_user(user_id: str):
+async def delete_user(user_id: str, _user: dict = Depends(get_current_user)):
     success = await storage.delete_user(user_id)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "User deleted successfully"}
 
 @app.get("/api/sites")
-async def get_sites():
+async def get_sites(_auth: dict = Depends(get_daemon_or_user_auth)):
     sites = await storage.get_sites()
     return [snake_to_camel(s) for s in sites]
 
 @app.post("/api/sites/{site_id}/heartbeat")
-async def site_heartbeat(site_id: str):
+async def site_heartbeat(site_id: str, _auth: dict = Depends(get_daemon_or_user_auth)):
     site = await storage.update_site_heartbeat(site_id)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
     return snake_to_camel(site)
 
 @app.get("/api/audit")
-async def get_audit_logs():
+async def get_audit_logs(_user: dict = Depends(get_current_user)):
     logs = await storage.get_audit_logs()
     return [snake_to_camel(log) for log in logs]
 
 @app.get("/api/transfers")
-async def get_transfers():
+async def get_transfers(_user: dict = Depends(get_current_user)):
     transfers = await storage.get_transfer_jobs()
     return [snake_to_camel(t) for t in transfers]
 
@@ -457,7 +489,7 @@ async def seed_data():
     return result
 
 @app.get("/api/settings/storage")
-async def get_storage_settings():
+async def get_storage_settings(_user: dict = Depends(get_current_user)):
     """Get storage configuration and disk usage"""
     import shutil
     

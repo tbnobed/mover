@@ -42,17 +42,25 @@ async def update_file(file_id: str, updates: Dict[str, Any]) -> Optional[Dict[st
         row = await conn.fetchrow("SELECT * FROM files WHERE id = $1", file_id)
         return dict(row) if row else None
 
+def sanitize_user(user: Dict[str, Any]) -> Dict[str, Any]:
+    """Remove sensitive fields from user data before returning to API"""
+    if user is None:
+        return None
+    result = dict(user)
+    result.pop('password_hash', None)
+    return result
+
 async def get_users() -> List[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
         rows = await conn.fetch("SELECT * FROM users ORDER BY created_at DESC")
-        return [dict(row) for row in rows]
+        return [sanitize_user(dict(row)) for row in rows]
 
 async def get_user(user_id: str) -> Optional[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
-        return dict(row) if row else None
+        return sanitize_user(dict(row)) if row else None
 
 async def create_user(data: Dict[str, Any]) -> Dict[str, Any]:
     pool = await get_pool()
@@ -67,7 +75,7 @@ async def create_user(data: Dict[str, Any]) -> Dict[str, Any]:
             VALUES ($1, $2, $3, $4, $5, $6, NOW())
         """, user_id, data["username"], password_hash, data["display_name"], data.get("email"), data["role"])
         row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
-        return dict(row)
+        return sanitize_user(dict(row))
 
 async def update_user(user_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     pool = await get_pool()
@@ -108,7 +116,7 @@ async def update_user(user_id: str, data: Dict[str, Any]) -> Optional[Dict[str, 
             await conn.execute(query, *values)
         
         row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
-        return dict(row) if row else None
+        return sanitize_user(dict(row)) if row else None
 
 async def delete_user(user_id: str) -> bool:
     pool = await get_pool()

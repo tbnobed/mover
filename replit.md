@@ -137,7 +137,33 @@ Visit `POST /api/seed` to populate demo data:
 - Modern, clean UI with professional aesthetic
 - Color scheme: Blue primary (#0ea5e9), dark sidebar
 
+## Authentication
+
+The system uses cookie-based session authentication for users and API key authentication for site daemons.
+
+### User Authentication
+- Users log in with username/password
+- Passwords are hashed with bcrypt
+- Sessions are stored in the database with 7-day expiry
+- Session cookies are httponly with secure flag in production
+
+### Daemon Authentication
+- Site daemons authenticate using X-API-Key header
+- Set DAEMON_API_KEY environment variable to enable
+- Daemons can access: POST /api/files, POST /api/files/upload, GET /api/sites, POST /api/sites/:id/heartbeat
+
+### Auth Endpoints
+- `POST /api/auth/login` - User login (returns session cookie)
+- `POST /api/auth/logout` - User logout (clears session)
+- `GET /api/auth/me` - Get current user info
+
 ## Recent Changes
+- 2026-01-30: Added user authentication system
+  - Password hashing with bcrypt
+  - Cookie-based session management
+  - Login page and logout button
+  - Protected API routes with user or daemon auth
+  - Daemon API key support for site daemons
 - 2026-01-30: Added Python site daemon for file detection
   - Watches directories for new video files
   - Computes SHA256 hashes for validation
