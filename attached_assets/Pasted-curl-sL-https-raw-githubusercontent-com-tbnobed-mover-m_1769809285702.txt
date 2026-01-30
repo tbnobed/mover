@@ -1,0 +1,211 @@
+curl -sL https://raw.githubusercontent.com/tbnobed/mover/main/install-orchestrator.sh | sudo bash
+==============================================
+  Color Routing System - Orchestrator Installer
+==============================================
+
+This script will install/reinstall the Color Routing Orchestrator.
+
+
+Configuration:
+  Server Host: SERVER_HOST=${SERVER_HOST:-localhost}
+  Database Password: ****
+  Daemon API Key: ****
+  Storage Path: STORAGE_PATH=${STORAGE_PATH:-/data/incoming}
+
+Step 1: Stopping existing services...
+
+Step 2: Installing system dependencies...
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.6).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+postgresql is already the newest version (16+257build1.1).
+postgresql-contrib is already the newest version (16+257build1.1).
+python3 is already the newest version (3.12.3-0ubuntu2.1).
+python3-pip is already the newest version (24.0+dfsg-1ubuntu1.3).
+python3-venv is already the newest version (3.12.3-0ubuntu2.1).
+nginx is already the newest version (1.24.0-2ubuntu7.5).
+openssl is already the newest version (3.0.13-0ubuntu3.7).
+0 upgraded, 0 newly installed, 0 to remove and 45 not upgraded.
+
+Step 3: Setting up PostgreSQL...
+Synchronizing state of postgresql.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable postgresql
+Resetting database and user...
+DROP DATABASE
+DROP ROLE
+CREATE ROLE
+CREATE DATABASE
+GRANT
+ALTER DATABASE
+Database setup complete.
+
+Step 4: Cloning/updating repository...
+Updating existing installation...
+remote: Enumerating objects: 8, done.
+remote: Counting objects: 100% (8/8), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 5 (delta 3), reused 5 (delta 3), pack-reused 0 (from 0)
+Unpacking objects: 100% (5/5), 4.03 KiB | 4.03 MiB/s, done.
+From https://github.com/tbnobed/mover
+   b6f75c8..d95ac4c  main       -> origin/main
+HEAD is now at d95ac4c Improve install script to handle interactive prompts correctly
+
+Step 5: Installing Node.js dependencies...
+
+up to date, audited 484 packages in 954ms
+
+77 packages are looking for funding
+  run `npm fund` for details
+
+1 moderate severity vulnerability
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+Step 6: Setting up Python virtual environment...
+Requirement already satisfied: pip in ./venv/lib/python3.12/site-packages (24.0)
+Collecting pip
+  Using cached pip-25.3-py3-none-any.whl.metadata (4.7 kB)
+Using cached pip-25.3-py3-none-any.whl (1.8 MB)
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 24.0
+    Uninstalling pip-24.0:
+      Successfully uninstalled pip-24.0
+Successfully installed pip-25.3
+Collecting fastapi
+  Using cached fastapi-0.128.0-py3-none-any.whl.metadata (30 kB)
+Collecting uvicorn
+  Using cached uvicorn-0.40.0-py3-none-any.whl.metadata (6.7 kB)
+Collecting asyncpg
+  Using cached asyncpg-0.31.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (4.4 kB)
+Collecting pydantic
+  Using cached pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+Collecting aiofiles
+  Using cached aiofiles-25.1.0-py3-none-any.whl.metadata (6.3 kB)
+Collecting python-multipart
+  Using cached python_multipart-0.0.22-py3-none-any.whl.metadata (1.8 kB)
+Collecting bcrypt
+  Using cached bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl.metadata (10 kB)
+Collecting starlette<0.51.0,>=0.40.0 (from fastapi)
+  Using cached starlette-0.50.0-py3-none-any.whl.metadata (6.3 kB)
+Collecting typing-extensions>=4.8.0 (from fastapi)
+  Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting annotated-doc>=0.0.2 (from fastapi)
+  Using cached annotated_doc-0.0.4-py3-none-any.whl.metadata (6.6 kB)
+Collecting anyio<5,>=3.6.2 (from starlette<0.51.0,>=0.40.0->fastapi)
+  Using cached anyio-4.12.1-py3-none-any.whl.metadata (4.3 kB)
+Collecting idna>=2.8 (from anyio<5,>=3.6.2->starlette<0.51.0,>=0.40.0->fastapi)
+  Using cached idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+Collecting click>=7.0 (from uvicorn)
+  Using cached click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+Collecting h11>=0.8 (from uvicorn)
+  Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting annotated-types>=0.6.0 (from pydantic)
+  Using cached annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.41.5 (from pydantic)
+  Using cached pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic)
+  Using cached typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Using cached fastapi-0.128.0-py3-none-any.whl (103 kB)
+Using cached starlette-0.50.0-py3-none-any.whl (74 kB)
+Using cached anyio-4.12.1-py3-none-any.whl (113 kB)
+Using cached uvicorn-0.40.0-py3-none-any.whl (68 kB)
+Using cached asyncpg-0.31.0-cp312-cp312-manylinux_2_28_x86_64.whl (3.5 MB)
+Using cached pydantic-2.12.5-py3-none-any.whl (463 kB)
+Using cached pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Using cached aiofiles-25.1.0-py3-none-any.whl (14 kB)
+Using cached python_multipart-0.0.22-py3-none-any.whl (24 kB)
+Using cached bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl (278 kB)
+Using cached annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Using cached click-8.3.1-py3-none-any.whl (108 kB)
+Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Using cached idna-3.11-py3-none-any.whl (71 kB)
+Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Installing collected packages: typing-extensions, python-multipart, idna, h11, click, bcrypt, asyncpg, annotated-types, annotated-doc, aiofiles, uvicorn, typing-inspection, pydantic-core, anyio, starlette, pydantic, fastapi
+Successfully installed aiofiles-25.1.0 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.12.1 asyncpg-0.31.0 bcrypt-5.0.0 click-8.3.1 fastapi-0.128.0 h11-0.16.0 idna-3.11 pydantic-2.12.5 pydantic-core-2.41.5 python-multipart-0.0.22 starlette-0.50.0 typing-extensions-4.15.0 typing-inspection-0.4.2 uvicorn-0.40.0
+
+Step 7: Creating environment file...
+Environment file created.
+
+Step 8: Building frontend...
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.3.0 building client environment for production...
+transforming (5) ../node_modules/@tanstack/react-query/build/modern/index.js
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 2050 modules transformed.
+../dist/public/index.html                   2.01 kB │ gzip:   0.77 kB
+../dist/public/assets/index-BauEHzOC.css   74.29 kB │ gzip:  11.86 kB
+../dist/public/assets/index-CCFbzs0P.js   462.30 kB │ gzip: 140.35 kB
+✓ built in 3.94s
+building server...
+
+  dist/index.cjs  816.3kb
+
+⚡ Done in 42ms
+
+Step 9: Running database migrations...
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/opt/color-routing-orchestrator/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[✓] Changes applied
+
+Step 10: Creating systemd service...
+
+Step 11: Configuring Nginx reverse proxy...
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+Step 12: Starting services...
+Created symlink /etc/systemd/system/multi-user.target.wants/color-routing-orchestrator.service → /etc/systemd/system/color-routing-orchestrator.service.
+
+Waiting for service to start...
+
+Step 13: Seeding initial data...
+{"message":"Demo data seeded successfully"}
+Step 14: Verifying installation...
+Service is running!
+
+==============================================
+  Installation Complete!
+==============================================
+
+Orchestrator URL: http://SERVER_HOST=${SERVER_HOST:-localhost}
+Storage Path: STORAGE_PATH=${STORAGE_PATH:-/data/incoming}
+
+Default login credentials (change after first login):
+  Username: admin
+  Password: admin123
+
+Other seeded users (all have password 'admin123'):
+  - jsmith (colorist)
+  - mwilson (colorist)
+
+Daemon API Key (save this for site daemon setup):
+  DAEMON_API_KEY=${DAEMON_API_KEY:-$(openssl rand -hex 32)}
+
+Service commands:
+  sudo systemctl status color-routing-orchestrator
+  sudo systemctl restart color-routing-orchestrator
+  sudo journalctl -u color-routing-orchestrator -f
+
+Next steps:
+  1. Set up SSL with: sudo certbot --nginx -d SERVER_HOST=${SERVER_HOST:-localhost}
+  2. Install daemons at each site with the API key shown above
+  3. Change default passwords for all users
+
