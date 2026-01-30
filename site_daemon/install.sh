@@ -16,13 +16,13 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-read -p "Enter site name (tustin/nashville/dallas): " SITE_NAME < /dev/tty
+read -p "Enter site name (e.g., tustin, nashville, studio-a): " SITE_NAME < /dev/tty
 read -p "Enter watch directory path: " WATCH_PATH < /dev/tty
 read -p "Enter orchestrator URL (e.g., http://192.168.1.100): " ORCHESTRATOR_URL < /dev/tty
 read -p "Enter daemon API key (from orchestrator install): " DAEMON_API_KEY < /dev/tty
 
-if [[ ! "$SITE_NAME" =~ ^(tustin|nashville|dallas)$ ]]; then
-  echo "Error: Site must be tustin, nashville, or dallas"
+if [ -z "$SITE_NAME" ]; then
+  echo "Error: Site name is required"
   exit 1
 fi
 
