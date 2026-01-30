@@ -16,19 +16,31 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-read -p "Enter site name (tustin/nashville/dallas): " SITE_NAME
-read -p "Enter watch directory path: " WATCH_PATH
-read -p "Enter orchestrator URL (e.g., https://your-app.replit.app): " ORCHESTRATOR_URL
+read -p "Enter site name (tustin/nashville/dallas): " SITE_NAME < /dev/tty
+read -p "Enter watch directory path: " WATCH_PATH < /dev/tty
+read -p "Enter orchestrator URL (e.g., http://192.168.1.100): " ORCHESTRATOR_URL < /dev/tty
+read -p "Enter daemon API key (from orchestrator install): " DAEMON_API_KEY < /dev/tty
 
 if [[ ! "$SITE_NAME" =~ ^(tustin|nashville|dallas)$ ]]; then
   echo "Error: Site must be tustin, nashville, or dallas"
   exit 1
 fi
 
-if [ ! -d "$WATCH_PATH" ]; then
-  echo "Error: Watch directory does not exist: $WATCH_PATH"
+if [ -z "$DAEMON_API_KEY" ]; then
+  echo "Error: Daemon API key is required"
   exit 1
 fi
+
+echo ""
+echo "Configuration:"
+echo "  Site: ${SITE_NAME}"
+echo "  Watch Path: ${WATCH_PATH}"
+echo "  Orchestrator: ${ORCHESTRATOR_URL}"
+echo "  API Key: ****"
+echo ""
+
+echo "Creating watch directory if needed..."
+mkdir -p "$WATCH_PATH"
 
 echo ""
 echo "Installing dependencies..."
@@ -40,7 +52,8 @@ echo "Cloning repository..."
 if [ -d "$INSTALL_DIR" ]; then
   echo "Updating existing installation..."
   cd "$INSTALL_DIR"
-  git pull
+  git fetch origin
+  git reset --hard origin/main
 else
   git clone "$REPO_URL" "$INSTALL_DIR"
   cd "$INSTALL_DIR"
@@ -48,21 +61,32 @@ fi
 
 echo ""
 echo "Setting up Python virtual environment..."
+rm -rf ${INSTALL_DIR}/venv
 python3 -m venv ${INSTALL_DIR}/venv
 ${INSTALL_DIR}/venv/bin/pip install --upgrade pip
 ${INSTALL_DIR}/venv/bin/pip install watchdog aiohttp
 
 echo ""
+echo "Creating environment file..."
+cat > ${INSTALL_DIR}/.env << EOF
+SITE_NAME=${SITE_NAME}
+WATCH_PATH=${WATCH_PATH}
+ORCHESTRATOR_URL=${ORCHESTRATOR_URL}
+DAEMON_API_KEY=${DAEMON_API_KEY}
+EOF
+
+echo ""
 echo "Creating systemd service..."
 cat > /etc/systemd/system/${SERVICE_NAME}.service << EOF
 [Unit]
-Description=Color Routing System Site Daemon
+Description=Color Routing System Site Daemon (${SITE_NAME})
 After=network.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=${INSTALL_DIR}
+Environment="DAEMON_API_KEY=${DAEMON_API_KEY}"
 ExecStart=${INSTALL_DIR}/venv/bin/python ${INSTALL_DIR}/site_daemon/daemon.py --site ${SITE_NAME} --watch ${WATCH_PATH} --orchestrator ${ORCHESTRATOR_URL}
 Restart=always
 RestartSec=10
@@ -78,6 +102,16 @@ systemctl enable ${SERVICE_NAME}
 systemctl start ${SERVICE_NAME}
 
 echo ""
+echo "Waiting for service to start..."
+sleep 3
+
+if systemctl is-active --quiet ${SERVICE_NAME}; then
+  echo "Service is running!"
+else
+  echo "Warning: Service may not be running. Check with: journalctl -u ${SERVICE_NAME} -f"
+fi
+
+echo ""
 echo "=============================================="
 echo "  Installation Complete!"
 echo "=============================================="
@@ -85,6 +119,13 @@ echo ""
 echo "Site: ${SITE_NAME}"
 echo "Watch Path: ${WATCH_PATH}"
 echo "Orchestrator: ${ORCHESTRATOR_URL}"
+echo ""
+echo "The daemon will:"
+echo "  - Watch ${WATCH_PATH} for new video files"
+echo "  - Report detected files to the orchestrator"
+echo "  - Send heartbeats every 30 seconds"
+echo ""
+echo "Supported file types: .mxf, .mov, .mp4, .ari, .r3d, .braw, .dpx, .exr"
 echo ""
 echo "Service commands:"
 echo "  sudo systemctl status ${SERVICE_NAME}"
