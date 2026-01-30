@@ -10,7 +10,7 @@ export interface User {
 }
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery<User>({
+  const { data: user, isLoading, error, refetch } = useQuery<User>({
     queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 5 * 60 * 1000,
@@ -33,5 +33,6 @@ export function useAuth() {
     isAuthenticated,
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
+    refetch,
   };
 }

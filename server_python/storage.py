@@ -174,8 +174,45 @@ async def delete_session(token: str) -> bool:
 async def get_sites() -> List[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
-        rows = await conn.fetch("SELECT * FROM sites")
+        rows = await conn.fetch("SELECT * FROM sites ORDER BY name")
         return [dict(row) for row in rows]
+
+async def create_site(data: Dict[str, Any]) -> Dict[str, Any]:
+    pool = await get_pool()
+    site_id = str(uuid.uuid4())
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO sites (id, name, export_path, is_active, last_heartbeat)
+            VALUES ($1, $2, $3, 'true', NULL)
+        """, site_id, data["name"], data["export_path"])
+        row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1", site_id)
+        return dict(row)
+
+async def update_site(site_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        set_clauses = []
+        values = []
+        for i, (key, value) in enumerate(updates.items(), start=1):
+            set_clauses.append(f"{key} = ${i}")
+            values.append(value)
+        values.append(site_id)
+        query = f"UPDATE sites SET {', '.join(set_clauses)} WHERE id = ${len(values)}"
+        await conn.execute(query, *values)
+        row = await conn.fetchrow("SELECT * FROM sites WHERE id = $1", site_id)
+        return dict(row) if row else None
+
+async def delete_site(site_id: str) -> bool:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        result = await conn.execute("DELETE FROM sites WHERE id = $1", site_id)
+        return "DELETE 1" in result
+
+async def get_user_count() -> int:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT COUNT(*) as count FROM users")
+        return row["count"] if row else 0
 
 async def update_site_heartbeat(site_id: str) -> Optional[Dict[str, Any]]:
     pool = await get_pool()

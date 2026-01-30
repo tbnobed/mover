@@ -74,6 +74,15 @@ class UserResponse(BaseModel):
     role: str
     createdAt: Optional[datetime] = None
 
+class SiteCreate(BaseModel):
+    name: str
+    exportPath: str
+
+class SiteUpdate(BaseModel):
+    name: Optional[str] = None
+    exportPath: Optional[str] = None
+    isActive: Optional[str] = None
+
 class SiteResponse(BaseModel):
     id: str
     name: str

@@ -18,7 +18,8 @@ import uvicorn
 
 from database import get_pool, close_pool
 from models import (
-    FileCreate, FileResponse, LoginRequest, UserCreate, UserUpdate, UserResponse, SiteResponse,
+    FileCreate, FileResponse, LoginRequest, UserCreate, UserUpdate, UserResponse, 
+    SiteCreate, SiteUpdate, SiteResponse,
     AuditLogResponse, TransferJobResponse, StatsResponse, AssignRequest, RejectRequest
 )
 import storage
@@ -77,6 +78,31 @@ async def get_daemon_or_user_auth(request: Request):
             return {"type": "user", **session}
     
     raise HTTPException(status_code=401, detail="Authentication required")
+
+@app.get("/api/bootstrap")
+async def check_bootstrap():
+    """Check if system needs initial setup (no users exist)"""
+    user_count = await storage.get_user_count()
+    return {"needsBootstrap": user_count == 0}
+
+@app.post("/api/bootstrap")
+async def bootstrap_admin(user_data: UserCreate):
+    """Create the first admin user - only works when no users exist"""
+    user_count = await storage.get_user_count()
+    if user_count > 0:
+        raise HTTPException(status_code=403, detail="System already initialized")
+    
+    if not user_data.password:
+        raise HTTPException(status_code=400, detail="Password is required")
+    
+    user = await storage.create_user({
+        "username": user_data.username,
+        "display_name": user_data.displayName,
+        "email": user_data.email,
+        "role": "admin",
+        "password": user_data.password
+    })
+    return storage.sanitize_user(snake_to_camel(user))
 
 @app.post("/api/auth/login")
 async def login(login_data: LoginRequest, response: Response):
@@ -465,6 +491,37 @@ async def delete_user(user_id: str, _user: dict = Depends(get_current_user)):
 async def get_sites(_auth: dict = Depends(get_daemon_or_user_auth)):
     sites = await storage.get_sites()
     return [snake_to_camel(s) for s in sites]
+
+@app.post("/api/sites")
+async def create_site(site_data: SiteCreate, _user: dict = Depends(get_current_user)):
+    site = await storage.create_site({
+        "name": site_data.name.lower(),
+        "export_path": site_data.exportPath
+    })
+    return snake_to_camel(site)
+
+@app.put("/api/sites/{site_id}")
+async def update_site(site_id: str, site_data: SiteUpdate, _user: dict = Depends(get_current_user)):
+    updates = {}
+    if site_data.name is not None:
+        updates["name"] = site_data.name.lower()
+    if site_data.exportPath is not None:
+        updates["export_path"] = site_data.exportPath
+    if site_data.isActive is not None:
+        updates["is_active"] = site_data.isActive
+    if not updates:
+        raise HTTPException(status_code=400, detail="No updates provided")
+    site = await storage.update_site(site_id, updates)
+    if not site:
+        raise HTTPException(status_code=404, detail="Site not found")
+    return snake_to_camel(site)
+
+@app.delete("/api/sites/{site_id}")
+async def delete_site(site_id: str, _user: dict = Depends(get_current_user)):
+    success = await storage.delete_site(site_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Site not found")
+    return {"message": "Site deleted successfully"}
 
 @app.post("/api/sites/{site_id}/heartbeat")
 async def site_heartbeat(site_id: str, _auth: dict = Depends(get_daemon_or_user_auth)):

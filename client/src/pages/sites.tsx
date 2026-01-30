@@ -1,9 +1,21 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Server, Wifi, WifiOff, RefreshCw, MapPin, FolderOpen } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Server, Wifi, WifiOff, RefreshCw, MapPin, FolderOpen, Plus, Trash2 } from "lucide-react";
 import type { Site } from "@shared/schema";
 import { formatDistanceToNow, format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -38,6 +50,9 @@ function SiteCardSkeleton() {
 
 export default function SitesPage() {
   const { toast } = useToast();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newSite, setNewSite] = useState({ name: "", exportPath: "" });
+  
   const { data: sites, isLoading, isRefetching, refetch } = useQuery<Site[]>({
     queryKey: ["/api/sites"],
   });
@@ -47,6 +62,30 @@ export default function SitesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
       toast({ title: "Heartbeat sent" });
+    },
+  });
+
+  const createSiteMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/sites", newSite),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
+      toast({ title: "Site created successfully" });
+      setCreateDialogOpen(false);
+      setNewSite({ name: "", exportPath: "" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteSiteMutation = useMutation({
+    mutationFn: (siteId: string) => apiRequest("DELETE", `/api/sites/${siteId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
+      toast({ title: "Site deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -62,15 +101,67 @@ export default function SitesPage() {
           <h1 className="text-2xl font-semibold">Sites</h1>
           <p className="text-muted-foreground">Monitor site daemon status</p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={handleRefresh} 
-          disabled={isRefetching}
-          data-testid="button-refresh-sites"
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh} 
+            disabled={isRefetching}
+            data-testid="button-refresh-sites"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button data-testid="button-add-site">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Site
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Site</DialogTitle>
+                <DialogDescription>
+                  Configure a new site for daemon connectivity
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="siteName">Site Name</Label>
+                  <Input
+                    id="siteName"
+                    value={newSite.name}
+                    onChange={(e) => setNewSite({ ...newSite, name: e.target.value })}
+                    placeholder="e.g., tustin, nashville, dallas"
+                    data-testid="input-site-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="exportPath">Export Path</Label>
+                  <Input
+                    id="exportPath"
+                    value={newSite.exportPath}
+                    onChange={(e) => setNewSite({ ...newSite, exportPath: e.target.value })}
+                    placeholder="/mnt/site_exports/color_ready/"
+                    data-testid="input-site-export-path"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => createSiteMutation.mutate()}
+                  disabled={!newSite.name || !newSite.exportPath || createSiteMutation.isPending}
+                  data-testid="button-create-site"
+                >
+                  {createSiteMutation.isPending ? "Creating..." : "Create Site"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -142,16 +233,31 @@ export default function SitesPage() {
                       </div>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => heartbeatMutation.mutate(site.id)}
-                    disabled={heartbeatMutation.isPending}
-                    data-testid={`button-heartbeat-${site.name}`}
-                  >
-                    <RefreshCw className={`mr-2 h-4 w-4 ${heartbeatMutation.isPending ? "animate-spin" : ""}`} />
-                    Send Heartbeat
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => heartbeatMutation.mutate(site.id)}
+                      disabled={heartbeatMutation.isPending}
+                      data-testid={`button-heartbeat-${site.name}`}
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${heartbeatMutation.isPending ? "animate-spin" : ""}`} />
+                      Heartbeat
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm(`Delete site "${site.name}"?`)) {
+                          deleteSiteMutation.mutate(site.id);
+                        }
+                      }}
+                      disabled={deleteSiteMutation.isPending}
+                      data-testid={`button-delete-${site.name}`}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -160,7 +266,11 @@ export default function SitesPage() {
           <Card className="col-span-full">
             <CardContent className="py-12 text-center">
               <Server className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">No sites configured</p>
+              <p className="text-muted-foreground mb-4">No sites configured</p>
+              <Button onClick={() => setCreateDialogOpen(true)} data-testid="button-add-site-empty">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Your First Site
+              </Button>
             </CardContent>
           </Card>
         )}
