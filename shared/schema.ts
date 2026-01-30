@@ -23,6 +23,7 @@ export const userRoleEnum = pgEnum("user_role", ["admin", "colorist", "engineer"
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
+  passwordHash: text("password_hash"),
   displayName: text("display_name").notNull(),
   role: userRoleEnum("role").notNull().default("colorist"),
   email: text("email"),
@@ -83,7 +84,15 @@ export const transferJobs = pgTable("transfer_jobs", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
-export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+export const sessions = pgTable("sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, passwordHash: true });
 export const insertSiteSchema = createInsertSchema(sites).omit({ id: true });
 export const insertFileSchema = createInsertSchema(files).omit({ id: true, detectedAt: true });
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, createdAt: true });

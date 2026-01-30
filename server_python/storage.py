@@ -1,5 +1,7 @@
 import uuid
-from datetime import datetime
+import secrets
+import bcrypt
+from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from database import get_pool
 
@@ -55,11 +57,15 @@ async def get_user(user_id: str) -> Optional[Dict[str, Any]]:
 async def create_user(data: Dict[str, Any]) -> Dict[str, Any]:
     pool = await get_pool()
     user_id = str(uuid.uuid4())
+    password_hash = None
+    if data.get("password"):
+        password_hash = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
     async with pool.acquire() as conn:
         await conn.execute("""
-            INSERT INTO users (id, username, display_name, email, role, created_at)
-            VALUES ($1, $2, $3, $4, $5, NOW())
-        """, user_id, data["username"], data["display_name"], data.get("email"), data["role"])
+            INSERT INTO users (id, username, password_hash, display_name, email, role, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        """, user_id, data["username"], password_hash, data["display_name"], data.get("email"), data["role"])
         row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
         return dict(row)
 
@@ -90,6 +96,11 @@ async def update_user(user_id: str, data: Dict[str, Any]) -> Optional[Dict[str, 
             set_clauses.append(f"role = ${param_idx}")
             values.append(data["role"])
             param_idx += 1
+        if "password" in data and data["password"]:
+            password_hash = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            set_clauses.append(f"password_hash = ${param_idx}")
+            values.append(password_hash)
+            param_idx += 1
         
         if set_clauses:
             values.append(user_id)
@@ -102,7 +113,54 @@ async def update_user(user_id: str, data: Dict[str, Any]) -> Optional[Dict[str, 
 async def delete_user(user_id: str) -> bool:
     pool = await get_pool()
     async with pool.acquire() as conn:
+        await conn.execute("DELETE FROM sessions WHERE user_id = $1", user_id)
         result = await conn.execute("DELETE FROM users WHERE id = $1", user_id)
+        return result == "DELETE 1"
+
+async def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT * FROM users WHERE username = $1", username)
+        return dict(row) if row else None
+
+async def verify_password(username: str, password: str) -> Optional[Dict[str, Any]]:
+    user = await get_user_by_username(username)
+    if not user or not user.get("password_hash"):
+        return None
+    
+    if bcrypt.checkpw(password.encode('utf-8'), user["password_hash"].encode('utf-8')):
+        return user
+    return None
+
+async def create_session(user_id: str) -> str:
+    pool = await get_pool()
+    token = secrets.token_urlsafe(32)
+    session_id = str(uuid.uuid4())
+    expires_at = datetime.utcnow() + timedelta(days=7)
+    
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO sessions (id, user_id, token, expires_at, created_at)
+            VALUES ($1, $2, $3, $4, NOW())
+        """, session_id, user_id, token, expires_at)
+    
+    return token
+
+async def get_session(token: str) -> Optional[Dict[str, Any]]:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            SELECT s.*, u.username, u.display_name, u.role, u.email 
+            FROM sessions s 
+            JOIN users u ON s.user_id = u.id 
+            WHERE s.token = $1 AND s.expires_at > NOW()
+        """, token)
+        return dict(row) if row else None
+
+async def delete_session(token: str) -> bool:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        result = await conn.execute("DELETE FROM sessions WHERE token = $1", token)
         return result == "DELETE 1"
 
 async def get_sites() -> List[Dict[str, Any]]:

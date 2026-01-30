@@ -48,15 +48,21 @@ class FileResponse(BaseModel):
     delivered_at: Optional[datetime] = None
     archived_at: Optional[datetime] = None
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 class UserCreate(BaseModel):
     username: str
     displayName: str
+    password: Optional[str] = None
     email: Optional[str] = None
     role: str = "colorist"
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     displayName: Optional[str] = None
+    password: Optional[str] = None
     email: Optional[str] = None
     role: Optional[str] = None
 

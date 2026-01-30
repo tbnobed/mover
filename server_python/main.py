@@ -4,7 +4,7 @@ import hashlib
 import aiofiles
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 STORAGE_PATH = os.environ.get("STORAGE_PATH", "./data/incoming")
@@ -18,7 +18,7 @@ import uvicorn
 
 from database import get_pool, close_pool
 from models import (
-    FileCreate, FileResponse, UserCreate, UserUpdate, UserResponse, SiteResponse,
+    FileCreate, FileResponse, LoginRequest, UserCreate, UserUpdate, UserResponse, SiteResponse,
     AuditLogResponse, TransferJobResponse, StatsResponse, AssignRequest, RejectRequest
 )
 import storage
@@ -48,6 +48,58 @@ def snake_to_camel(data):
     elif isinstance(data, list):
         return [snake_to_camel(item) for item in data]
     return data
+
+@app.post("/api/auth/login")
+async def login(login_data: LoginRequest, response: Response):
+    user = await storage.verify_password(login_data.username, login_data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    token = await storage.create_session(user["id"])
+    response.set_cookie(
+        key="session_token",
+        value=token,
+        httponly=True,
+        max_age=7 * 24 * 60 * 60,
+        samesite="lax"
+    )
+    
+    return {
+        "message": "Login successful",
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "displayName": user["display_name"],
+            "role": user["role"],
+            "email": user["email"]
+        }
+    }
+
+@app.post("/api/auth/logout")
+async def logout(request: Request, response: Response):
+    token = request.cookies.get("session_token")
+    if token:
+        await storage.delete_session(token)
+    response.delete_cookie(key="session_token")
+    return {"message": "Logged out successfully"}
+
+@app.get("/api/auth/me")
+async def get_current_user(request: Request):
+    token = request.cookies.get("session_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    session = await storage.get_session(token)
+    if not session:
+        raise HTTPException(status_code=401, detail="Session expired")
+    
+    return {
+        "id": session["user_id"],
+        "username": session["username"],
+        "displayName": session["display_name"],
+        "role": session["role"],
+        "email": session["email"]
+    }
 
 @app.get("/api/stats")
 async def get_stats():
@@ -345,6 +397,7 @@ async def create_user(user_data: UserCreate):
     user = await storage.create_user({
         "username": user_data.username,
         "display_name": user_data.displayName,
+        "password": user_data.password,
         "email": user_data.email,
         "role": user_data.role
     })
@@ -361,6 +414,8 @@ async def update_user(user_id: str, user_data: UserUpdate):
         data["email"] = user_data.email
     if user_data.role is not None:
         data["role"] = user_data.role
+    if user_data.password is not None:
+        data["password"] = user_data.password
     
     user = await storage.update_user(user_id, data)
     if not user:
