@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { spawn, ChildProcess } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +17,6 @@ function startPythonServer() {
   const pythonPath = process.env.PYTHONPATH || "./server_python";
   const pythonBin = process.env.PYTHON_BIN || "./venv/bin/python3";
   
-  const fs = require("fs");
   const actualPythonBin = fs.existsSync(pythonBin) ? pythonBin : "python3";
   
   console.log(`[python] Starting with: ${actualPythonBin}`);
