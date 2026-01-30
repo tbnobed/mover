@@ -26,6 +26,8 @@ ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:5000")
 DAEMON_API_KEY = os.getenv("DAEMON_API_KEY", "")
 HEARTBEAT_INTERVAL = 30
 SUPPORTED_EXTENSIONS = {".mxf", ".mov", ".mp4", ".ari", ".r3d", ".braw", ".dpx", ".exr"}
+FILE_STABILITY_CHECKS = 3  # Number of checks where file size must be stable
+FILE_STABILITY_INTERVAL = 2  # Seconds between stability checks
 
 
 def get_auth_headers() -> dict:
@@ -56,9 +58,45 @@ class FileDetector(FileSystemEventHandler):
                     except:
                         pass
     
+    async def wait_for_file_stability(self, file_path: str) -> bool:
+        """Wait until file size stops changing (file is completely written)"""
+        path = Path(file_path)
+        stable_count = 0
+        last_size = -1
+        
+        print(f"[{datetime.now().isoformat()}] Waiting for file to be complete: {path.name}")
+        
+        while stable_count < FILE_STABILITY_CHECKS:
+            try:
+                if not path.exists():
+                    print(f"[{datetime.now().isoformat()}] File disappeared: {path.name}")
+                    return False
+                    
+                current_size = path.stat().st_size
+                
+                if current_size == last_size and current_size > 0:
+                    stable_count += 1
+                else:
+                    stable_count = 0
+                    
+                last_size = current_size
+                await asyncio.sleep(FILE_STABILITY_INTERVAL)
+                
+            except Exception as e:
+                print(f"[{datetime.now().isoformat()}] Stability check error: {e}")
+                return False
+        
+        print(f"[{datetime.now().isoformat()}] File complete: {path.name} ({last_size:,} bytes)")
+        return True
+    
     async def report_file(self, file_path: str, upload_file: bool = True):
         path = Path(file_path)
         try:
+            # Wait for file to be completely written
+            if not await self.wait_for_file_stability(file_path):
+                print(f"[{datetime.now().isoformat()}] Skipping unstable file: {path.name}")
+                return
+                
             if upload_file:
                 await self.upload_file(file_path)
             else:
