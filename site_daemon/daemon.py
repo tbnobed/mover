@@ -12,13 +12,14 @@ Runs at each site (Tustin, Nashville, Dallas) to:
 import os
 import sys
 import time
+import json
 import hashlib
 import asyncio
 import argparse
 import aiohttp
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Set
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 

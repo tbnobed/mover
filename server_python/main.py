@@ -225,6 +225,14 @@ async def upload_file(
     if source_site.lower() not in site_names:
         raise HTTPException(status_code=400, detail=f"Unknown site: {source_site}. Site must register via heartbeat first.")
     
+    # Check if file from this source path already exists
+    existing = await storage.get_file_by_source(source_site, source_path)
+    if existing:
+        raise HTTPException(
+            status_code=409, 
+            detail=f"File already tracked: {existing['filename']} (id: {existing['id']}, state: {existing['state']})"
+        )
+    
     safe_filename = os.path.basename(file.filename or "unnamed")
     if not safe_filename or ".." in safe_filename or "/" in safe_filename or "\\" in safe_filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
@@ -244,6 +252,12 @@ async def upload_file(
             file_size += len(chunk)
     
     sha256_hash = sha256.hexdigest()
+    
+    # Check if a file with same hash exists (duplicate content from different path)
+    hash_duplicate = await storage.get_file_by_hash(sha256_hash)
+    if hash_duplicate:
+        # Log warning but still accept - could be intentional re-upload from different location
+        print(f"Warning: File {safe_filename} has same hash as existing file {hash_duplicate['filename']} (id: {hash_duplicate['id']})")
     
     db_file = await storage.create_file({
         "filename": safe_filename,
