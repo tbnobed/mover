@@ -1,0 +1,27 @@
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo systemctl status color-routing-orchestrator
+● color-routing-orchestrator.service - Color Routing System Orchestrator
+     Loaded: loaded (/etc/systemd/system/color-routing-orchestrator.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-01-30 17:34:41 UTC; 1min 22s ago
+   Main PID: 13603 (npm exec tsx se)
+      Tasks: 43 (limit: 14258)
+     Memory: 75.7M (peak: 126.7M)
+        CPU: 8.550s
+     CGroup: /system.slice/color-routing-orchestrator.service
+             ├─13603 "npm exec tsx server/production.ts"
+             ├─13615 sh -c "tsx server/production.ts"
+             ├─13616 node /opt/color-routing-orchestrator/node_modules/.bin/tsx server/production.ts
+             ├─13627 /usr/bin/node --require /opt/color-routing-orchestrator/node_modules/tsx/dist/preflight.cjs --import file:///opt/color-routing-orchestrator/node_modules/tsx/dist/loader.mjs >
+             ├─13639 /opt/color-routing-orchestrator/node_modules/@esbuild/linux-x64/bin/esbuild --service=0.25.12 --ping
+             └─13700 /opt/color-routing-orchestrator/venv/bin/python3 server_python/main.py
+
+Jan 30 17:35:59 mov-orc-dev npx[13627]:     result = self.fn(*self.args, **self.kwargs)
+Jan 30 17:35:59 mov-orc-dev npx[13627]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 30 17:35:59 mov-orc-dev npx[13627]:   File "/usr/lib/python3.12/socket.py", line 963, in getaddrinfo
+Jan 30 17:35:59 mov-orc-dev npx[13627]:     for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+Jan 30 17:35:59 mov-orc-dev npx[13627]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Jan 30 17:35:59 mov-orc-dev npx[13627]: socket.gaierror: [Errno -2] Name or service not known
+Jan 30 17:35:59 mov-orc-dev npx[13627]: [python] ERROR:    Application startup failed. Exiting.
+Jan 30 17:35:59 mov-orc-dev npx[13627]: [python] process exited with code 3
+Jan 30 17:35:59 mov-orc-dev npx[13627]: [python] Restarting in 5 seconds...
+Jan 30 17:36:04 mov-orc-dev npx[13627]: [python] Starting with: /opt/color-routing-orchestrator/venv/bin/python3
+lines 1-25/25 (END)
