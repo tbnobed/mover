@@ -78,6 +78,7 @@ function UserRowSkeleton() {
 interface UserFormData {
   username: string;
   displayName: string;
+  password: string;
   email: string;
   role: string;
 }
@@ -91,6 +92,7 @@ export default function UsersPage() {
   const [formData, setFormData] = useState<UserFormData>({
     username: "",
     displayName: "",
+    password: "",
     email: "",
     role: "colorist",
   });
@@ -146,7 +148,7 @@ export default function UsersPage() {
   });
 
   const resetForm = () => {
-    setFormData({ username: "", displayName: "", email: "", role: "colorist" });
+    setFormData({ username: "", displayName: "", password: "", email: "", role: "colorist" });
   };
 
   const handleRefresh = () => {
@@ -164,6 +166,7 @@ export default function UsersPage() {
     setFormData({
       username: user.username,
       displayName: user.displayName,
+      password: "",
       email: user.email || "",
       role: user.role,
     });
@@ -176,8 +179,8 @@ export default function UsersPage() {
   };
 
   const handleSubmitCreate = () => {
-    if (!formData.username || !formData.displayName) {
-      toast({ title: "Username and display name are required", variant: "destructive" });
+    if (!formData.username || !formData.displayName || !formData.password) {
+      toast({ title: "Username, display name, and password are required", variant: "destructive" });
       return;
     }
     createMutation.mutate(formData);
@@ -185,7 +188,16 @@ export default function UsersPage() {
 
   const handleSubmitUpdate = () => {
     if (!selectedUser) return;
-    updateMutation.mutate({ id: selectedUser.id, data: formData });
+    const updateData: Partial<UserFormData> = {
+      username: formData.username,
+      displayName: formData.displayName,
+      email: formData.email,
+      role: formData.role,
+    };
+    if (formData.password) {
+      updateData.password = formData.password;
+    }
+    updateMutation.mutate({ id: selectedUser.id, data: updateData });
   };
 
   const handleConfirmDelete = () => {
@@ -333,6 +345,17 @@ export default function UsersPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Enter password"
+                data-testid="input-password"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="email">Email (optional)</Label>
               <Input
                 id="email"
@@ -402,6 +425,17 @@ export default function UsersPage() {
                 value={formData.displayName}
                 onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
                 data-testid="input-edit-displayname"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-password">Password (leave blank to keep current)</Label>
+              <Input
+                id="edit-password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Enter new password"
+                data-testid="input-edit-password"
               />
             </div>
             <div className="space-y-2">
