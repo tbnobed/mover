@@ -18,7 +18,7 @@ import uvicorn
 
 from database import get_pool, close_pool
 from models import (
-    FileCreate, FileResponse, UserCreate, UserResponse, SiteResponse,
+    FileCreate, FileResponse, UserCreate, UserUpdate, UserResponse, SiteResponse,
     AuditLogResponse, TransferJobResponse, StatsResponse, AssignRequest, RejectRequest
 )
 import storage
@@ -344,10 +344,35 @@ async def get_users():
 async def create_user(user_data: UserCreate):
     user = await storage.create_user({
         "username": user_data.username,
+        "display_name": user_data.displayName,
         "email": user_data.email,
         "role": user_data.role
     })
     return snake_to_camel(user)
+
+@app.put("/api/users/{user_id}")
+async def update_user(user_id: str, user_data: UserUpdate):
+    data = {}
+    if user_data.username is not None:
+        data["username"] = user_data.username
+    if user_data.displayName is not None:
+        data["display_name"] = user_data.displayName
+    if user_data.email is not None:
+        data["email"] = user_data.email
+    if user_data.role is not None:
+        data["role"] = user_data.role
+    
+    user = await storage.update_user(user_id, data)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return snake_to_camel(user)
+
+@app.delete("/api/users/{user_id}")
+async def delete_user(user_id: str):
+    success = await storage.delete_user(user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User deleted successfully"}
 
 @app.get("/api/sites")
 async def get_sites():

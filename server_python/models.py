@@ -50,16 +50,23 @@ class FileResponse(BaseModel):
 
 class UserCreate(BaseModel):
     username: str
-    email: str
-    role: str
+    displayName: str
+    email: Optional[str] = None
+    role: str = "colorist"
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    displayName: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: str
     username: str
-    email: str
+    displayName: str
+    email: Optional[str] = None
     role: str
-    is_active: bool
-    created_at: Optional[datetime] = None
+    createdAt: Optional[datetime] = None
 
 class SiteResponse(BaseModel):
     id: str

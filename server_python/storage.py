@@ -57,11 +57,53 @@ async def create_user(data: Dict[str, Any]) -> Dict[str, Any]:
     user_id = str(uuid.uuid4())
     async with pool.acquire() as conn:
         await conn.execute("""
-            INSERT INTO users (id, username, email, role, is_active, created_at)
-            VALUES ($1, $2, $3, $4, true, NOW())
-        """, user_id, data["username"], data["email"], data["role"])
+            INSERT INTO users (id, username, display_name, email, role, created_at)
+            VALUES ($1, $2, $3, $4, $5, NOW())
+        """, user_id, data["username"], data["display_name"], data.get("email"), data["role"])
         row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
         return dict(row)
+
+async def update_user(user_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        existing = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
+        if not existing:
+            return None
+        
+        set_clauses = []
+        values = []
+        param_idx = 1
+        
+        if "username" in data and data["username"]:
+            set_clauses.append(f"username = ${param_idx}")
+            values.append(data["username"])
+            param_idx += 1
+        if "display_name" in data and data["display_name"]:
+            set_clauses.append(f"display_name = ${param_idx}")
+            values.append(data["display_name"])
+            param_idx += 1
+        if "email" in data:
+            set_clauses.append(f"email = ${param_idx}")
+            values.append(data["email"])
+            param_idx += 1
+        if "role" in data and data["role"]:
+            set_clauses.append(f"role = ${param_idx}")
+            values.append(data["role"])
+            param_idx += 1
+        
+        if set_clauses:
+            values.append(user_id)
+            query = f"UPDATE users SET {', '.join(set_clauses)} WHERE id = ${param_idx}"
+            await conn.execute(query, *values)
+        
+        row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
+        return dict(row) if row else None
+
+async def delete_user(user_id: str) -> bool:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        result = await conn.execute("DELETE FROM users WHERE id = $1", user_id)
+        return result == "DELETE 1"
 
 async def get_sites() -> List[Dict[str, Any]]:
     pool = await get_pool()
