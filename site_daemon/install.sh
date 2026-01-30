@@ -21,6 +21,11 @@ read -p "Enter watch directory path: " WATCH_PATH < /dev/tty
 read -p "Enter orchestrator URL (e.g., http://192.168.1.100): " ORCHESTRATOR_URL < /dev/tty
 read -p "Enter daemon API key (from orchestrator install): " DAEMON_API_KEY < /dev/tty
 
+# Add http:// prefix if missing
+if [[ ! "$ORCHESTRATOR_URL" =~ ^https?:// ]]; then
+  ORCHESTRATOR_URL="http://${ORCHESTRATOR_URL}"
+fi
+
 if [ -z "$SITE_NAME" ]; then
   echo "Error: Site name is required"
   exit 1
