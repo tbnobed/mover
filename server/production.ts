@@ -14,7 +14,13 @@ let pythonProcess: ChildProcess | null = null;
 
 function startPythonServer() {
   const pythonPath = process.env.PYTHONPATH || "./server_python";
-  pythonProcess = spawn("python3", ["server_python/main.py"], {
+  const pythonBin = process.env.PYTHON_BIN || "./venv/bin/python3";
+  
+  const fs = require("fs");
+  const actualPythonBin = fs.existsSync(pythonBin) ? pythonBin : "python3";
+  
+  console.log(`[python] Starting with: ${actualPythonBin}`);
+  pythonProcess = spawn(actualPythonBin, ["server_python/main.py"], {
     env: { ...process.env, PYTHONPATH: pythonPath },
     stdio: ["ignore", "pipe", "pipe"],
   });

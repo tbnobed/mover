@@ -33,7 +33,7 @@ fi
 echo ""
 echo "Installing dependencies..."
 apt-get update -qq
-apt-get install -y python3 python3-pip git
+apt-get install -y python3 python3-pip python3-venv git
 
 echo ""
 echo "Cloning repository..."
@@ -47,8 +47,10 @@ else
 fi
 
 echo ""
-echo "Installing Python dependencies..."
-pip3 install watchdog aiohttp
+echo "Setting up Python virtual environment..."
+python3 -m venv ${INSTALL_DIR}/venv
+${INSTALL_DIR}/venv/bin/pip install --upgrade pip
+${INSTALL_DIR}/venv/bin/pip install watchdog aiohttp
 
 echo ""
 echo "Creating systemd service..."
@@ -61,7 +63,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=${INSTALL_DIR}
-ExecStart=/usr/bin/python3 ${INSTALL_DIR}/site_daemon/daemon.py --site ${SITE_NAME} --watch ${WATCH_PATH} --orchestrator ${ORCHESTRATOR_URL}
+ExecStart=${INSTALL_DIR}/venv/bin/python ${INSTALL_DIR}/site_daemon/daemon.py --site ${SITE_NAME} --watch ${WATCH_PATH} --orchestrator ${ORCHESTRATOR_URL}
 Restart=always
 RestartSec=10
 

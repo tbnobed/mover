@@ -56,8 +56,10 @@ echo "Step 4: Installing Node.js dependencies..."
 npm install
 
 echo ""
-echo "Step 5: Installing Python dependencies..."
-pip3 install fastapi uvicorn asyncpg pydantic aiofiles python-multipart
+echo "Step 5: Setting up Python virtual environment..."
+python3 -m venv ${INSTALL_DIR}/venv
+${INSTALL_DIR}/venv/bin/pip install --upgrade pip
+${INSTALL_DIR}/venv/bin/pip install fastapi uvicorn asyncpg pydantic aiofiles python-multipart
 
 echo ""
 echo "Step 6: Creating environment file..."
@@ -66,6 +68,7 @@ cat > ${INSTALL_DIR}/.env << EOF
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
 SESSION_SECRET=${SESSION_SECRET}
 STORAGE_PATH=${STORAGE_PATH}
+PYTHON_BIN=${INSTALL_DIR}/venv/bin/python3
 NODE_ENV=production
 PORT=5000
 EOF
