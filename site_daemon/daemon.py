@@ -23,8 +23,17 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
 ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:5000")
+DAEMON_API_KEY = os.getenv("DAEMON_API_KEY", "")
 HEARTBEAT_INTERVAL = 30
 SUPPORTED_EXTENSIONS = {".mxf", ".mov", ".mp4", ".ari", ".r3d", ".braw", ".dpx", ".exr"}
+
+
+def get_auth_headers() -> dict:
+    """Get authentication headers for API requests"""
+    headers = {}
+    if DAEMON_API_KEY:
+        headers["X-API-Key"] = DAEMON_API_KEY
+    return headers
 
 
 class FileDetector(FileSystemEventHandler):
@@ -71,7 +80,8 @@ class FileDetector(FileSystemEventHandler):
                 
                 async with session.post(
                     f"{self.orchestrator_url}/api/files/upload",
-                    data=data
+                    data=data,
+                    headers=get_auth_headers()
                 ) as resp:
                     if resp.status == 200 or resp.status == 201:
                         result = await resp.json()
@@ -98,7 +108,8 @@ class FileDetector(FileSystemEventHandler):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 f"{self.orchestrator_url}/api/files",
-                json=payload
+                json=payload,
+                headers=get_auth_headers()
             ) as resp:
                 if resp.status == 200 or resp.status == 201:
                     data = await resp.json()
@@ -136,7 +147,8 @@ class SiteDaemon:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{self.orchestrator_url}/api/sites/{self.site_id}/heartbeat",
-                    json=payload
+                    json=payload,
+                    headers=get_auth_headers()
                 ) as resp:
                     if resp.status == 200:
                         print(f"[{datetime.now().isoformat()}] Heartbeat sent for {self.site_id}")
@@ -180,7 +192,8 @@ class SiteDaemon:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{self.orchestrator_url}/api/files/{file_id}/complete-transfer",
-                    json={"transferredBy": self.site_id}
+                    json={"transferredBy": self.site_id},
+                    headers=get_auth_headers()
                 ) as resp:
                     if resp.status == 200:
                         print(f"[{datetime.now().isoformat()}] Transfer completed: {file_id}")
@@ -210,12 +223,14 @@ class SiteDaemon:
     
     async def run(self):
         self.running = True
+        auth_status = "Enabled" if DAEMON_API_KEY else "Disabled (no API key)"
         print(f"")
         print(f"{'='*60}")
         print(f"  Color Routing System - Site Daemon")
         print(f"  Site: {self.site_id}")
         print(f"  Watch Path: {self.watch_path}")
         print(f"  Orchestrator: {self.orchestrator_url}")
+        print(f"  Authentication: {auth_status}")
         print(f"{'='*60}")
         print(f"")
         
@@ -259,8 +274,17 @@ def main():
         action="store_true",
         help="Only report metadata, don't upload files (default: upload files)"
     )
+    parser.add_argument(
+        "--api-key", "-k",
+        default=None,
+        help="API key for authenticating with orchestrator (or set DAEMON_API_KEY env var)"
+    )
     
     args = parser.parse_args()
+    
+    global DAEMON_API_KEY
+    if args.api_key:
+        DAEMON_API_KEY = args.api_key
     
     watch_path = args.watch or f"./watch_{args.site}"
     Path(watch_path).mkdir(parents=True, exist_ok=True)

@@ -58,9 +58,11 @@ python site_daemon/daemon.py --site tustin --watch /path/to/watch
 ```
 
 ### CLI Options
-- `--site`: Site identifier (tustin, nashville, dallas)
-- `--watch`: Directory path to monitor for new files
-- `--orchestrator`: URL of central orchestrator (default: http://localhost:5000)
+- `--site`, `-s`: Site identifier (tustin, nashville, dallas) - required
+- `--watch`, `-w`: Directory path to monitor for new files
+- `--orchestrator`, `-o`: URL of central orchestrator (default: http://localhost:5000)
+- `--api-key`, `-k`: API key for authenticating with orchestrator (or set DAEMON_API_KEY env var)
+- `--metadata-only`: Only report metadata, don't upload files
 
 ### Features
 - File detection using watchdog library
