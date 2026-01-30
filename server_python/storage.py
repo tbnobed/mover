@@ -285,12 +285,13 @@ async def seed_data():
         user1_id = str(uuid.uuid4())
         user2_id = str(uuid.uuid4())
         user3_id = str(uuid.uuid4())
+        password_hash = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt()).decode()
         await conn.execute("""
-            INSERT INTO users (id, username, display_name, email, role, created_at) VALUES
-            ($1, 'jsmith', 'John Smith', 'jsmith@studio.com', 'colorist', NOW()),
-            ($2, 'mwilson', 'Mary Wilson', 'mwilson@studio.com', 'colorist', NOW()),
-            ($3, 'admin', 'System Admin', 'admin@studio.com', 'admin', NOW())
-        """, user1_id, user2_id, user3_id)
+            INSERT INTO users (id, username, display_name, email, role, password_hash, created_at) VALUES
+            ($1, 'jsmith', 'John Smith', 'jsmith@studio.com', 'colorist', $4, NOW()),
+            ($2, 'mwilson', 'Mary Wilson', 'mwilson@studio.com', 'colorist', $4, NOW()),
+            ($3, 'admin', 'Admin User', 'admin@studio.com', 'admin', $4, NOW())
+        """, user1_id, user2_id, user3_id, password_hash)
         
         file1_id = str(uuid.uuid4())
         file2_id = str(uuid.uuid4())
