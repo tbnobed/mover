@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Server, Wifi, WifiOff, RefreshCw, MapPin, FolderOpen, Plus, Trash2 } from "lucide-react";
+import { Server, Wifi, WifiOff, RefreshCw, MapPin, FolderOpen, Plus, Trash2, Pencil } from "lucide-react";
 import type { Site } from "@shared/schema";
 import { formatDistanceToNow, format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -52,6 +52,9 @@ export default function SitesPage() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newSite, setNewSite] = useState({ name: "", exportPath: "" });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingSite, setEditingSite] = useState<Site | null>(null);
+  const [editExportPath, setEditExportPath] = useState("");
   
   const { data: sites, isLoading, isRefetching, refetch } = useQuery<Site[]>({
     queryKey: ["/api/sites"],
@@ -88,6 +91,26 @@ export default function SitesPage() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
+
+  const updateSiteMutation = useMutation({
+    mutationFn: ({ siteId, exportPath }: { siteId: string; exportPath: string }) => 
+      apiRequest("PUT", `/api/sites/${siteId}`, { exportPath }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
+      toast({ title: "Site updated successfully" });
+      setEditDialogOpen(false);
+      setEditingSite(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleEditSite = (site: Site) => {
+    setEditingSite(site);
+    setEditExportPath(site.exportPath);
+    setEditDialogOpen(true);
+  };
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/sites"] });
@@ -247,6 +270,14 @@ export default function SitesPage() {
                     <Button
                       variant="outline"
                       size="icon"
+                      onClick={() => handleEditSite(site)}
+                      data-testid={`button-edit-${site.name}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
                       onClick={() => {
                         if (confirm(`Delete site "${site.name}"?`)) {
                           deleteSiteMutation.mutate(site.id);
@@ -275,6 +306,45 @@ export default function SitesPage() {
           </Card>
         )}
       </div>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Site: {editingSite?.name}</DialogTitle>
+            <DialogDescription>
+              Update the export path for this site
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editExportPath">Export Path</Label>
+              <Input
+                id="editExportPath"
+                value={editExportPath}
+                onChange={(e) => setEditExportPath(e.target.value)}
+                placeholder="/mnt/site_exports/color_ready/"
+                data-testid="input-edit-export-path"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingSite) {
+                  updateSiteMutation.mutate({ siteId: editingSite.id, exportPath: editExportPath });
+                }
+              }}
+              disabled={!editExportPath || updateSiteMutation.isPending}
+              data-testid="button-save-site"
+            >
+              {updateSiteMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
