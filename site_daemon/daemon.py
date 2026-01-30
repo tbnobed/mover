@@ -47,34 +47,65 @@ class FileDetector(FileSystemEventHandler):
                     except:
                         pass
     
-    async def report_file(self, file_path: str):
+    async def report_file(self, file_path: str, upload_file: bool = True):
         path = Path(file_path)
         try:
-            stat = path.stat()
-            file_size = stat.st_size
-            sha256_hash = await self.calculate_hash(file_path)
-            
-            payload = {
-                "filename": path.name,
-                "source_site": self.site_id,
-                "source_path": str(path.absolute()),
-                "file_size": file_size,
-                "sha256_hash": sha256_hash,
-            }
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    f"{self.orchestrator_url}/api/files",
-                    json=payload
-                ) as resp:
-                    if resp.status == 200 or resp.status == 201:
-                        data = await resp.json()
-                        print(f"[{datetime.now().isoformat()}] Reported to orchestrator: {path.name} -> {data.get('id', 'unknown')}")
-                    else:
-                        text = await resp.text()
-                        print(f"[{datetime.now().isoformat()}] Failed to report: {resp.status} - {text}")
+            if upload_file:
+                await self.upload_file(file_path)
+            else:
+                await self.report_metadata(file_path)
         except Exception as e:
             print(f"[{datetime.now().isoformat()}] Error reporting file: {e}")
+    
+    async def upload_file(self, file_path: str):
+        """Upload the actual file to the orchestrator"""
+        path = Path(file_path)
+        print(f"[{datetime.now().isoformat()}] Uploading: {path.name}")
+        
+        async with aiohttp.ClientSession() as session:
+            with open(file_path, 'rb') as f:
+                data = aiohttp.FormData()
+                data.add_field('file', f, filename=path.name)
+                data.add_field('source_site', self.site_id)
+                data.add_field('source_path', str(path.absolute()))
+                
+                async with session.post(
+                    f"{self.orchestrator_url}/api/files/upload",
+                    data=data
+                ) as resp:
+                    if resp.status == 200 or resp.status == 201:
+                        result = await resp.json()
+                        print(f"[{datetime.now().isoformat()}] Uploaded: {path.name} -> {result.get('id', 'unknown')}")
+                    else:
+                        text = await resp.text()
+                        print(f"[{datetime.now().isoformat()}] Upload failed: {resp.status} - {text}")
+    
+    async def report_metadata(self, file_path: str):
+        """Report file metadata only (no file transfer)"""
+        path = Path(file_path)
+        stat = path.stat()
+        file_size = stat.st_size
+        sha256_hash = await self.calculate_hash(file_path)
+        
+        payload = {
+            "filename": path.name,
+            "source_site": self.site_id,
+            "source_path": str(path.absolute()),
+            "file_size": file_size,
+            "sha256_hash": sha256_hash,
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{self.orchestrator_url}/api/files",
+                json=payload
+            ) as resp:
+                if resp.status == 200 or resp.status == 201:
+                    data = await resp.json()
+                    print(f"[{datetime.now().isoformat()}] Reported: {path.name} -> {data.get('id', 'unknown')}")
+                else:
+                    text = await resp.text()
+                    print(f"[{datetime.now().isoformat()}] Failed to report: {resp.status} - {text}")
     
     async def calculate_hash(self, file_path: str) -> str:
         sha256 = hashlib.sha256()
@@ -85,13 +116,15 @@ class FileDetector(FileSystemEventHandler):
 
 
 class SiteDaemon:
-    def __init__(self, site_id: str, watch_path: str, orchestrator_url: str):
+    def __init__(self, site_id: str, watch_path: str, orchestrator_url: str, upload_files: bool = True):
         self.site_id = site_id
         self.watch_path = watch_path
         self.orchestrator_url = orchestrator_url
+        self.upload_files = upload_files
         self.running = False
         self.observer: Optional[Observer] = None
         self.pending_queue: asyncio.Queue = asyncio.Queue()
+        self.file_detector = FileDetector(site_id, watch_path, orchestrator_url, self.pending_queue)
         
     async def send_heartbeat(self):
         try:
@@ -169,7 +202,7 @@ class SiteDaemon:
         while self.running:
             try:
                 file_path = await asyncio.wait_for(self.pending_queue.get(), timeout=1.0)
-                await self.file_detector.report_file(file_path)
+                await self.file_detector.report_file(file_path, upload_file=self.upload_files)
             except asyncio.TimeoutError:
                 continue
             except Exception as e:
@@ -221,13 +254,20 @@ def main():
         default=ORCHESTRATOR_URL,
         help=f"Orchestrator URL (default: {ORCHESTRATOR_URL})"
     )
+    parser.add_argument(
+        "--metadata-only",
+        action="store_true",
+        help="Only report metadata, don't upload files (default: upload files)"
+    )
     
     args = parser.parse_args()
     
     watch_path = args.watch or f"./watch_{args.site}"
     Path(watch_path).mkdir(parents=True, exist_ok=True)
     
-    daemon = SiteDaemon(args.site, watch_path, args.orchestrator)
+    upload_files = not args.metadata_only
+    
+    daemon = SiteDaemon(args.site, watch_path, args.orchestrator, upload_files)
     asyncio.run(daemon.run())
 
 

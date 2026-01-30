@@ -1,9 +1,14 @@
 import os
 import sys
+import hashlib
+import aiofiles
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+
+STORAGE_PATH = os.environ.get("STORAGE_PATH", "./data/incoming")
+os.makedirs(STORAGE_PATH, exist_ok=True)
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
@@ -89,6 +94,66 @@ async def create_file(file_data: FileCreate):
         "new_state": "detected"
     })
     return snake_to_camel(file)
+
+ALLOWED_SITES = {"tustin", "nashville", "dallas"}
+
+@app.post("/api/files/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    source_site: str = Form(...),
+    source_path: str = Form(...)
+):
+    """Upload a file from a site daemon"""
+    if source_site not in ALLOWED_SITES:
+        raise HTTPException(status_code=400, detail=f"Invalid site: {source_site}")
+    
+    safe_filename = os.path.basename(file.filename or "unnamed")
+    if not safe_filename or ".." in safe_filename or "/" in safe_filename or "\\" in safe_filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
+    site_dir = os.path.join(STORAGE_PATH, source_site)
+    os.makedirs(site_dir, exist_ok=True)
+    
+    dest_path = os.path.join(site_dir, safe_filename)
+    
+    sha256 = hashlib.sha256()
+    file_size = 0
+    
+    async with aiofiles.open(dest_path, 'wb') as out_file:
+        while chunk := await file.read(1024 * 1024):
+            await out_file.write(chunk)
+            sha256.update(chunk)
+            file_size += len(chunk)
+    
+    sha256_hash = sha256.hexdigest()
+    
+    db_file = await storage.create_file({
+        "filename": safe_filename,
+        "source_site": source_site,
+        "source_path": source_path,
+        "file_size": file_size,
+        "sha256_hash": sha256_hash
+    })
+    
+    await storage.create_audit_log({
+        "file_id": db_file["id"],
+        "action": f"File uploaded from {source_site}",
+        "previous_state": None,
+        "new_state": "detected"
+    })
+    
+    return snake_to_camel({
+        **db_file,
+        "storage_path": dest_path
+    })
+
+@app.get("/api/settings")
+async def get_settings():
+    """Get current storage settings"""
+    return {
+        "storagePath": STORAGE_PATH,
+        "sites": ["tustin", "nashville", "dallas"]
+    }
 
 @app.post("/api/files/{file_id}/validate")
 async def validate_file(file_id: str):

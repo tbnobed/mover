@@ -23,6 +23,8 @@ read -sp "Enter a database password: " DB_PASSWORD
 echo ""
 read -sp "Enter a session secret (random string): " SESSION_SECRET
 echo ""
+read -p "Enter storage path for incoming files (default: /data/incoming): " STORAGE_PATH_INPUT
+STORAGE_PATH=${STORAGE_PATH_INPUT:-/data/incoming}
 
 echo ""
 echo "Step 1: Installing system dependencies..."
@@ -55,13 +57,15 @@ npm install
 
 echo ""
 echo "Step 5: Installing Python dependencies..."
-pip3 install fastapi uvicorn asyncpg pydantic
+pip3 install fastapi uvicorn asyncpg pydantic aiofiles python-multipart
 
 echo ""
 echo "Step 6: Creating environment file..."
+mkdir -p ${STORAGE_PATH}
 cat > ${INSTALL_DIR}/.env << EOF
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
 SESSION_SECRET=${SESSION_SECRET}
+STORAGE_PATH=${STORAGE_PATH}
 NODE_ENV=production
 PORT=5000
 EOF
@@ -136,6 +140,7 @@ echo "  Installation Complete!"
 echo "=============================================="
 echo ""
 echo "Orchestrator URL: http://${SERVER_HOST}"
+echo "Storage Path: ${STORAGE_PATH}"
 echo ""
 echo "Service commands:"
 echo "  sudo systemctl status ${SERVICE_NAME}"
