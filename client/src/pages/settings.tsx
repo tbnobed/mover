@@ -4,18 +4,49 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import { 
   Settings, 
   Bell, 
   Shield, 
   Database, 
   Clock,
-  Save
+  Save,
+  HardDrive,
+  FolderOpen,
+  RefreshCw
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
+import { useQuery } from "@tanstack/react-query";
+
+interface StorageSettings {
+  storagePath: string;
+  allowedSites: string[];
+  totalFiles: number;
+  totalSize: number;
+  siteStats: Record<string, { fileCount: number; totalSize: number }>;
+  diskUsage: {
+    total: number;
+    used: number;
+    free: number;
+    percentUsed: number;
+  } | null;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  
+  const { data: storageSettings, isLoading: storageLoading, refetch: refetchStorage } = useQuery<StorageSettings>({
+    queryKey: ["/api/settings/storage"],
+  });
 
   return (
     <div className="p-6 space-y-6">
@@ -25,6 +56,92 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4" />
+                <CardTitle>File Storage</CardTitle>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => refetchStorage()}
+                data-testid="button-refresh-storage"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardDescription>Storage path and disk usage for uploaded files</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {storageLoading ? (
+              <div className="text-muted-foreground">Loading storage info...</div>
+            ) : storageSettings ? (
+              <>
+                <div className="space-y-2">
+                  <Label>Storage Path</Label>
+                  <div className="flex items-center gap-2 p-2 bg-muted rounded-md font-mono text-sm">
+                    <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                    <span data-testid="text-storage-path">{storageSettings.storagePath}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Set via STORAGE_PATH environment variable. Restart required to change.
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                {storageSettings.diskUsage && (
+                  <div className="space-y-2">
+                    <Label>Disk Usage</Label>
+                    <Progress 
+                      value={storageSettings.diskUsage.percentUsed} 
+                      className="h-2"
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{formatBytes(storageSettings.diskUsage.used)} used</span>
+                      <span>{formatBytes(storageSettings.diskUsage.free)} free</span>
+                      <span>{formatBytes(storageSettings.diskUsage.total)} total</span>
+                    </div>
+                  </div>
+                )}
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                  <Label>Site Storage</Label>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {storageSettings.allowedSites.map((site) => {
+                      const stats = storageSettings.siteStats[site];
+                      return (
+                        <div 
+                          key={site} 
+                          className="p-3 border rounded-md"
+                          data-testid={`card-site-storage-${site}`}
+                        >
+                          <div className="font-medium capitalize">{site}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {stats?.fileCount || 0} files
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatBytes(stats?.totalSize || 0)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                <div className="text-sm text-muted-foreground">
+                  Total: {storageSettings.totalFiles} files ({formatBytes(storageSettings.totalSize)})
+                </div>
+              </>
+            ) : (
+              <div className="text-muted-foreground">Unable to load storage settings</div>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

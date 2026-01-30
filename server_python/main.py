@@ -376,6 +376,56 @@ async def seed_data():
     result = await storage.seed_data()
     return result
 
+@app.get("/api/settings/storage")
+async def get_storage_settings():
+    """Get storage configuration and disk usage"""
+    import shutil
+    
+    total_size = 0
+    file_count = 0
+    site_stats = {}
+    
+    for site in ALLOWED_SITES:
+        site_path = os.path.join(STORAGE_PATH, site)
+        site_size = 0
+        site_files = 0
+        
+        if os.path.exists(site_path):
+            for f in os.listdir(site_path):
+                file_path = os.path.join(site_path, f)
+                if os.path.isfile(file_path):
+                    size = os.path.getsize(file_path)
+                    site_size += size
+                    site_files += 1
+        
+        site_stats[site] = {
+            "fileCount": site_files,
+            "totalSize": site_size
+        }
+        total_size += site_size
+        file_count += site_files
+    
+    disk_usage = None
+    try:
+        usage = shutil.disk_usage(STORAGE_PATH)
+        disk_usage = {
+            "total": usage.total,
+            "used": usage.used,
+            "free": usage.free,
+            "percentUsed": round((usage.used / usage.total) * 100, 1)
+        }
+    except:
+        pass
+    
+    return {
+        "storagePath": STORAGE_PATH,
+        "allowedSites": list(ALLOWED_SITES),
+        "totalFiles": file_count,
+        "totalSize": total_size,
+        "siteStats": site_stats,
+        "diskUsage": disk_usage
+    }
+
 dist_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dist", "public")
 if os.path.exists(dist_path):
     app.mount("/assets", StaticFiles(directory=os.path.join(dist_path, "assets")), name="assets")
