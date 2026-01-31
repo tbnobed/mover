@@ -106,38 +106,54 @@ class FileDetector(FileSystemEventHandler):
             print(f"[{datetime.now().isoformat()}] Error reporting file: {e}")
     
     async def upload_file(self, file_path: str):
-        """Upload the actual file to the orchestrator"""
+        """Upload the actual file to the orchestrator using streaming"""
         path = Path(file_path)
         file_size = path.stat().st_size
-        print(f"[{datetime.now().isoformat()}] Uploading: {path.name} ({file_size:,} bytes)")
+        print(f"[{datetime.now().isoformat()}] Uploading: {path.name} ({file_size:,} bytes / {file_size / (1024**3):.2f} GB)")
         
-        # Read entire file into memory first to ensure complete transfer
-        # This is important for files on network mounts (NFS/SMB)
-        with open(file_path, 'rb') as f:
-            file_content = f.read()
+        # Calculate hash before upload for verification
+        sha256_hash = await self.calculate_hash(file_path)
         
-        actual_size = len(file_content)
-        if actual_size != file_size:
-            print(f"[{datetime.now().isoformat()}] Warning: File size mismatch - expected {file_size}, read {actual_size}")
+        # Streaming file reader generator - handles files of any size
+        async def file_sender():
+            chunk_size = 64 * 1024 * 1024  # 64MB chunks for large files
+            bytes_sent = 0
+            last_progress = 0
+            with open(file_path, 'rb') as f:
+                while True:
+                    chunk = f.read(chunk_size)
+                    if not chunk:
+                        break
+                    bytes_sent += len(chunk)
+                    # Log progress every 10%
+                    progress = int((bytes_sent / file_size) * 100) if file_size > 0 else 100
+                    if progress >= last_progress + 10:
+                        print(f"[{datetime.now().isoformat()}] Upload progress: {path.name} - {progress}% ({bytes_sent:,} / {file_size:,} bytes)")
+                        last_progress = progress
+                    yield chunk
         
-        # Create timeout for large file uploads (5 minutes + 1 second per MB)
-        timeout_seconds = 300 + (actual_size // (1024 * 1024))
-        timeout = aiohttp.ClientTimeout(total=timeout_seconds)
+        # Very long timeout for massive files (base 1 hour + 1 hour per TB)
+        tb_count = max(1, file_size // (1024**4))
+        timeout_seconds = 3600 + (tb_count * 3600)
+        timeout = aiohttp.ClientTimeout(total=timeout_seconds, sock_read=3600)
+        
+        headers = get_auth_headers()
+        headers['X-File-Size'] = str(file_size)
+        headers['X-File-Hash'] = sha256_hash
+        headers['X-Source-Site'] = self.site_id
+        headers['X-Source-Path'] = str(path.absolute())
+        headers['Content-Type'] = 'application/octet-stream'
         
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            data = aiohttp.FormData()
-            data.add_field('file', file_content, filename=path.name, content_type='application/octet-stream')
-            data.add_field('source_site', self.site_id)
-            data.add_field('source_path', str(path.absolute()))
-            
             async with session.post(
-                f"{self.orchestrator_url}/api/files/upload",
-                data=data,
-                headers=get_auth_headers()
+                f"{self.orchestrator_url}/api/files/upload-stream",
+                data=file_sender(),
+                headers=headers,
+                params={'filename': path.name}
             ) as resp:
                 if resp.status == 200 or resp.status == 201:
                     result = await resp.json()
-                    print(f"[{datetime.now().isoformat()}] Uploaded: {path.name} ({actual_size:,} bytes) -> {result.get('id', 'unknown')}")
+                    print(f"[{datetime.now().isoformat()}] Uploaded: {path.name} ({file_size:,} bytes) -> {result.get('id', 'unknown')}")
                 else:
                     text = await resp.text()
                     print(f"[{datetime.now().isoformat()}] Upload failed: {resp.status} - {text}")

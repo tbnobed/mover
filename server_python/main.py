@@ -279,6 +279,110 @@ async def upload_file(
         "storage_path": dest_path
     })
 
+@app.post("/api/files/upload-stream")
+async def upload_file_stream(request: Request, filename: str):
+    """
+    Streaming upload endpoint for large files (supports files of any size up to 500TB+)
+    Uses raw body streaming to avoid memory issues.
+    File metadata passed via headers:
+    - X-File-Size: Expected file size
+    - X-File-Hash: SHA256 hash for verification
+    - X-Source-Site: Site identifier
+    - X-Source-Path: Original file path
+    """
+    await get_daemon_or_user_auth(request)
+    
+    # Get metadata from headers
+    expected_size = int(request.headers.get('X-File-Size', 0))
+    expected_hash = request.headers.get('X-File-Hash', '')
+    source_site = request.headers.get('X-Source-Site', '')
+    source_path = request.headers.get('X-Source-Path', '')
+    
+    if not source_site or not source_path:
+        raise HTTPException(status_code=400, detail="Missing X-Source-Site or X-Source-Path headers")
+    
+    # Validate site exists
+    sites = await storage.get_sites()
+    site_names = {s["name"].lower() for s in sites}
+    if source_site.lower() not in site_names:
+        raise HTTPException(status_code=400, detail=f"Unknown site: {source_site}. Site must register via heartbeat first.")
+    
+    # Check for duplicates
+    existing = await storage.get_file_by_source(source_site, source_path)
+    if existing:
+        raise HTTPException(
+            status_code=409, 
+            detail=f"File already tracked: {existing['filename']} (id: {existing['id']}, state: {existing['state']})"
+        )
+    
+    safe_filename = os.path.basename(filename or "unnamed")
+    if not safe_filename or ".." in safe_filename or "/" in safe_filename or "\\" in safe_filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
+    site_dir = os.path.join(STORAGE_PATH, source_site)
+    os.makedirs(site_dir, exist_ok=True)
+    dest_path = os.path.join(site_dir, safe_filename)
+    
+    # Stream directly to disk with hash calculation
+    sha256 = hashlib.sha256()
+    file_size = 0
+    chunk_size = 64 * 1024 * 1024  # 64MB chunks to match daemon
+    
+    print(f"[{datetime.now().isoformat()}] Starting streaming upload: {safe_filename} (expected: {expected_size:,} bytes)")
+    
+    async with aiofiles.open(dest_path, 'wb') as out_file:
+        async for chunk in request.stream():
+            await out_file.write(chunk)
+            sha256.update(chunk)
+            file_size += len(chunk)
+            # Log progress for large files
+            if file_size % (1024 * 1024 * 1024) < len(chunk):  # Every GB
+                print(f"[{datetime.now().isoformat()}] Received: {safe_filename} - {file_size:,} bytes ({file_size / (1024**3):.2f} GB)")
+    
+    sha256_hash = sha256.hexdigest()
+    
+    print(f"[{datetime.now().isoformat()}] Upload complete: {safe_filename} - {file_size:,} bytes")
+    
+    # Verify file integrity
+    if expected_size > 0 and file_size != expected_size:
+        os.remove(dest_path)  # Clean up incomplete file
+        raise HTTPException(
+            status_code=400, 
+            detail=f"File size mismatch: expected {expected_size}, received {file_size}"
+        )
+    
+    if expected_hash and sha256_hash != expected_hash:
+        os.remove(dest_path)  # Clean up corrupted file
+        raise HTTPException(
+            status_code=400,
+            detail=f"Hash mismatch: expected {expected_hash}, got {sha256_hash}"
+        )
+    
+    # Check for hash duplicates
+    hash_duplicate = await storage.get_file_by_hash(sha256_hash)
+    if hash_duplicate:
+        print(f"Warning: File {safe_filename} has same hash as existing file {hash_duplicate['filename']} (id: {hash_duplicate['id']})")
+    
+    db_file = await storage.create_file({
+        "filename": safe_filename,
+        "source_site": source_site,
+        "source_path": source_path,
+        "file_size": file_size,
+        "sha256_hash": sha256_hash
+    })
+    
+    await storage.create_audit_log({
+        "file_id": db_file["id"],
+        "action": f"File uploaded from {source_site} (streaming)",
+        "previous_state": None,
+        "new_state": "detected"
+    })
+    
+    return snake_to_camel({
+        **db_file,
+        "storage_path": dest_path
+    })
+
 @app.get("/api/settings")
 async def get_settings(_user: dict = Depends(get_current_user)):
     """Get current storage settings"""
