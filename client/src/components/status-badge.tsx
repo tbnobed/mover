@@ -38,22 +38,36 @@ export function StatusBadge({ state }: { state: FileState }) {
   );
 }
 
-const siteColors: Record<SiteName, string> = {
-  tustin: "bg-chart-1/15 text-chart-1 border-chart-1/30",
-  nashville: "bg-chart-2/15 text-chart-2 border-chart-2/30",
-  dallas: "bg-chart-4/15 text-chart-4 border-chart-4/30",
-};
+const siteColorsList = [
+  "bg-chart-1/15 text-chart-1 border-chart-1/30",
+  "bg-chart-2/15 text-chart-2 border-chart-2/30",
+  "bg-chart-3/15 text-chart-3 border-chart-3/30",
+  "bg-chart-4/15 text-chart-4 border-chart-4/30",
+  "bg-chart-5/15 text-chart-5 border-chart-5/30",
+];
 
-const siteLabels: Record<SiteName, string> = {
-  tustin: "Tustin",
-  nashville: "Nashville",
-  dallas: "Dallas",
-};
+function getSiteColor(site: string): string {
+  // Generate consistent color based on site name
+  let hash = 0;
+  for (let i = 0; i < site.length; i++) {
+    hash = site.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return siteColorsList[Math.abs(hash) % siteColorsList.length];
+}
 
-export function SiteBadge({ site }: { site: SiteName }) {
+function formatSiteName(site: string): string {
+  // Capitalize first letter of each word
+  return site.split(/[-_\s]/).map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ');
+}
+
+export function SiteBadge({ site }: { site: string }) {
+  if (!site) return <span className="text-muted-foreground">-</span>;
+  
   return (
-    <Badge variant="outline" className={`${siteColors[site]} border`} data-testid={`badge-site-${site}`}>
-      {siteLabels[site]}
+    <Badge variant="outline" className={`${getSiteColor(site)} border`} data-testid={`badge-site-${site}`}>
+      {formatSiteName(site)}
     </Badge>
   );
 }
