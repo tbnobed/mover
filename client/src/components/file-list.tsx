@@ -60,16 +60,30 @@ function FileRowSkeleton() {
 
 interface FileListProps {
   onFileSelect?: (file: File) => void;
-  filter?: string;
+  stateFilter?: string;
+  siteFilter?: string;
+  searchQuery?: string;
 }
 
-export function FileList({ onFileSelect, filter }: FileListProps) {
+export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all", searchQuery = "" }: FileListProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   
-  const { data: files, isLoading, error } = useQuery<File[]>({
-    queryKey: filter ? ["/api/files", filter] : ["/api/files"],
+  const { data: rawFiles, isLoading, error } = useQuery<File[]>({
+    queryKey: ["/api/files"],
     refetchInterval: 5000,
+  });
+
+  const files = rawFiles?.filter(file => {
+    if (stateFilter !== "all" && file.state !== stateFilter) return false;
+    if (siteFilter !== "all" && file.sourceSite !== siteFilter && file.siteId !== siteFilter) return false;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesFilename = file.filename.toLowerCase().includes(query);
+      const matchesPath = file.sourcePath?.toLowerCase().includes(query);
+      if (!matchesFilename && !matchesPath) return false;
+    }
+    return true;
   });
 
   const bulkActionMutation = useMutation({

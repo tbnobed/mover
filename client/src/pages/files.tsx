@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Filter, RefreshCw } from "lucide-react";
-import type { File } from "@shared/schema";
+import type { File, Site } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 
 export default function FilesPage() {
@@ -23,6 +23,10 @@ export default function FilesPage() {
 
   const { isRefetching, refetch } = useQuery<File[]>({
     queryKey: ["/api/files"],
+  });
+
+  const { data: sites } = useQuery<Site[]>({
+    queryKey: ["/api/sites"],
   });
 
   const handleRefresh = () => {
@@ -81,14 +85,16 @@ export default function FilesPage() {
             </SelectContent>
           </Select>
           <Select value={siteFilter} onValueChange={setSiteFilter}>
-            <SelectTrigger className="w-[140px]" data-testid="select-site-filter">
+            <SelectTrigger className="w-[160px]" data-testid="select-site-filter">
               <SelectValue placeholder="All Sites" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Sites</SelectItem>
-              <SelectItem value="tustin">Tustin</SelectItem>
-              <SelectItem value="nashville">Nashville</SelectItem>
-              <SelectItem value="dallas">Dallas</SelectItem>
+              {sites?.map((site) => (
+                <SelectItem key={site.id} value={site.id}>
+                  {site.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -96,7 +102,12 @@ export default function FilesPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className={selectedFile ? "lg:col-span-2" : "lg:col-span-3"}>
-          <FileList onFileSelect={setSelectedFile} />
+          <FileList 
+            onFileSelect={setSelectedFile} 
+            stateFilter={stateFilter}
+            siteFilter={siteFilter}
+            searchQuery={searchQuery}
+          />
         </div>
         {selectedFile && (
           <div>
