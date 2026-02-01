@@ -29,6 +29,7 @@ function StatCardSkeleton() {
 export function StatsCards() {
   const { data: stats, isLoading } = useQuery<Stats>({
     queryKey: ["/api/stats"],
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   if (isLoading) {

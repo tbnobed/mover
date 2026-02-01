@@ -22,6 +22,7 @@ function ActivitySkeleton() {
 export function RecentActivity() {
   const { data: logs, isLoading } = useQuery<AuditLog[]>({
     queryKey: ["/api/audit"],
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   return (

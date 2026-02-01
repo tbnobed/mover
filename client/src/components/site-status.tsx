@@ -24,6 +24,7 @@ function SiteStatusSkeleton() {
 export function SiteStatus() {
   const { data: sites, isLoading } = useQuery<Site[]>({
     queryKey: ["/api/sites"],
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   const siteColors: Record<string, string> = {

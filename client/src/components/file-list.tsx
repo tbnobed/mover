@@ -51,6 +51,7 @@ interface FileListProps {
 export function FileList({ onFileSelect, filter }: FileListProps) {
   const { data: files, isLoading, error } = useQuery<File[]>({
     queryKey: filter ? ["/api/files", filter] : ["/api/files"],
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   if (error) {
