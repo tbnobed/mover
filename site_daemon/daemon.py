@@ -21,6 +21,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Set
 from watchdog.observers.polling import PollingObserver
+from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
 ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:5000")
