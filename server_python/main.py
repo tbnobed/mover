@@ -74,9 +74,16 @@ def is_production():
     return os.environ.get("NODE_ENV") == "production" or os.environ.get("PRODUCTION") == "true"
 
 DAEMON_API_KEY = os.environ.get("DAEMON_API_KEY", "")
+print(f"[startup] DAEMON_API_KEY configured: {bool(DAEMON_API_KEY)}, length: {len(DAEMON_API_KEY)}")
 
 async def get_daemon_or_user_auth(request: Request):
     api_key = request.headers.get("X-API-Key")
+    
+    # Debug: Log auth attempt details
+    if api_key:
+        key_match = (api_key == DAEMON_API_KEY) if DAEMON_API_KEY else False
+        print(f"[auth] API key received (len={len(api_key)}), server key configured: {bool(DAEMON_API_KEY)}, match: {key_match}")
+    
     if DAEMON_API_KEY and api_key == DAEMON_API_KEY:
         return {"type": "daemon", "daemon": True}
     
