@@ -9,7 +9,9 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Res
 from fastapi.middleware.cors import CORSMiddleware
 
 STORAGE_PATH = os.environ.get("STORAGE_PATH", "./data/incoming")
+MAM_DELIVERY_PATH = os.environ.get("MAM_DELIVERY_PATH", "./data/mam_delivery")
 os.makedirs(STORAGE_PATH, exist_ok=True)
+os.makedirs(MAM_DELIVERY_PATH, exist_ok=True)
 
 # In-memory tracking for active uploads
 active_uploads: dict = {}
@@ -834,6 +836,7 @@ async def get_storage_settings(_user: dict = Depends(get_current_user)):
     
     return {
         "storagePath": STORAGE_PATH,
+        "mamDeliveryPath": MAM_DELIVERY_PATH,
         "registeredSites": site_names,
         "totalFiles": file_count,
         "totalSize": total_size,

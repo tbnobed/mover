@@ -21,7 +21,9 @@ import { useQuery } from "@tanstack/react-query";
 
 interface StorageSettings {
   storagePath: string;
-  allowedSites: string[];
+  mamDeliveryPath: string;
+  allowedSites?: string[];
+  registeredSites?: string[];
   totalFiles: number;
   totalSize: number;
   siteStats: Record<string, { fileCount: number; totalSize: number }>;
@@ -80,13 +82,24 @@ export default function SettingsPage() {
             ) : storageSettings ? (
               <>
                 <div className="space-y-2">
-                  <Label>Storage Path</Label>
+                  <Label>Incoming Storage Path</Label>
                   <div className="flex items-center gap-2 p-2 bg-muted rounded-md font-mono text-sm">
                     <FolderOpen className="h-4 w-4 text-muted-foreground" />
                     <span data-testid="text-storage-path">{storageSettings.storagePath}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Set via STORAGE_PATH environment variable. Restart required to change.
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>MAM Delivery Path</Label>
+                  <div className="flex items-center gap-2 p-2 bg-muted rounded-md font-mono text-sm">
+                    <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                    <span data-testid="text-mam-path">{storageSettings.mamDeliveryPath}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Destination for "Deliver to MAM" action. Set via MAM_DELIVERY_PATH environment variable.
                   </p>
                 </div>
                 
@@ -112,7 +125,7 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <Label>Site Storage</Label>
                   <div className="grid gap-3 md:grid-cols-3">
-                    {storageSettings.allowedSites.map((site) => {
+                    {(storageSettings.registeredSites || storageSettings.allowedSites || []).map((site) => {
                       const stats = storageSettings.siteStats[site];
                       return (
                         <div 

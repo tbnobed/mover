@@ -137,6 +137,19 @@ Visit `POST /api/seed` to populate demo data:
 - 3 users (2 colorists, 1 admin)
 - Sample files in various states
 
+## Environment Variables
+
+### Orchestrator
+- `STORAGE_PATH`: Directory for incoming file uploads (default: `./data/incoming`)
+- `MAM_DELIVERY_PATH`: Destination directory for "Deliver to MAM" action (default: `./data/mam_delivery`)
+- `DAEMON_API_KEY`: API key for site daemon authentication
+- `DATABASE_URL`: PostgreSQL connection string
+- `SESSION_SECRET`: Secret for session cookie signing
+
+### Site Daemon
+- `DAEMON_API_KEY`: API key to authenticate with orchestrator
+- `ORCHESTRATOR_URL`: URL of central orchestrator (can also use CLI flag)
+
 ## User Preferences
 - Dark mode enabled by default
 - Modern, clean UI with professional aesthetic
