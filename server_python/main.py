@@ -171,12 +171,15 @@ async def get_current_user(request: Request):
 @app.get("/api/stats")
 async def get_stats(_user: dict = Depends(get_current_user)):
     stats = await storage.get_stats()
+    # Include active uploads in transferring count
+    active_upload_count = len(active_uploads)
     return {
         "totalFiles": stats["total_files"],
         "detected": stats["detected"],
         "validated": stats["validated"],
         "queued": stats["queued"],
-        "transferring": stats["transferring"],
+        "transferring": stats["transferring"] + active_upload_count,
+        "activeUploads": active_upload_count,
         "transferred": stats["transferred"],
         "assigned": stats["assigned"],
         "inProgress": stats["in_progress"],
@@ -396,60 +399,61 @@ async def upload_file_stream(request: Request, filename: str):
         sha256_hash = sha256.hexdigest()
         
         print(f"[{datetime.now().isoformat()}] Upload complete: {safe_filename} - {file_size:,} bytes")
+        
+        # Verify file integrity
+        if expected_size > 0 and file_size != expected_size:
+            os.remove(dest_path)  # Clean up incomplete file
+            raise HTTPException(
+                status_code=400, 
+                detail=f"File size mismatch: expected {expected_size}, received {file_size}"
+            )
+        
+        if expected_hash and sha256_hash != expected_hash:
+            os.remove(dest_path)  # Clean up corrupted file
+            raise HTTPException(
+                status_code=400,
+                detail=f"Hash mismatch: expected {expected_hash}, got {sha256_hash}"
+            )
+        
+        # Check for hash duplicates
+        hash_duplicate = await storage.get_file_by_hash(sha256_hash)
+        if hash_duplicate:
+            print(f"Warning: File {safe_filename} has same hash as existing file {hash_duplicate['filename']} (id: {hash_duplicate['id']})")
+        
+        db_file = await storage.create_file({
+            "filename": safe_filename,
+            "source_site": source_site,
+            "source_path": source_path,
+            "file_size": file_size,
+            "sha256_hash": sha256_hash
+        })
+        
+        # Add to permanent file history ledger (NEVER deleted)
+        await storage.add_to_file_history(sha256_hash, safe_filename, source_site, file_size)
+        
+        await storage.create_audit_log({
+            "file_id": db_file["id"],
+            "action": f"File uploaded from {source_site} (streaming)",
+            "previous_state": None,
+            "new_state": "detected"
+        })
+        
+        print(f"[{datetime.now().isoformat()}] File registered in database: {safe_filename} (id: {db_file['id']})")
+        
+        return snake_to_camel({
+            **db_file,
+            "storage_path": dest_path
+        })
+        
     except Exception as e:
+        print(f"[{datetime.now().isoformat()}] Upload failed: {safe_filename} - {str(e)}")
         active_uploads[upload_id]["status"] = "failed"
         active_uploads[upload_id]["error"] = str(e)
-        # Clean up after 60 seconds
-        del active_uploads[upload_id]
         raise
-    
-    # Verify file integrity
-    if expected_size > 0 and file_size != expected_size:
-        os.remove(dest_path)  # Clean up incomplete file
-        raise HTTPException(
-            status_code=400, 
-            detail=f"File size mismatch: expected {expected_size}, received {file_size}"
-        )
-    
-    if expected_hash and sha256_hash != expected_hash:
-        os.remove(dest_path)  # Clean up corrupted file
-        raise HTTPException(
-            status_code=400,
-            detail=f"Hash mismatch: expected {expected_hash}, got {sha256_hash}"
-        )
-    
-    # Check for hash duplicates
-    hash_duplicate = await storage.get_file_by_hash(sha256_hash)
-    if hash_duplicate:
-        print(f"Warning: File {safe_filename} has same hash as existing file {hash_duplicate['filename']} (id: {hash_duplicate['id']})")
-    
-    db_file = await storage.create_file({
-        "filename": safe_filename,
-        "source_site": source_site,
-        "source_path": source_path,
-        "file_size": file_size,
-        "sha256_hash": sha256_hash
-    })
-    
-    # Add to permanent file history ledger (NEVER deleted)
-    await storage.add_to_file_history(sha256_hash, safe_filename, source_site, file_size)
-    
-    await storage.create_audit_log({
-        "file_id": db_file["id"],
-        "action": f"File uploaded from {source_site} (streaming)",
-        "previous_state": None,
-        "new_state": "detected"
-    })
-    
-    # Mark upload complete and remove from tracking
-    active_uploads[upload_id]["status"] = "complete"
-    active_uploads[upload_id]["progress"] = 100
-    del active_uploads[upload_id]
-    
-    return snake_to_camel({
-        **db_file,
-        "storage_path": dest_path
-    })
+    finally:
+        # Always clean up from active_uploads tracking
+        if upload_id in active_uploads:
+            del active_uploads[upload_id]
 
 @app.get("/api/settings")
 async def get_settings(_user: dict = Depends(get_current_user)):
