@@ -18,11 +18,11 @@ async def get_file(file_id: str) -> Optional[Dict[str, Any]]:
         return dict(row) if row else None
 
 async def get_file_by_source(source_site: str, source_path: str) -> Optional[Dict[str, Any]]:
-    """Check if a file from this source already exists"""
+    """Check if a file from this source already exists (case-insensitive site match)"""
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
-            "SELECT * FROM files WHERE source_site = $1 AND source_path = $2",
+            "SELECT * FROM files WHERE LOWER(source_site) = LOWER($1) AND source_path = $2",
             source_site, source_path
         )
         return dict(row) if row else None

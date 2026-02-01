@@ -1,0 +1,40 @@
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ # On the orchestrator server (10.63.12.122)
+cd /opt/color-routing-orchestrator
+sudo git pull origin main
+sudo rm -rf dist && npm run build
+sudo systemctl restart color-routing-orchestrator
+remote: Enumerating objects: 11, done.
+remote: Counting objects: 100% (11/11), done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 9 (delta 6), reused 6 (delta 3), pack-reused 0 (from 0)
+Unpacking objects: 100% (9/9), 3.68 KiB | 753.00 KiB/s, done.
+From https://github.com/tbnobed/mover
+ * branch            main       -> FETCH_HEAD
+   590b8dc..cd8990a  main       -> origin/main
+Updating 590b8dc..cd8990a
+Fast-forward
+ attached_assets/Pasted--Color-Routing-System-Site-Daemon--1769928981467_1769928981467.txt        |  35 ++++++++++++++++++++++++++++
+ attached_assets/Pasted--Color-Routing-System-Site-Daemon--1769929003907_1769929003907.txt        |  39 +++++++++++++++++++++++++++++++
+ attached_assets/Pasted-obtv-admin-dal-daemon1-opt-color-routing-daemon-sudo-gi_1769929057416.txt | 115 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 189 insertions(+)
+ create mode 100644 attached_assets/Pasted--Color-Routing-System-Site-Daemon--1769928981467_1769928981467.txt
+ create mode 100644 attached_assets/Pasted--Color-Routing-System-Site-Daemon--1769929003907_1769929003907.txt
+ create mode 100644 attached_assets/Pasted-obtv-admin-dal-daemon1-opt-color-routing-daemon-sudo-gi_1769929057416.txt
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.3.0 building client environment for production...
+transforming (5) ../node_modules/@tanstack/react-query/build/modern/index.js
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 2051 modules transformed.
+../dist/public/index.html                   2.01 kB │ gzip:   0.77 kB
+../dist/public/assets/index-CkHRVJbG.css   74.68 kB │ gzip:  11.91 kB
+../dist/public/assets/index-Bnjrj6US.js   468.33 kB │ gzip: 141.48 kB
+✓ built in 4.03s
+building server...
+
+  dist/index.cjs  816.3kb
+
+⚡ Done in 40ms

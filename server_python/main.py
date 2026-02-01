@@ -305,20 +305,27 @@ async def check_file_exists(request: Request, hash: str = None, filename: str = 
     """
     await get_daemon_or_user_auth(request)
     
+    # Debug logging
+    print(f"[CHECK] hash={hash}, filename={filename}, site={site}, source_path={source_path}")
+    
     if not hash and not filename and not source_path:
         raise HTTPException(status_code=400, detail="Must provide hash, filename, or source_path")
     
     # Check by hash in permanent history (authoritative source)
     if hash:
-        if await storage.file_exists_in_history(hash):
+        hash_exists = await storage.file_exists_in_history(hash)
+        print(f"[CHECK] Hash lookup result: {hash_exists}")
+        if hash_exists:
             return {"exists": True, "reason": "File hash already in history"}
     
     # Check by source path - prevents duplicate uploads from same location
     if site and source_path:
         existing = await storage.get_file_by_source(site, source_path)
+        print(f"[CHECK] Source path lookup: site={site}, path={source_path}, found={existing is not None}")
         if existing:
             return {"exists": True, "reason": f"File already tracked from this path (id: {existing['id']}, state: {existing['state']})"}
     
+    print(f"[CHECK] File not found, returning exists=False")
     return {"exists": False, "reason": None}
 
 @app.post("/api/files/upload-stream")
