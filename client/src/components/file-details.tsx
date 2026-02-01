@@ -17,7 +17,11 @@ import {
   HardDrive, 
   Calendar, 
   User,
-  ArrowRight
+  ArrowRight,
+  CheckCircle,
+  ListPlus,
+  Send,
+  CheckCheck
 } from "lucide-react";
 import type { File, AuditLog } from "@shared/schema";
 import { format } from "date-fns";
@@ -93,8 +97,57 @@ export function FileDetails({ file, onClose }: FileDetailsProps) {
     },
   });
 
+  const validateMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/validate`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "File validated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to validate file", variant: "destructive" });
+    },
+  });
+
+  const queueMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/queue`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "File queued for transfer" });
+    },
+    onError: () => {
+      toast({ title: "Failed to queue file", variant: "destructive" });
+    },
+  });
+
+  const startTransferMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/start-transfer`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "Transfer started" });
+    },
+    onError: () => {
+      toast({ title: "Failed to start transfer", variant: "destructive" });
+    },
+  });
+
+  const completeTransferMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/complete-transfer`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "Transfer completed" });
+    },
+    onError: () => {
+      toast({ title: "Failed to complete transfer", variant: "destructive" });
+    },
+  });
+
   const isPending = assignMutation.isPending || startWorkMutation.isPending || 
-    deliverMutation.isPending || rejectMutation.isPending;
+    deliverMutation.isPending || rejectMutation.isPending || validateMutation.isPending ||
+    queueMutation.isPending || startTransferMutation.isPending || completeTransferMutation.isPending;
 
   return (
     <Card className="h-full flex flex-col">
@@ -182,6 +235,46 @@ export function FileDetails({ file, onClose }: FileDetailsProps) {
           <div className="space-y-3">
             <h4 className="text-sm font-medium">Actions</h4>
             <div className="flex flex-wrap gap-2">
+              {file.state === "detected" && (
+                <Button 
+                  onClick={() => validateMutation.mutate()} 
+                  disabled={isPending}
+                  data-testid="button-validate-file"
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Validate
+                </Button>
+              )}
+              {file.state === "validated" && (
+                <Button 
+                  onClick={() => queueMutation.mutate()} 
+                  disabled={isPending}
+                  data-testid="button-queue-file"
+                >
+                  <ListPlus className="mr-2 h-4 w-4" />
+                  Queue for Transfer
+                </Button>
+              )}
+              {file.state === "queued" && (
+                <Button 
+                  onClick={() => startTransferMutation.mutate()} 
+                  disabled={isPending}
+                  data-testid="button-start-transfer"
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Start Transfer
+                </Button>
+              )}
+              {file.state === "transferring" && (
+                <Button 
+                  onClick={() => completeTransferMutation.mutate()} 
+                  disabled={isPending}
+                  data-testid="button-complete-transfer"
+                >
+                  <CheckCheck className="mr-2 h-4 w-4" />
+                  Complete Transfer
+                </Button>
+              )}
               {file.state === "transferred" && (
                 <Button 
                   onClick={() => assignMutation.mutate()} 
