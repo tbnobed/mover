@@ -109,6 +109,9 @@ async function main() {
     pathRewrite: (path: string) => path.startsWith('/api') ? path : `/api${path}`,
     on: {
       proxyReq: (proxyReq, req: any) => {
+        if (req.headers['x-api-key']) {
+          proxyReq.setHeader('X-API-Key', req.headers['x-api-key']);
+        }
         if (req.body && Object.keys(req.body).length > 0) {
           const bodyData = JSON.stringify(req.body);
           proxyReq.setHeader('Content-Type', 'application/json');
