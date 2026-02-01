@@ -29,9 +29,11 @@ DAEMON_API_KEY = os.getenv("DAEMON_API_KEY", "")
 HEARTBEAT_INTERVAL = 30
 SUPPORTED_EXTENSIONS = {".mxf", ".mov", ".mp4", ".mkv", ".avi", ".ari", ".r3d", ".braw", ".dpx", ".exr", ".dng", ".prores"}
 # File stability: wait until file hasn't changed for this long (size AND mtime)
-# Default: 60 seconds of no changes. Override with FILE_STABILITY_SECONDS env var
-FILE_STABILITY_SECONDS = int(os.getenv("FILE_STABILITY_SECONDS", "60"))
+# Default: 120 seconds of no changes. Override with FILE_STABILITY_SECONDS env var
+FILE_STABILITY_SECONDS = int(os.getenv("FILE_STABILITY_SECONDS", "120"))
 FILE_CHECK_INTERVAL = 5  # Check every 5 seconds
+# Minimum file size to consider a file valid (ignore 0-byte placeholders)
+MIN_FILE_SIZE_BYTES = int(os.getenv("MIN_FILE_SIZE_BYTES", "1024"))  # 1KB minimum
 
 
 def get_auth_headers() -> dict:
@@ -390,6 +392,10 @@ class SiteDaemon:
             # File unchanged - check how long
             elapsed = (now - info['stable_since']).total_seconds()
             if elapsed >= FILE_STABILITY_SECONDS:
+                # Don't accept 0-byte or tiny files - they're placeholders
+                if current_size < MIN_FILE_SIZE_BYTES:
+                    # Keep tracking - file hasn't received content yet
+                    return False, True
                 print(f"[{now.isoformat()}] File complete: {path.name} ({current_size:,} bytes) - stable for {elapsed:.0f}s")
                 del self.writing_files[file_path]
                 return True, False
