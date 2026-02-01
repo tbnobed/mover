@@ -1,0 +1,45 @@
+10.100.4.150:0 - "GET /api/files/check?hash=63a925f7e1a6e6d951d66e874a5f9277afd5d94b34c560202174b144c13c9f88&filename=2024-02-06+07-20-57.mkv&site=Tustin&source_path=/mnt/color/2024-02-06+07-20-57.mkv HTTP/1.1" 401 Unauthorized
+Feb 01 07:12:00 mov-orc-dev npx[29841]: 7:12:00 AM [server] GET /api/files/check 401 in 3ms
+Feb 01 07:12:00 mov-orc-dev npx[29841]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 01 07:12:00 mov-orc-dev npx[29841]: 7:12:00 AM [server] POST /api/sites/Tustin/heartbeat 200 in 6ms
+Feb 01 07:12:02 mov-orc-dev npx[29841]: [python] INFO:     10.63.16.117:0 - "GET /api/files/check?hash=644e68533b38ae598340618431ef79500c1717faf5139aaa1f0d9c9fa93a2077&filename=2024-02-06+09-50-52.mkv&site=Dallas&source_path=/mnt/color/2024-02-06+09-50-52.mkv HTTP/1.1" 401 Unauthorized
+Feb 01 07:12:02 mov-orc-dev npx[29841]: 7:12:02 AM [server] GET /api/files/check 401 in 3ms
+Feb 01 07:12:04 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 07:12:04 mov-orc-dev npx[29841]: 7:12:04 AM [server] GET /api/files 200 in 9ms
+Feb 01 07:12:04 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 01 07:12:04 mov-orc-dev npx[29841]: INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 01 07:12:04 mov-orc-dev npx[29841]: 7:12:04 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 8ms
+Feb 01 07:12:04 mov-orc-dev npx[29841]: 7:12:04 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 8ms
+Feb 01 07:12:07 mov-orc-dev npx[29841]: [python] INFO:     10.63.16.117:0 - "POST /api/files/upload-stream?filename=2024-02-06+09-50-52.mkv HTTP/1.1" 409 Conflict
+Feb 01 07:12:07 mov-orc-dev npx[29841]: 7:12:07 AM [server] POST /api/files/upload-stream 409 in 14ms
+Feb 01 07:12:09 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 01 07:12:09 mov-orc-dev npx[29841]: 7:12:09 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 5ms
+Feb 01 07:12:09 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 07:12:09 mov-orc-dev npx[29841]: 7:12:09 AM [server] GET /api/files 200 in 6ms
+Feb 01 07:12:09 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 01 07:12:09 mov-orc-dev npx[29841]: 7:12:09 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 6ms
+Feb 01 07:12:13 mov-orc-dev npx[29841]: [python] INFO:     10.63.16.117:0 - "GET /api/files/check?hash=2290245ca889c47557caccf27a3f5500179802a2922b5391c697fd06fdbe20aa&filename=2024-02-06+09-50-52.mp4&site=Dallas&source_path=/mnt/color/2024-02-06+09-50-52.mp4 HTTP/1.1" 401 Unauthorized
+Feb 01 07:12:13 mov-orc-dev npx[29841]: 7:12:13 AM [server] GET /api/files/check 401 in 2ms
+Feb 01 07:12:14 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 01 07:12:14 mov-orc-dev npx[29841]: 7:12:14 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 4ms
+Feb 01 07:12:14 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 07:12:14 mov-orc-dev npx[29841]: 7:12:14 AM [server] GET /api/files 200 in 6ms
+Feb 01 07:12:14 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 01 07:12:14 mov-orc-dev npx[29841]: 7:12:14 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 4ms
+Feb 01 07:12:18 mov-orc-dev npx[29841]: [python] INFO:     10.63.16.117:0 - "POST /api/files/upload-stream?filename=2024-02-06+09-50-52.mp4 HTTP/1.1" 409 Conflict
+Feb 01 07:12:18 mov-orc-dev npx[29841]: 7:12:18 AM [server] POST /api/files/upload-stream 409 in 7ms
+Feb 01 07:12:19 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 01 07:12:19 mov-orc-dev npx[29841]: 7:12:19 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 4ms
+Feb 01 07:12:19 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 07:12:19 mov-orc-dev npx[29841]: 7:12:19 AM [server] GET /api/files 200 in 4ms
+Feb 01 07:12:19 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 01 07:12:19 mov-orc-dev npx[29841]: 7:12:19 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 3ms
+Feb 01 07:12:24 mov-orc-dev npx[29841]: [python] INFO:     10.63.16.117:0 - "GET /api/files/check?hash=3fc71dbe4e7d938e46dd4d85ece5d642e1e3ef45452a41ce1ff7e9b2dbd2a636&filename=2024-02-06_07-20-54.mp4&site=Dallas&source_path=/mnt/color/2024-02-06_07-20-54.mp4 HTTP/1.1" 401 Unauthorized
+Feb 01 07:12:24 mov-orc-dev npx[29841]: 7:12:24 AM [server] GET /api/files/check 401 in 2ms
+Feb 01 07:12:24 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 01 07:12:24 mov-orc-dev npx[29841]: 7:12:24 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 5ms
+Feb 01 07:12:24 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 07:12:24 mov-orc-dev npx[29841]: 7:12:24 AM [server] GET /api/files 200 in 4ms
+Feb 01 07:12:24 mov-orc-dev npx[29841]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 01 07:12:24 mov-orc-dev npx[29841]: 7:12:24 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 2ms
+F

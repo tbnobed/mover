@@ -78,17 +78,25 @@ class FileDetector(FileSystemEventHandler):
                 'site': self.site_id,
                 'source_path': source_path
             }
+            headers = get_auth_headers()
+            print(f"[{datetime.now().isoformat()}] Check request headers: {headers}")
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     f"{self.orchestrator_url}/api/files/check",
                     params=params,
-                    headers=get_auth_headers()
+                    headers=headers
                 ) as resp:
+                    print(f"[{datetime.now().isoformat()}] Check response status: {resp.status}")
                     if resp.status == 200:
                         result = await resp.json()
                         return result.get('exists', False)
+                    elif resp.status == 401:
+                        print(f"[{datetime.now().isoformat()}] AUTH FAILED! API key sent: {'X-API-Key' in headers}, DAEMON_API_KEY set: {bool(DAEMON_API_KEY)}")
+                        return False
                     else:
                         # If check fails, proceed with upload (server will reject duplicates)
+                        text = await resp.text()
+                        print(f"[{datetime.now().isoformat()}] Check failed: {resp.status} - {text}")
                         return False
         except Exception as e:
             print(f"[{datetime.now().isoformat()}] Error checking file existence: {e}")
