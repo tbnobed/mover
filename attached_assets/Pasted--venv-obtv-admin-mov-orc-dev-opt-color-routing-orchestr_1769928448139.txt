@@ -1,0 +1,39 @@
+(venv) obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ python -m uvicorn server_python.main:app --host 0.0.0.0 --port 5000
+INFO:     Started server process [29061]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/color-routing-orchestrator/server_python/main.py", line 33, in lifespan
+    await get_pool()
+  File "/opt/color-routing-orchestrator/server_python/database.py", line 107, in get_pool
+    pool = await asyncpg.create_pool(DATABASE_URL)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/pool.py", line 439, in _async__init__
+    await self._initialize()
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/pool.py", line 466, in _initialize
+    await first_ch.connect()
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/pool.py", line 153, in connect
+    self._con = await self._pool._get_new_connection()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/pool.py", line 538, in _get_new_connection
+    con = await self._connect(
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1102, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidAuthorizationSpecificationError: role "obtv-admin" does not exist
+
+ERROR:    Application startup failed. Exiting.
+(venv) obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ 
