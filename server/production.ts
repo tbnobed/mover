@@ -109,8 +109,12 @@ async function main() {
     pathRewrite: (path: string) => path.startsWith('/api') ? path : `/api${path}`,
     on: {
       proxyReq: (proxyReq, req: any) => {
-        if (req.headers['x-api-key']) {
-          proxyReq.setHeader('X-API-Key', req.headers['x-api-key']);
+        const apiKey = req.headers['x-api-key'];
+        if (apiKey) {
+          console.log(`[proxy] Forwarding X-API-Key for ${req.method} ${req.path} (len=${apiKey.length})`);
+          proxyReq.setHeader('X-API-Key', apiKey);
+        } else {
+          console.log(`[proxy] No X-API-Key received for ${req.method} ${req.path}`);
         }
         if (req.body && Object.keys(req.body).length > 0) {
           const bodyData = JSON.stringify(req.body);
