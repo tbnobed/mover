@@ -431,14 +431,19 @@ async def upload_file_stream(request: Request, filename: str):
         # Add to permanent file history ledger (NEVER deleted)
         await storage.add_to_file_history(sha256_hash, safe_filename, source_site, file_size)
         
+        # Verify file is actually in database before creating audit log
+        verified_file = await storage.get_file(db_file["id"])
+        if not verified_file:
+            raise Exception(f"File {safe_filename} not found in database after creation")
+        
         await storage.create_audit_log({
             "file_id": db_file["id"],
-            "action": f"File uploaded from {source_site} (streaming)",
+            "action": f"File uploaded and verified from {source_site}",
             "previous_state": None,
             "new_state": "detected"
         })
         
-        print(f"[{datetime.now().isoformat()}] File registered in database: {safe_filename} (id: {db_file['id']})")
+        print(f"[{datetime.now().isoformat()}] File verified in database: {safe_filename} (id: {db_file['id']})")
         
         return snake_to_camel({
             **db_file,
