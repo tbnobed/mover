@@ -655,8 +655,7 @@ async def deliver_file(file_id: str, _user: dict = Depends(get_current_user)):
     
     updated = await storage.update_file(file_id, {
         "state": "delivered_to_mam", 
-        "delivered_at": datetime.now(),
-        "mam_path": dest_path
+        "delivered_at": datetime.now()
     })
     await storage.create_audit_log({
         "file_id": file_id,

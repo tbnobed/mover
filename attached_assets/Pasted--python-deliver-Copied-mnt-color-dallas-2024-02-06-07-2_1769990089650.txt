@@ -1,0 +1,79 @@
+[python] [deliver] Copied /mnt/color/dallas/2024-02-06_07-20-54.mov to /mnt/mam/delivery/dallas/2024-02-06_07-20-54.mov
+Feb 01 23:54:05 mov-orc-dev npx[35810]: INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 23:54:05 mov-orc-dev npx[35810]: 11:54:05 PM [server] GET /api/uploads/active 200 in 2649ms
+Feb 01 23:54:05 mov-orc-dev npx[35810]: [python] INFO:     172.31.204.121:0 - "POST /api/files/303f6063-4e91-4a76-a254-54bad2289487/deliver HTTP/1.1" 500 Internal Server Error
+Feb 01 23:54:05 mov-orc-dev npx[35810]: 11:54:05 PM [server] POST /api/files/303f6063-4e91-4a76-a254-54bad2289487/deliver 500 in 3350ms
+Feb 01 23:54:05 mov-orc-dev npx[35810]: [python] ERROR:    Exception in ASGI application
+Feb 01 23:54:05 mov-orc-dev npx[35810]: Traceback (most recent call last):
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     result = await app(  # type: ignore[func-returns-value]
+Feb 01 23:54:05 mov-orc-dev npx[35810]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     return await self.app(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await super().__call__(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await self.middleware_stack(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     raise exc
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await self.app(scope, receive, _send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await self.simple_response(scope, receive, send, request_headers=headers)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await self.app(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     raise exc
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await app(scope, receive, sender)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await self.app(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await self.middleware_stack(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await route.handle(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await self.app(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 115, in app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     raise exc
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await app(scope, receive, sender)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 101, in app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     response = await f(request)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:                ^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 355, in app
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     raw_response = await run_endpoint_function(
+Feb 01 23:54:05 mov-orc-dev npx[35810]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     return await dependant.call(**values)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/server_python/main.py", line 656, in deliver_file
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     updated = await storage.update_file(file_id, {
+Feb 01 23:54:05 mov-orc-dev npx[35810]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/server_python/storage.py", line 123, in update_file
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     await conn.execute(query, *values)
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 357, in execute
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     _, status, _ = await self._execute(
+Feb 01 23:54:05 mov-orc-dev npx[35810]:                    ^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1873, in _execute
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     result, _ = await self.__execute(
+Feb 01 23:54:05 mov-orc-dev npx[35810]:                 ^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1970, in __execute
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     result, stmt = await self._do_execute(
+Feb 01 23:54:05 mov-orc-dev npx[35810]:                    ^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2013, in _do_execute
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     stmt = await self._get_statement(
+Feb 01 23:54:05 mov-orc-dev npx[35810]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 443, in _get_statement
+Feb 01 23:54:05 mov-orc-dev npx[35810]:     statement = await self._protocol.prepare(
+Feb 01 23:54:05 mov-orc-dev npx[35810]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 01 23:54:05 mov-orc-dev npx[35810]:   File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+Feb 01 23:54:05 mov-orc-dev npx[35810]: asyncpg.exceptions.UndefinedColumnError: column "mam_path" of relation "files" does not exist
+Feb 01 23:54:05 mov-orc-dev npx[35810]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 01 23:54:05 mov-orc-dev npx[35810]: 11:54:05 PM [server] POST /api/sites/Tustin/heartbeat 200 in 2096ms
+Feb 01 23:54:05 mov-orc-dev npx[35810]: [python] INFO:     172.31.204.121:0 - "GET /api/stats HTTP/1.1" 200 OK
