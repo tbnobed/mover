@@ -203,6 +203,40 @@ async def get_files(_user: dict = Depends(get_current_user)):
     files = await storage.get_files()
     return [snake_to_camel(f) for f in files]
 
+@app.get("/api/files/check")
+async def check_file_exists(request: Request, hash: str = None, filename: str = None, site: str = None, source_path: str = None):
+    """
+    Check if a file already exists in the system before uploading.
+    Daemon should call this BEFORE uploading to prevent duplicate transfers.
+    Checks PERMANENT history - files are never forgotten even after deletion.
+    Also checks if the same source path is already tracked (prevents re-upload).
+    Returns: {"exists": true/false, "reason": "..." or null}
+    """
+    await get_daemon_or_user_auth(request)
+    
+    # Debug logging
+    print(f"[CHECK] hash={hash}, filename={filename}, site={site}, source_path={source_path}")
+    
+    if not hash and not filename and not source_path:
+        raise HTTPException(status_code=400, detail="Must provide hash, filename, or source_path")
+    
+    # Check by hash in permanent history (authoritative source)
+    if hash:
+        hash_exists = await storage.file_exists_in_history(hash)
+        print(f"[CHECK] Hash lookup result: {hash_exists}")
+        if hash_exists:
+            return {"exists": True, "reason": "File hash already in history"}
+    
+    # Check by source path - prevents duplicate uploads from same location
+    if site and source_path:
+        existing = await storage.get_file_by_source(site, source_path)
+        print(f"[CHECK] Source path lookup: site={site}, path={source_path}, found={existing is not None}")
+        if existing:
+            return {"exists": True, "reason": f"File already tracked from this path (id: {existing['id']}, state: {existing['state']})"}
+    
+    print(f"[CHECK] File not found, returning exists=False")
+    return {"exists": False, "reason": None}
+
 @app.get("/api/files/{file_id}")
 async def get_file(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
@@ -303,40 +337,6 @@ async def upload_file(
 async def get_active_uploads():
     """Get list of currently active uploads with progress"""
     return list(active_uploads.values())
-
-@app.get("/api/files/check")
-async def check_file_exists(request: Request, hash: str = None, filename: str = None, site: str = None, source_path: str = None):
-    """
-    Check if a file already exists in the system before uploading.
-    Daemon should call this BEFORE uploading to prevent duplicate transfers.
-    Checks PERMANENT history - files are never forgotten even after deletion.
-    Also checks if the same source path is already tracked (prevents re-upload).
-    Returns: {"exists": true/false, "reason": "..." or null}
-    """
-    await get_daemon_or_user_auth(request)
-    
-    # Debug logging
-    print(f"[CHECK] hash={hash}, filename={filename}, site={site}, source_path={source_path}")
-    
-    if not hash and not filename and not source_path:
-        raise HTTPException(status_code=400, detail="Must provide hash, filename, or source_path")
-    
-    # Check by hash in permanent history (authoritative source)
-    if hash:
-        hash_exists = await storage.file_exists_in_history(hash)
-        print(f"[CHECK] Hash lookup result: {hash_exists}")
-        if hash_exists:
-            return {"exists": True, "reason": "File hash already in history"}
-    
-    # Check by source path - prevents duplicate uploads from same location
-    if site and source_path:
-        existing = await storage.get_file_by_source(site, source_path)
-        print(f"[CHECK] Source path lookup: site={site}, path={source_path}, found={existing is not None}")
-        if existing:
-            return {"exists": True, "reason": f"File already tracked from this path (id: {existing['id']}, state: {existing['state']})"}
-    
-    print(f"[CHECK] File not found, returning exists=False")
-    return {"exists": False, "reason": None}
 
 @app.post("/api/files/upload-stream")
 async def upload_file_stream(request: Request, filename: str):
