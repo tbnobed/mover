@@ -117,15 +117,26 @@ cd ${INSTALL_DIR}
 npm run build
 
 echo ""
-echo "Step 9: Running database migrations..."
+echo "Step 9: Granting schema ownership before migrations..."
+sudo -u postgres psql -d ${DB_NAME} -c "GRANT ALL ON SCHEMA public TO ${DB_USER};"
+sudo -u postgres psql -d ${DB_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${DB_USER};"
+sudo -u postgres psql -d ${DB_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${DB_USER};"
+
+echo ""
+echo "Step 9b: Transferring ownership of existing tables..."
+sudo -u postgres psql -d ${DB_NAME} -c "DO \$\$ DECLARE r RECORD; BEGIN FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP EXECUTE 'ALTER TABLE public.' || quote_ident(r.tablename) || ' OWNER TO ${DB_USER}'; END LOOP; END \$\$;"
+sudo -u postgres psql -d ${DB_NAME} -c "DO \$\$ DECLARE r RECORD; BEGIN FOR r IN SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public' LOOP EXECUTE 'ALTER SEQUENCE public.' || quote_ident(r.sequence_name) || ' OWNER TO ${DB_USER}'; END LOOP; END \$\$;"
+sudo -u postgres psql -d ${DB_NAME} -c "DO \$\$ DECLARE r RECORD; BEGIN FOR r IN SELECT typname FROM pg_type WHERE typnamespace = 'public'::regnamespace AND typtype = 'e' LOOP EXECUTE 'ALTER TYPE public.' || quote_ident(r.typname) || ' OWNER TO ${DB_USER}'; END LOOP; END \$\$;"
+echo "Ownership transferred."
+
+echo ""
+echo "Step 9c: Running database migrations..."
 npm run db:push
 
 echo ""
-echo "Step 9b: Granting permissions on all tables..."
+echo "Step 9d: Final permission grants..."
 sudo -u postgres psql -d ${DB_NAME} -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${DB_USER};"
 sudo -u postgres psql -d ${DB_NAME} -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${DB_USER};"
-sudo -u postgres psql -d ${DB_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${DB_USER};"
-sudo -u postgres psql -d ${DB_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${DB_USER};"
 echo "Permissions granted."
 
 echo ""
