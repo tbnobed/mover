@@ -2,6 +2,7 @@ import os
 import sys
 import hashlib
 import aiofiles
+import uuid
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Response, Depends
@@ -9,6 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 STORAGE_PATH = os.environ.get("STORAGE_PATH", "./data/incoming")
 os.makedirs(STORAGE_PATH, exist_ok=True)
+
+# In-memory tracking for active uploads
+active_uploads: dict = {}
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
@@ -279,6 +283,11 @@ async def upload_file(
         "storage_path": dest_path
     })
 
+@app.get("/api/uploads/active")
+async def get_active_uploads():
+    """Get list of currently active uploads with progress"""
+    return list(active_uploads.values())
+
 @app.post("/api/files/upload-stream")
 async def upload_file_stream(request: Request, filename: str):
     """
@@ -323,25 +332,53 @@ async def upload_file_stream(request: Request, filename: str):
     os.makedirs(site_dir, exist_ok=True)
     dest_path = os.path.join(site_dir, safe_filename)
     
+    # Generate upload ID for tracking
+    upload_id = str(uuid.uuid4())
+    
     # Stream directly to disk with hash calculation
     sha256 = hashlib.sha256()
     file_size = 0
-    chunk_size = 64 * 1024 * 1024  # 64MB chunks to match daemon
+    
+    # Track this upload
+    active_uploads[upload_id] = {
+        "id": upload_id,
+        "filename": safe_filename,
+        "sourceSite": source_site,
+        "expectedSize": expected_size,
+        "receivedSize": 0,
+        "progress": 0,
+        "startedAt": datetime.now().isoformat() + 'Z',
+        "status": "uploading"
+    }
     
     print(f"[{datetime.now().isoformat()}] Starting streaming upload: {safe_filename} (expected: {expected_size:,} bytes)")
     
-    async with aiofiles.open(dest_path, 'wb') as out_file:
-        async for chunk in request.stream():
-            await out_file.write(chunk)
-            sha256.update(chunk)
-            file_size += len(chunk)
-            # Log progress for large files
-            if file_size % (1024 * 1024 * 1024) < len(chunk):  # Every GB
-                print(f"[{datetime.now().isoformat()}] Received: {safe_filename} - {file_size:,} bytes ({file_size / (1024**3):.2f} GB)")
-    
-    sha256_hash = sha256.hexdigest()
-    
-    print(f"[{datetime.now().isoformat()}] Upload complete: {safe_filename} - {file_size:,} bytes")
+    try:
+        async with aiofiles.open(dest_path, 'wb') as out_file:
+            async for chunk in request.stream():
+                await out_file.write(chunk)
+                sha256.update(chunk)
+                file_size += len(chunk)
+                
+                # Update progress tracking
+                progress = int((file_size / expected_size) * 100) if expected_size > 0 else 0
+                active_uploads[upload_id]["receivedSize"] = file_size
+                active_uploads[upload_id]["progress"] = min(progress, 100)
+                
+                # Log progress for large files (every GB)
+                if file_size % (1024 * 1024 * 1024) < len(chunk):
+                    print(f"[{datetime.now().isoformat()}] Received: {safe_filename} - {file_size:,} bytes ({file_size / (1024**3):.2f} GB)")
+        
+        active_uploads[upload_id]["status"] = "verifying"
+        sha256_hash = sha256.hexdigest()
+        
+        print(f"[{datetime.now().isoformat()}] Upload complete: {safe_filename} - {file_size:,} bytes")
+    except Exception as e:
+        active_uploads[upload_id]["status"] = "failed"
+        active_uploads[upload_id]["error"] = str(e)
+        # Clean up after 60 seconds
+        del active_uploads[upload_id]
+        raise
     
     # Verify file integrity
     if expected_size > 0 and file_size != expected_size:
@@ -377,6 +414,11 @@ async def upload_file_stream(request: Request, filename: str):
         "previous_state": None,
         "new_state": "detected"
     })
+    
+    # Mark upload complete and remove from tracking
+    active_uploads[upload_id]["status"] = "complete"
+    active_uploads[upload_id]["progress"] = 100
+    del active_uploads[upload_id]
     
     return snake_to_camel({
         **db_file,

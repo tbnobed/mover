@@ -4,6 +4,7 @@ import { FileList } from "@/components/file-list";
 import { FileDetails } from "@/components/file-details";
 import { SiteStatus } from "@/components/site-status";
 import { RecentActivity } from "@/components/recent-activity";
+import { UploadProgress } from "@/components/upload-progress";
 import type { File } from "@shared/schema";
 
 export default function Dashboard() {
@@ -17,6 +18,8 @@ export default function Dashboard() {
       </div>
 
       <StatsCards />
+      
+      <UploadProgress />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
