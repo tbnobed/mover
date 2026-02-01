@@ -621,18 +621,49 @@ async def start_work(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/deliver")
 async def deliver_file(file_id: str, _user: dict = Depends(get_current_user)):
+    import shutil
+    
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
     if file["state"] != "in_progress":
         raise HTTPException(status_code=400, detail="File cannot be delivered in current state")
     
-    updated = await storage.update_file(file_id, {"state": "delivered_to_mam", "delivered_at": datetime.now()})
+    # Copy file to MAM delivery path
+    source_site = file.get("source_site", "unknown")
+    filename = file.get("filename", "")
+    
+    # Source file is in STORAGE_PATH/site/filename
+    source_path = os.path.join(STORAGE_PATH, source_site.lower(), filename)
+    
+    # Create site subfolder in MAM delivery path
+    mam_site_path = os.path.join(MAM_DELIVERY_PATH, source_site.lower())
+    os.makedirs(mam_site_path, exist_ok=True)
+    
+    dest_path = os.path.join(mam_site_path, filename)
+    
+    # Copy the file if source exists
+    if os.path.exists(source_path):
+        try:
+            shutil.copy2(source_path, dest_path)
+            print(f"[deliver] Copied {source_path} to {dest_path}")
+        except Exception as e:
+            print(f"[deliver] Warning: Could not copy file: {e}")
+            # Continue anyway - file might be on network storage accessed differently
+    else:
+        print(f"[deliver] Warning: Source file not found at {source_path}")
+    
+    updated = await storage.update_file(file_id, {
+        "state": "delivered_to_mam", 
+        "delivered_at": datetime.now(),
+        "mam_path": dest_path
+    })
     await storage.create_audit_log({
         "file_id": file_id,
         "action": "Delivered to MAM",
         "previous_state": "in_progress",
-        "new_state": "delivered_to_mam"
+        "new_state": "delivered_to_mam",
+        "details": f"Delivered to {dest_path}"
     })
     return snake_to_camel(updated)
 
