@@ -459,6 +459,14 @@ async def get_settings(_user: dict = Depends(get_current_user)):
         "sites": ["tustin", "nashville", "dallas"]
     }
 
+@app.get("/api/daemon/download")
+async def download_daemon():
+    """Download the latest daemon.py file for site installation"""
+    daemon_path = os.path.join(os.path.dirname(__file__), "..", "site_daemon", "daemon.py")
+    if os.path.exists(daemon_path):
+        return FileResponse(daemon_path, media_type="text/plain", filename="daemon.py")
+    raise HTTPException(status_code=404, detail="Daemon file not found")
+
 @app.post("/api/files/{file_id}/validate")
 async def validate_file(file_id: str, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)
