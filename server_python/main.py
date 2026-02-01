@@ -573,12 +573,18 @@ async def assign_file(file_id: str, request: Optional[AssignRequest] = None, _us
     user_id = request.user_id if request else None
     if not user_id:
         users = await storage.get_users()
+        # Try to find a colorist first, then fall back to any non-admin user, then admin
         colorist = next((u for u in users if u["role"] == "colorist"), None)
         if colorist:
             user_id = colorist["id"]
+        else:
+            # Fall back to any available user
+            any_user = next((u for u in users if u["role"] in ["colorist", "engineer", "admin"]), None)
+            if any_user:
+                user_id = any_user["id"]
     
     if not user_id:
-        raise HTTPException(status_code=400, detail="No colorist available for assignment")
+        raise HTTPException(status_code=400, detail="No user available for assignment")
     
     updated = await storage.update_file(file_id, {
         "state": "colorist_assigned",
