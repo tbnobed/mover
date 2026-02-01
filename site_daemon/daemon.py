@@ -262,6 +262,10 @@ class SiteDaemon:
         self.observer: Optional[Observer] = None
         self.pending_queue: asyncio.Queue = asyncio.Queue()
         self.file_detector = FileDetector(site_id, watch_path, orchestrator_url, self.pending_queue)
+        # Track files being written (waiting for stability)
+        self.writing_files: dict = {}  # path -> {last_size, last_mtime, stable_since}
+        self.uploading_file: Optional[str] = None  # Currently uploading file (only one at a time)
+        self.stable_queue: asyncio.Queue = asyncio.Queue()  # Files ready for upload
         
     async def send_heartbeat(self):
         try:
@@ -346,15 +350,127 @@ class SiteDaemon:
         print(f"[{datetime.now().isoformat()}] File watcher started for {self.watch_path}")
         print(f"[{datetime.now().isoformat()}] Duplicate check: Files will be verified with orchestrator API before upload")
     
+    def check_file_stability_instant(self, file_path: str) -> tuple[bool, bool]:
+        """
+        Check file stability without blocking.
+        Returns: (is_stable, should_track)
+        - is_stable: True if file has been unchanged for FILE_STABILITY_SECONDS
+        - should_track: True if file exists and should continue tracking
+        """
+        path = Path(file_path)
+        try:
+            if not path.exists():
+                return False, False
+            
+            stat = path.stat()
+            current_size = stat.st_size
+            current_mtime = stat.st_mtime
+            now = datetime.now()
+            
+            if file_path not in self.writing_files:
+                # First time seeing this file
+                self.writing_files[file_path] = {
+                    'last_size': current_size,
+                    'last_mtime': current_mtime,
+                    'stable_since': now,
+                    'name': path.name
+                }
+                print(f"[{now.isoformat()}] Tracking file stability: {path.name} ({current_size:,} bytes)")
+                return False, True
+            
+            info = self.writing_files[file_path]
+            
+            # Check if file changed
+            if current_size != info['last_size'] or current_mtime != info['last_mtime']:
+                info['last_size'] = current_size
+                info['last_mtime'] = current_mtime
+                info['stable_since'] = now
+                return False, True
+            
+            # File unchanged - check how long
+            elapsed = (now - info['stable_since']).total_seconds()
+            if elapsed >= FILE_STABILITY_SECONDS:
+                print(f"[{now.isoformat()}] File complete: {path.name} ({current_size:,} bytes) - stable for {elapsed:.0f}s")
+                del self.writing_files[file_path]
+                return True, False
+            
+            return False, True
+            
+        except Exception as e:
+            print(f"[{datetime.now().isoformat()}] Stability check error for {path.name}: {e}")
+            return False, False
+    
+    async def check_writing_files(self):
+        """Periodically check files being written and queue stable ones for upload"""
+        while self.running:
+            try:
+                stable_files = []
+                still_writing = []
+                
+                for file_path in list(self.writing_files.keys()):
+                    is_stable, should_track = self.check_file_stability_instant(file_path)
+                    if is_stable:
+                        stable_files.append(file_path)
+                    elif should_track:
+                        still_writing.append(file_path)
+                
+                # Queue stable files for upload
+                for file_path in stable_files:
+                    await self.stable_queue.put(file_path)
+                
+                # Log files still writing (every 30 seconds)
+                if still_writing and int(time.time()) % 30 == 0:
+                    for fp in still_writing:
+                        info = self.writing_files.get(fp, {})
+                        size = info.get('last_size', 0)
+                        name = info.get('name', Path(fp).name)
+                        print(f"[{datetime.now().isoformat()}] Still writing: {name} ({size:,} bytes)")
+                
+            except Exception as e:
+                print(f"[{datetime.now().isoformat()}] Error checking writing files: {e}")
+            
+            await asyncio.sleep(FILE_CHECK_INTERVAL)
+    
     async def process_pending_files(self):
+        """Process incoming files - check stability and route accordingly"""
         while self.running:
             try:
                 file_path = await asyncio.wait_for(self.pending_queue.get(), timeout=1.0)
-                await self.file_detector.report_file(file_path, upload_file=self.upload_files)
+                
+                # Quick stability check
+                is_stable, should_track = self.check_file_stability_instant(file_path)
+                
+                if is_stable:
+                    # File is stable, queue for upload
+                    await self.stable_queue.put(file_path)
+                elif not should_track:
+                    # File disappeared or error
+                    print(f"[{datetime.now().isoformat()}] Skipping file (not found): {Path(file_path).name}")
+                # else: file is being tracked in writing_files
+                
             except asyncio.TimeoutError:
                 continue
             except Exception as e:
                 print(f"[{datetime.now().isoformat()}] Error processing file: {e}")
+    
+    async def upload_stable_files(self):
+        """Upload files that have been verified as stable"""
+        while self.running:
+            try:
+                file_path = await asyncio.wait_for(self.stable_queue.get(), timeout=1.0)
+                
+                # Only upload one file at a time
+                self.uploading_file = file_path
+                try:
+                    await self.file_detector.upload_file(file_path)
+                finally:
+                    self.uploading_file = None
+                    
+            except asyncio.TimeoutError:
+                continue
+            except Exception as e:
+                print(f"[{datetime.now().isoformat()}] Error uploading file: {e}")
+                self.uploading_file = None
     
     async def run(self):
         self.running = True
@@ -375,7 +491,9 @@ class SiteDaemon:
         try:
             await asyncio.gather(
                 self.heartbeat_loop(),
-                self.process_pending_files()
+                self.process_pending_files(),
+                self.check_writing_files(),
+                self.upload_stable_files()
             )
         except KeyboardInterrupt:
             print(f"\n[{datetime.now().isoformat()}] Shutting down...")
