@@ -76,7 +76,7 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
 
   const files = rawFiles?.filter(file => {
     if (stateFilter !== "all" && file.state !== stateFilter) return false;
-    if (siteFilter !== "all" && file.sourceSite !== siteFilter && file.siteId !== siteFilter) return false;
+    if (siteFilter !== "all" && file.sourceSite !== siteFilter) return false;
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesFilename = file.filename.toLowerCase().includes(query);

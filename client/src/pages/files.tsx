@@ -91,7 +91,7 @@ export default function FilesPage() {
             <SelectContent>
               <SelectItem value="all">All Sites</SelectItem>
               {sites?.map((site) => (
-                <SelectItem key={site.id} value={site.id}>
+                <SelectItem key={site.id} value={site.name}>
                   {site.name}
                 </SelectItem>
               ))}
