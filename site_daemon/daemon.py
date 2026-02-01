@@ -158,6 +158,11 @@ class FileDetector(FileSystemEventHandler):
         path = Path(file_path)
         file_size = path.stat().st_size
         
+        # CRITICAL: Reject 0-byte or tiny files
+        if file_size < MIN_FILE_SIZE_BYTES:
+            print(f"[{datetime.now().isoformat()}] SKIPPED (too small): {path.name} ({file_size} bytes, min: {MIN_FILE_SIZE_BYTES})")
+            return
+        
         # Calculate hash FIRST for duplicate check
         print(f"[{datetime.now().isoformat()}] Calculating hash: {path.name} ({file_size:,} bytes)")
         sha256_hash = await self.calculate_hash(file_path)
