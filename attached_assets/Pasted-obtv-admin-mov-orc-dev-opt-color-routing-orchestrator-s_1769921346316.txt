@@ -1,0 +1,204 @@
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo journalctl -u color-routing-orchestrator -n 200 --no-pager
+Feb 01 04:46:23 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:23 mov-orc-dev npx[27710]: 4:46:23 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:23 mov-orc-dev npx[27710]: [python] INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 01 04:46:23 mov-orc-dev npx[27710]: 4:46:23 AM [server] POST /api/sites/Dallas/heartbeat 200 in 4ms
+Feb 01 04:46:24 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:24 mov-orc-dev npx[27710]: 4:46:24 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:25 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:25 mov-orc-dev npx[27710]: 4:46:25 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/auth/me HTTP/1.1" 200 OK
+Feb 01 04:46:26 mov-orc-dev npx[27710]: 4:46:26 AM [server] GET /api/auth/me 200 in 4ms
+Feb 01 04:46:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/bootstrap HTTP/1.1" 200 OK
+Feb 01 04:46:26 mov-orc-dev npx[27710]: 4:46:26 AM [server] GET /api/bootstrap 200 in 4ms
+Feb 01 04:46:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:26 mov-orc-dev npx[27710]: 4:46:26 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/stats HTTP/1.1" 200 OK
+Feb 01 04:46:26 mov-orc-dev npx[27710]: 4:46:26 AM [server] GET /api/stats 200 in 5ms
+Feb 01 04:46:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 04:46:26 mov-orc-dev npx[27710]: 4:46:26 AM [server] GET /api/files 200 in 4ms
+Feb 01 04:46:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/sites HTTP/1.1" 200 OK
+Feb 01 04:46:26 mov-orc-dev npx[27710]: 4:46:26 AM [server] GET /api/sites 200 in 6ms
+Feb 01 04:46:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/audit HTTP/1.1" 200 OK
+Feb 01 04:46:26 mov-orc-dev npx[27710]: 4:46:26 AM [server] GET /api/audit 200 in 5ms
+Feb 01 04:46:27 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:27 mov-orc-dev npx[27710]: 4:46:27 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:28 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:28 mov-orc-dev npx[27710]: 4:46:28 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:29 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:29 mov-orc-dev npx[27710]: 4:46:29 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:30 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:30 mov-orc-dev npx[27710]: 4:46:30 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:31 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:31 mov-orc-dev npx[27710]: 4:46:31 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:32 mov-orc-dev npx[27710]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 01 04:46:32 mov-orc-dev npx[27710]: 4:46:32 AM [server] POST /api/sites/Tustin/heartbeat 200 in 4ms
+Feb 01 04:46:32 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:32 mov-orc-dev npx[27710]: 4:46:32 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:33 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:33 mov-orc-dev npx[27710]: 4:46:33 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:34 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:34 mov-orc-dev npx[27710]: 4:46:34 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:36 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:36 mov-orc-dev npx[27710]: 4:46:36 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:37 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:37 mov-orc-dev npx[27710]: 4:46:37 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:38 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:38 mov-orc-dev npx[27710]: 4:46:38 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:39 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:39 mov-orc-dev npx[27710]: 4:46:39 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:40 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:40 mov-orc-dev npx[27710]: 4:46:40 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:41 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:41 mov-orc-dev npx[27710]: 4:46:41 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:42 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:42 mov-orc-dev npx[27710]: 4:46:42 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:43 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:43 mov-orc-dev npx[27710]: 4:46:43 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:44 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:44 mov-orc-dev npx[27710]: 4:46:44 AM [server] GET /api/uploads/active 200 in 4ms
+Feb 01 04:46:45 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:45 mov-orc-dev npx[27710]: 4:46:45 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:46 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:46 mov-orc-dev npx[27710]: 4:46:46 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:47 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:47 mov-orc-dev npx[27710]: 4:46:47 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:48 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:48 mov-orc-dev npx[27710]: 4:46:48 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:49 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:49 mov-orc-dev npx[27710]: 4:46:49 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:50 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:50 mov-orc-dev npx[27710]: 4:46:50 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:51 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:51 mov-orc-dev npx[27710]: 4:46:51 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:53 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:53 mov-orc-dev npx[27710]: 4:46:53 AM [server] GET /api/uploads/active 200 in 4ms
+Feb 01 04:46:53 mov-orc-dev npx[27710]: [python] INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 01 04:46:53 mov-orc-dev npx[27710]: 4:46:53 AM [server] POST /api/sites/Dallas/heartbeat 200 in 5ms
+Feb 01 04:46:54 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:54 mov-orc-dev npx[27710]: 4:46:54 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:55 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:55 mov-orc-dev npx[27710]: 4:46:55 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:56 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:56 mov-orc-dev npx[27710]: 4:46:56 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:57 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:57 mov-orc-dev npx[27710]: 4:46:57 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:46:58 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:58 mov-orc-dev npx[27710]: 4:46:58 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:46:59 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:46:59 mov-orc-dev npx[27710]: 4:46:59 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:00 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:00 mov-orc-dev npx[27710]: 4:47:00 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:01 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:01 mov-orc-dev npx[27710]: 4:47:01 AM [server] GET /api/uploads/active 200 in 4ms
+Feb 01 04:47:02 mov-orc-dev npx[27710]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 01 04:47:02 mov-orc-dev npx[27710]: 4:47:02 AM [server] POST /api/sites/Tustin/heartbeat 200 in 6ms
+Feb 01 04:47:02 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:02 mov-orc-dev npx[27710]: 4:47:02 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:03 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:03 mov-orc-dev npx[27710]: 4:47:03 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:04 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:04 mov-orc-dev npx[27710]: 4:47:04 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:05 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:05 mov-orc-dev npx[27710]: 4:47:05 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:06 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:06 mov-orc-dev npx[27710]: 4:47:06 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:07 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:07 mov-orc-dev npx[27710]: 4:47:07 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:08 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:08 mov-orc-dev npx[27710]: 4:47:08 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:10 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:10 mov-orc-dev npx[27710]: 4:47:10 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:11 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:11 mov-orc-dev npx[27710]: 4:47:11 AM [server] GET /api/uploads/active 200 in 6ms
+Feb 01 04:47:12 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:12 mov-orc-dev npx[27710]: 4:47:12 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:13 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:13 mov-orc-dev npx[27710]: 4:47:13 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:14 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:14 mov-orc-dev npx[27710]: 4:47:14 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:15 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:15 mov-orc-dev npx[27710]: 4:47:15 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:16 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:16 mov-orc-dev npx[27710]: 4:47:16 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:17 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:17 mov-orc-dev npx[27710]: 4:47:17 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:18 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:18 mov-orc-dev npx[27710]: 4:47:18 AM [server] GET /api/uploads/active 200 in 4ms
+Feb 01 04:47:19 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:19 mov-orc-dev npx[27710]: 4:47:19 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:20 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:20 mov-orc-dev npx[27710]: 4:47:20 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:21 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:21 mov-orc-dev npx[27710]: 4:47:21 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:22 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:22 mov-orc-dev npx[27710]: 4:47:22 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:23 mov-orc-dev npx[27710]: [python] INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 01 04:47:23 mov-orc-dev npx[27710]: 4:47:23 AM [server] POST /api/sites/Dallas/heartbeat 200 in 4ms
+Feb 01 04:47:23 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:23 mov-orc-dev npx[27710]: 4:47:23 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:24 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:24 mov-orc-dev npx[27710]: 4:47:24 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:25 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:25 mov-orc-dev npx[27710]: 4:47:25 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:26 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:26 mov-orc-dev npx[27710]: 4:47:26 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:28 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:28 mov-orc-dev npx[27710]: 4:47:28 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:29 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:29 mov-orc-dev npx[27710]: 4:47:29 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:30 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:30 mov-orc-dev npx[27710]: 4:47:30 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:31 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:31 mov-orc-dev npx[27710]: 4:47:31 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:32 mov-orc-dev npx[27710]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 01 04:47:32 mov-orc-dev npx[27710]: 4:47:32 AM [server] POST /api/sites/Tustin/heartbeat 200 in 9ms
+Feb 01 04:47:32 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:32 mov-orc-dev npx[27710]: 4:47:32 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:33 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:33 mov-orc-dev npx[27710]: 4:47:33 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:34 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:34 mov-orc-dev npx[27710]: 4:47:34 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:35 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:35 mov-orc-dev npx[27710]: 4:47:35 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:36 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:36 mov-orc-dev npx[27710]: 4:47:36 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:37 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:37 mov-orc-dev npx[27710]: 4:47:37 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:38 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:38 mov-orc-dev npx[27710]: 4:47:38 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:39 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:39 mov-orc-dev npx[27710]: 4:47:39 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:40 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:40 mov-orc-dev npx[27710]: 4:47:40 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:41 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:41 mov-orc-dev npx[27710]: 4:47:41 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:42 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:42 mov-orc-dev npx[27710]: 4:47:42 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:43 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:43 mov-orc-dev npx[27710]: 4:47:43 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:45 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:45 mov-orc-dev npx[27710]: 4:47:45 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:46 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:46 mov-orc-dev npx[27710]: 4:47:46 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:47 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:47 mov-orc-dev npx[27710]: 4:47:47 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:48 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:48 mov-orc-dev npx[27710]: 4:47:48 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:49 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:49 mov-orc-dev npx[27710]: 4:47:49 AM [server] GET /api/uploads/active 200 in 4ms
+Feb 01 04:47:50 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:50 mov-orc-dev npx[27710]: 4:47:50 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:51 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:51 mov-orc-dev npx[27710]: 4:47:51 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:52 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:52 mov-orc-dev npx[27710]: 4:47:52 AM [server] GET /api/uploads/active 200 in 2ms
+Feb 01 04:47:53 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:53 mov-orc-dev npx[27710]: 4:47:53 AM [server] GET /api/uploads/active 200 in 3ms
+Feb 01 04:47:53 mov-orc-dev npx[27710]: [python] INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 01 04:47:53 mov-orc-dev npx[27710]: 4:47:53 AM [server] POST /api/sites/Dallas/heartbeat 200 in 5ms
+Feb 01 04:47:54 mov-orc-dev npx[27710]: [python] INFO:     172.31.204.121:0 - "GET /api/uploads/active HTTP/1.1" 200 OK
+Feb 01 04:47:54 mov-orc-dev npx[27710]: 4:47:54 AM [server] GET /api/uploads/active 200 in 2ms
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ ^C
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo journalctl -u color-routing-orchestrator -n 200 --no-pager | grep -i error
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ 
