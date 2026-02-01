@@ -77,7 +77,10 @@ DAEMON_API_KEY = os.environ.get("DAEMON_API_KEY", "")
 print(f"[startup] DAEMON_API_KEY configured: {bool(DAEMON_API_KEY)}, length: {len(DAEMON_API_KEY)}")
 
 async def get_daemon_or_user_auth(request: Request):
-    api_key = request.headers.get("X-API-Key")
+    # Debug: print all headers for troubleshooting
+    print(f"[auth-debug] All headers: {dict(request.headers)}")
+    
+    api_key = request.headers.get("X-API-Key") or request.headers.get("x-api-key")
     
     # Debug: Log auth attempt details
     if api_key:
