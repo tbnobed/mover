@@ -28,8 +28,8 @@ ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:5000")
 DAEMON_API_KEY = os.getenv("DAEMON_API_KEY", "")
 HEARTBEAT_INTERVAL = 30
 SUPPORTED_EXTENSIONS = {".mxf", ".mov", ".mp4", ".mkv", ".avi", ".ari", ".r3d", ".braw", ".dpx", ".exr", ".dng", ".prores"}
-FILE_STABILITY_CHECKS = 3  # Number of checks where file size must be stable
-FILE_STABILITY_INTERVAL = 2  # Seconds between stability checks
+FILE_STABILITY_CHECKS = 10  # Number of checks where file size must be stable (10 × 3 = 30 seconds)
+FILE_STABILITY_INTERVAL = 3  # Seconds between stability checks
 
 
 def get_auth_headers() -> dict:
