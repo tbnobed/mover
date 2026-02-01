@@ -28,7 +28,7 @@ async def get_file_by_source(source_site: str, source_path: str) -> Optional[Dic
         return dict(row) if row else None
 
 async def get_file_by_hash(sha256_hash: str) -> Optional[Dict[str, Any]]:
-    """Check if a file with this hash already exists"""
+    """Check if a file with this hash already exists in files table"""
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
@@ -46,6 +46,58 @@ async def get_file_by_name_and_site(filename: str, source_site: str) -> Optional
             filename, source_site
         )
         return dict(row) if row else None
+
+# ============ FILE HISTORY (Permanent Ledger) ============
+# This table is NEVER deleted from - it's a permanent record of all files ever received
+
+async def check_file_history(sha256_hash: str) -> Optional[Dict[str, Any]]:
+    """Check if a file hash exists in the permanent history ledger"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT * FROM file_history WHERE sha256_hash = $1",
+            sha256_hash
+        )
+        return dict(row) if row else None
+
+async def add_to_file_history(sha256_hash: str, filename: str, source_site: str, file_size: int) -> Dict[str, Any]:
+    """Add a file to the permanent history ledger (if not already present)"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        # Check if already exists
+        existing = await conn.fetchrow(
+            "SELECT * FROM file_history WHERE sha256_hash = $1",
+            sha256_hash
+        )
+        if existing:
+            return dict(existing)
+        
+        # Insert new record
+        row = await conn.fetchrow("""
+            INSERT INTO file_history (id, sha256_hash, filename, source_site, file_size, first_seen_at)
+            VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW())
+            RETURNING *
+        """, sha256_hash, filename, source_site, file_size)
+        return dict(row)
+
+async def file_exists_in_history(sha256_hash: str) -> bool:
+    """Quick check if a file hash has ever been seen (in either files or history table)"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        # Check permanent history first (this is the authoritative source)
+        history = await conn.fetchrow(
+            "SELECT 1 FROM file_history WHERE sha256_hash = $1",
+            sha256_hash
+        )
+        if history:
+            return True
+        
+        # Also check files table for backwards compatibility
+        files = await conn.fetchrow(
+            "SELECT 1 FROM files WHERE sha256_hash = $1",
+            sha256_hash
+        )
+        return files is not None
 
 async def create_file(data: Dict[str, Any]) -> Dict[str, Any]:
     pool = await get_pool()

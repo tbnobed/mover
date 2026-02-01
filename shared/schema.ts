@@ -92,6 +92,17 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
+// Permanent file history ledger - NEVER deleted, only appended
+// Tracks every file hash ever received to prevent duplicate uploads
+export const fileHistory = pgTable("file_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sha256Hash: text("sha256_hash").notNull(),
+  filename: text("filename").notNull(),
+  sourceSite: text("source_site").notNull(),
+  fileSize: bigint("file_size", { mode: "number" }).notNull(),
+  firstSeenAt: timestamp("first_seen_at").defaultNow().notNull()
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, passwordHash: true });
 export const insertSiteSchema = createInsertSchema(sites).omit({ id: true });
 export const insertFileSchema = createInsertSchema(files).omit({ id: true, detectedAt: true });

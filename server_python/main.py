@@ -271,6 +271,9 @@ async def upload_file(
         "sha256_hash": sha256_hash
     })
     
+    # Add to permanent file history ledger (NEVER deleted)
+    await storage.add_to_file_history(sha256_hash, safe_filename, source_site, file_size)
+    
     await storage.create_audit_log({
         "file_id": db_file["id"],
         "action": f"File uploaded from {source_site}",
@@ -293,26 +296,20 @@ async def check_file_exists(request: Request, hash: str = None, filename: str = 
     """
     Check if a file already exists in the system before uploading.
     Daemon should call this BEFORE uploading to prevent duplicate transfers.
-    Returns: {"exists": true/false, "file": {...} or null}
+    Checks PERMANENT history - files are never forgotten even after deletion.
+    Returns: {"exists": true/false, "reason": "..." or null}
     """
     await get_daemon_or_user_auth(request)
     
     if not hash and not filename:
         raise HTTPException(status_code=400, detail="Must provide hash or filename")
     
-    # Check by hash first (most reliable)
+    # Check by hash in permanent history (authoritative source)
     if hash:
-        existing = await storage.get_file_by_hash(hash)
-        if existing:
-            return {"exists": True, "file": snake_to_camel(existing)}
+        if await storage.file_exists_in_history(hash):
+            return {"exists": True, "reason": "File hash already in history"}
     
-    # Check by filename + site
-    if filename and site:
-        existing = await storage.get_file_by_name_and_site(filename, site)
-        if existing:
-            return {"exists": True, "file": snake_to_camel(existing)}
-    
-    return {"exists": False, "file": None}
+    return {"exists": False, "reason": None}
 
 @app.post("/api/files/upload-stream")
 async def upload_file_stream(request: Request, filename: str):
@@ -433,6 +430,9 @@ async def upload_file_stream(request: Request, filename: str):
         "file_size": file_size,
         "sha256_hash": sha256_hash
     })
+    
+    # Add to permanent file history ledger (NEVER deleted)
+    await storage.add_to_file_history(sha256_hash, safe_filename, source_site, file_size)
     
     await storage.create_audit_log({
         "file_id": db_file["id"],
