@@ -684,6 +684,41 @@ async def archive_file(file_id: str, _user: dict = Depends(get_current_user)):
     })
     return snake_to_camel(updated)
 
+@app.post("/api/files/{file_id}/revert")
+async def revert_file(file_id: str, _user: dict = Depends(get_current_user)):
+    """Revert a file back one step in the workflow"""
+    file = await storage.get_file(file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    current_state = file["state"]
+    
+    # Define the previous state for each state
+    revert_map = {
+        "validated": "detected",
+        "colorist_assigned": "validated",
+        "in_progress": "colorist_assigned",
+        "delivered_to_mam": "in_progress",
+        "archived": "delivered_to_mam",
+        "rejected": "in_progress",  # Rejected files go back to in_progress
+    }
+    
+    if current_state not in revert_map:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot revert from '{current_state}' state"
+        )
+    
+    new_state = revert_map[current_state]
+    updated = await storage.update_file(file_id, {"state": new_state})
+    await storage.create_audit_log({
+        "file_id": file_id,
+        "action": f"Reverted to {new_state}",
+        "previous_state": current_state,
+        "new_state": new_state
+    })
+    return snake_to_camel(updated)
+
 @app.post("/api/files/{file_id}/reject")
 async def reject_file(file_id: str, request: Optional[RejectRequest] = None, _user: dict = Depends(get_current_user)):
     file = await storage.get_file(file_id)

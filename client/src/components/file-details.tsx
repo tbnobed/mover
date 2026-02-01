@@ -23,7 +23,8 @@ import {
   Send,
   CheckCheck,
   Trash2,
-  Lock
+  Lock,
+  Undo2
 } from "lucide-react";
 import type { File, AuditLog } from "@shared/schema";
 import { format } from "date-fns";
@@ -109,6 +110,18 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
     },
   });
 
+  const revertMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/revert`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "File reverted to previous state" });
+    },
+    onError: () => {
+      toast({ title: "Failed to revert file", variant: "destructive" });
+    },
+  });
+
   const validateMutation = useMutation({
     mutationFn: () => apiRequest("POST", `/api/files/${file.id}/validate`),
     onSuccess: () => {
@@ -173,7 +186,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
   const isPending = assignMutation.isPending || startWorkMutation.isPending || 
     deliverMutation.isPending || rejectMutation.isPending || validateMutation.isPending ||
     queueMutation.isPending || startTransferMutation.isPending || completeTransferMutation.isPending ||
-    deleteMutation.isPending;
+    deleteMutation.isPending || revertMutation.isPending;
 
   return (
     <Card className="h-full flex flex-col">
@@ -361,6 +374,17 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
+                </Button>
+              )}
+              {file.state !== "detected" && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => revertMutation.mutate()} 
+                  disabled={isPending}
+                  data-testid="button-revert-file"
+                >
+                  <Undo2 className="mr-2 h-4 w-4" />
+                  Revert
                 </Button>
               )}
             </div>
