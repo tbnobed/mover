@@ -1,0 +1,140 @@
+[proxy] Forwarding X-API-Key for POST /api/sites/Dallas/heartbeat (len=64)
+Feb 01 17:29:12 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'content-type': 'application/json', 'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'content-length': '63', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.63.16.117', 'x-real-ip': '10.63.16.117', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:12 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:12 mov-orc-dev npx[32963]: INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 01 17:29:12 mov-orc-dev npx[32963]: 5:29:12 PM [server] POST /api/sites/Dallas/heartbeat 200 in 4ms
+Feb 01 17:29:15 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:15 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:15 mov-orc-dev npx[32963]: 5:29:15 PM [server] GET /api/files 200 in 5ms
+Feb 01 17:29:18 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for POST /api/sites/Tustin/heartbeat (len=64)
+Feb 01 17:29:18 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'content-type': 'application/json', 'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'content-length': '63', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:18 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:18 mov-orc-dev npx[32963]: INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 01 17:29:18 mov-orc-dev npx[32963]: 5:29:18 PM [server] POST /api/sites/Tustin/heartbeat 200 in 7ms
+Feb 01 17:29:20 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:20 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:20 mov-orc-dev npx[32963]: 5:29:20 PM [server] GET /api/files 200 in 6ms
+Feb 01 17:29:25 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:25 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:25 mov-orc-dev npx[32963]: 5:29:25 PM [server] GET /api/files 200 in 7ms
+Feb 01 17:29:30 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:30 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:30 mov-orc-dev npx[32963]: 5:29:30 PM [server] GET /api/files 200 in 6ms
+Feb 01 17:29:35 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:35 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:35 mov-orc-dev npx[32963]: 5:29:35 PM [server] GET /api/files 200 in 5ms
+Feb 01 17:29:40 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:40 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:40 mov-orc-dev npx[32963]: 5:29:40 PM [server] GET /api/files 200 in 7ms
+Feb 01 17:29:45 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:45 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:45 mov-orc-dev npx[32963]: 5:29:45 PM [server] GET /api/files 200 in 8ms
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for POST /api/sites/Dallas/heartbeat (len=64)
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.63.16.117', 'x-real-ip': '10.63.16.117', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [CHECK] hash=644e68533b38ae598340618431ef79500c1717faf5139aaa1f0d9c9fa93a2077, filename=2024-02-06 09-50-52.mkv, site=Dallas, source_path=/mnt/color/2024-02-06 09-50-52.mkv
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [auth-debug] All headers: {'content-type': 'application/json', 'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'content-length': '63', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.63.16.117', 'x-real-ip': '10.63.16.117', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:29:48 mov-orc-dev npx[32963]: INFO:     10.63.16.117:0 - "GET /api/files/check?hash=644e68533b38ae598340618431ef79500c1717faf5139aaa1f0d9c9fa93a2077&filename=2024-02-06+09-50-52.mkv&site=Dallas&source_path=/mnt/color/2024-02-06+09-50-52.mkv HTTP/1.1" 200 OK
+Feb 01 17:29:48 mov-orc-dev npx[32963]: 5:29:48 PM [server] GET /api/files/check 200 in 9ms
+Feb 01 17:29:48 mov-orc-dev npx[32963]: [python] INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 01 17:29:48 mov-orc-dev npx[32963]: 5:29:48 PM [server] POST /api/sites/Dallas/heartbeat 200 in 10ms
+Feb 01 17:29:50 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:50 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:50 mov-orc-dev npx[32963]: 5:29:50 PM [server] GET /api/files 200 in 19ms
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for POST /api/sites/Tustin/heartbeat (len=64)
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [CHECK] hash=63a925f7e1a6e6d951d66e874a5f9277afd5d94b34c560202174b144c13c9f88, filename=2024-02-06 07-20-57.mkv, site=Tustin, source_path=/mnt/color/2024-02-06 07-20-57.mkv
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [auth-debug] All headers: {'content-type': 'application/json', 'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'content-length': '63', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:29:53 mov-orc-dev npx[32963]: INFO:     10.100.4.150:0 - "GET /api/files/check?hash=63a925f7e1a6e6d951d66e874a5f9277afd5d94b34c560202174b144c13c9f88&filename=2024-02-06+07-20-57.mkv&site=Tustin&source_path=/mnt/color/2024-02-06+07-20-57.mkv HTTP/1.1" 200 OK
+Feb 01 17:29:53 mov-orc-dev npx[32963]: 5:29:53 PM [server] GET /api/files/check 200 in 6ms
+Feb 01 17:29:53 mov-orc-dev npx[32963]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 01 17:29:53 mov-orc-dev npx[32963]: 5:29:53 PM [server] POST /api/sites/Tustin/heartbeat 200 in 5ms
+Feb 01 17:29:54 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:29:54 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.63.16.117', 'x-real-ip': '10.63.16.117', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:54 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:54 mov-orc-dev npx[32963]: [CHECK] hash=2290245ca889c47557caccf27a3f5500179802a2922b5391c697fd06fdbe20aa, filename=2024-02-06 09-50-52.mp4, site=Dallas, source_path=/mnt/color/2024-02-06 09-50-52.mp4
+Feb 01 17:29:54 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:29:54 mov-orc-dev npx[32963]: INFO:     10.63.16.117:0 - "GET /api/files/check?hash=2290245ca889c47557caccf27a3f5500179802a2922b5391c697fd06fdbe20aa&filename=2024-02-06+09-50-52.mp4&site=Dallas&source_path=/mnt/color/2024-02-06+09-50-52.mp4 HTTP/1.1" 200 OK
+Feb 01 17:29:54 mov-orc-dev npx[32963]: 5:29:54 PM [server] GET /api/files/check 200 in 6ms
+Feb 01 17:29:55 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:29:55 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:29:55 mov-orc-dev npx[32963]: 5:29:55 PM [server] GET /api/files 200 in 6ms
+Feb 01 17:29:59 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:29:59 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:29:59 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:29:59 mov-orc-dev npx[32963]: [CHECK] hash=ce4313b6e8b116d1de7bdc532c240a5348aca2df7cfd8b979c81c7f10c2bc0fe, filename=2024-02-05_10-10-11.mp4, site=Tustin, source_path=/mnt/color/2024-02-05_10-10-11.mp4
+Feb 01 17:29:59 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:29:59 mov-orc-dev npx[32963]: INFO:     10.100.4.150:0 - "GET /api/files/check?hash=ce4313b6e8b116d1de7bdc532c240a5348aca2df7cfd8b979c81c7f10c2bc0fe&filename=2024-02-05_10-10-11.mp4&site=Tustin&source_path=/mnt/color/2024-02-05_10-10-11.mp4 HTTP/1.1" 200 OK
+Feb 01 17:29:59 mov-orc-dev npx[32963]: 5:29:59 PM [server] GET /api/files/check 200 in 3ms
+Feb 01 17:30:00 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:30:00 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.63.16.117', 'x-real-ip': '10.63.16.117', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:30:00 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:30:00 mov-orc-dev npx[32963]: [CHECK] hash=3fc71dbe4e7d938e46dd4d85ece5d642e1e3ef45452a41ce1ff7e9b2dbd2a636, filename=2024-02-06_07-20-54.mp4, site=Dallas, source_path=/mnt/color/2024-02-06_07-20-54.mp4
+Feb 01 17:30:00 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:30:00 mov-orc-dev npx[32963]: INFO:     10.63.16.117:0 - "GET /api/files/check?hash=3fc71dbe4e7d938e46dd4d85ece5d642e1e3ef45452a41ce1ff7e9b2dbd2a636&filename=2024-02-06_07-20-54.mp4&site=Dallas&source_path=/mnt/color/2024-02-06_07-20-54.mp4 HTTP/1.1" 200 OK
+Feb 01 17:30:00 mov-orc-dev npx[32963]: 5:30:00 PM [server] GET /api/files/check 200 in 3ms
+Feb 01 17:30:00 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:30:00 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:30:00 mov-orc-dev npx[32963]: 5:30:00 PM [server] GET /api/files 200 in 4ms
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [CHECK] hash=915ec405c6fdbaa6da7762eb08b227f3b84ab48dfb1fcfefe3a5ab1e73f0ecf6, filename=2024-02-05_10-10-11.mov, site=Tustin, source_path=/mnt/color/2024-02-05_10-10-11.mov
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:30:05 mov-orc-dev npx[32963]: INFO:     10.100.4.150:0 - "GET /api/files/check?hash=915ec405c6fdbaa6da7762eb08b227f3b84ab48dfb1fcfefe3a5ab1e73f0ecf6&filename=2024-02-05_10-10-11.mov&site=Tustin&source_path=/mnt/color/2024-02-05_10-10-11.mov HTTP/1.1" 200 OK
+Feb 01 17:30:05 mov-orc-dev npx[32963]: 5:30:05 PM [server] GET /api/files/check 200 in 4ms
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:30:05 mov-orc-dev npx[32963]: 5:30:05 PM [server] GET /api/files 200 in 4ms
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.63.16.117', 'x-real-ip': '10.63.16.117', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [CHECK] hash=31a501ce219a51d7da16798fd65e680b8683c5a11802184a38bd4efbeaacc3ae, filename=2024-02-06_07-20-54.mov, site=Dallas, source_path=/mnt/color/2024-02-06_07-20-54.mov
+Feb 01 17:30:05 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:30:05 mov-orc-dev npx[32963]: INFO:     10.63.16.117:0 - "GET /api/files/check?hash=31a501ce219a51d7da16798fd65e680b8683c5a11802184a38bd4efbeaacc3ae&filename=2024-02-06_07-20-54.mov&site=Dallas&source_path=/mnt/color/2024-02-06_07-20-54.mov HTTP/1.1" 200 OK
+Feb 01 17:30:05 mov-orc-dev npx[32963]: 5:30:05 PM [server] GET /api/files/check 200 in 3ms
+Feb 01 17:30:10 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:30:10 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:30:10 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:30:10 mov-orc-dev npx[32963]: [CHECK] hash=675361ada362c8ab90fc57b9ded4495c5ecf76dfe826e4f71f042c341d9f975e, filename=2024-02-05 10-10-12.mp4, site=Tustin, source_path=/mnt/color/2024-02-05 10-10-12.mp4
+Feb 01 17:30:10 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:30:10 mov-orc-dev npx[32963]: INFO:     10.100.4.150:0 - "GET /api/files/check?hash=675361ada362c8ab90fc57b9ded4495c5ecf76dfe826e4f71f042c341d9f975e&filename=2024-02-05+10-10-12.mp4&site=Tustin&source_path=/mnt/color/2024-02-05+10-10-12.mp4 HTTP/1.1" 200 OK
+Feb 01 17:30:10 mov-orc-dev npx[32963]: 5:30:10 PM [server] GET /api/files/check 200 in 5ms
+Feb 01 17:30:10 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:30:10 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:30:10 mov-orc-dev npx[32963]: 5:30:10 PM [server] GET /api/files 200 in 5ms
+Feb 01 17:30:15 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:30:15 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:30:15 mov-orc-dev npx[32963]: 5:30:15 PM [server] GET /api/files 200 in 7ms
+Feb 01 17:30:16 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:30:16 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:30:16 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:30:16 mov-orc-dev npx[32963]: [CHECK] hash=83e7ebc35d621d625a703c3bfca442ff21b4f0f64c8f4371bf74df1e86785249, filename=2024-02-06 07-20-57.mp4, site=Tustin, source_path=/mnt/color/2024-02-06 07-20-57.mp4
+Feb 01 17:30:16 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:30:16 mov-orc-dev npx[32963]: INFO:     10.100.4.150:0 - "GET /api/files/check?hash=83e7ebc35d621d625a703c3bfca442ff21b4f0f64c8f4371bf74df1e86785249&filename=2024-02-06+07-20-57.mp4&site=Tustin&source_path=/mnt/color/2024-02-06+07-20-57.mp4 HTTP/1.1" 200 OK
+Feb 01 17:30:16 mov-orc-dev npx[32963]: 5:30:16 PM [server] GET /api/files/check 200 in 4ms
+Feb 01 17:30:20 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:30:20 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:30:20 mov-orc-dev npx[32963]: 5:30:20 PM [server] GET /api/files 200 in 6ms
+Feb 01 17:30:22 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for GET /api/files/check (len=64)
+Feb 01 17:30:22 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.100.4.150', 'x-real-ip': '10.100.4.150', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:30:22 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:30:22 mov-orc-dev npx[32963]: [CHECK] hash=2bdaae714cb9e2d21e3168a4205b1fb059864d96770a525ec47c456721b92d8b, filename=2024-02-05 10-10-12.mkv, site=Tustin, source_path=/mnt/color/2024-02-05 10-10-12.mkv
+Feb 01 17:30:22 mov-orc-dev npx[32963]: [CHECK] Hash lookup result: True
+Feb 01 17:30:22 mov-orc-dev npx[32963]: INFO:     10.100.4.150:0 - "GET /api/files/check?hash=2bdaae714cb9e2d21e3168a4205b1fb059864d96770a525ec47c456721b92d8b&filename=2024-02-05+10-10-12.mkv&site=Tustin&source_path=/mnt/color/2024-02-05+10-10-12.mkv HTTP/1.1" 200 OK
+Feb 01 17:30:22 mov-orc-dev npx[32963]: 5:30:22 PM [server] GET /api/files/check 200 in 4ms
+Feb 01 17:30:24 mov-orc-dev npx[32963]: [proxy] Forwarding X-API-Key for POST /api/sites/Dallas/heartbeat (len=64)
+Feb 01 17:30:24 mov-orc-dev npx[32963]: [python] [auth-debug] All headers: {'content-type': 'application/json', 'user-agent': 'Python/3.12 aiohttp/3.13.3', 'accept-encoding': 'gzip, deflate', 'accept': '*/*', 'content-length': '63', 'x-api-key': 'b9b93866ab36397eda5709cc22230e2c51d2af652e641a9d9111288936ce4aa0', 'x-forwarded-proto': 'http', 'x-forwarded-for': '10.63.16.117', 'x-real-ip': '10.63.16.117', 'host': 'localhost:5001', 'connection': 'upgrade'}
+Feb 01 17:30:24 mov-orc-dev npx[32963]: [auth] API key received (len=64), server key configured: True, match: True
+Feb 01 17:30:24 mov-orc-dev npx[32963]: INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 01 17:30:24 mov-orc-dev npx[32963]: 5:30:24 PM [server] POST /api/sites/Dallas/heartbeat 200 in 5ms
+Feb 01 17:30:25 mov-orc-dev npx[32963]: [proxy] No X-API-Key received for GET /api/files
+Feb 01 17:30:25 mov-orc-dev npx[32963]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 01 17:30:25 mov-orc-dev npx[32963]: 5:30:25 PM [server] GET /api/files 200 in 5ms

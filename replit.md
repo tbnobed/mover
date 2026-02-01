@@ -160,6 +160,10 @@ The system uses cookie-based session authentication for users and API key authen
 - `GET /api/auth/me` - Get current user info
 
 ## Recent Changes
+- 2026-02-01: Fixed /api/files/check endpoint authentication
+  - Root cause: FastAPI route order mattered - `/api/files/{file_id}` was matching "check" as file_id
+  - Solution: Moved `/api/files/check` route BEFORE `/{file_id}` wildcard route
+  - Also added explicit X-API-Key header forwarding in Express proxy middleware
 - 2026-01-30: Added user authentication system
   - Password hashing with bcrypt
   - Cookie-based session management
