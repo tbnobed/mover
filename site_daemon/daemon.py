@@ -282,7 +282,7 @@ class SiteDaemon:
             await asyncio.sleep(HEARTBEAT_INTERVAL)
     
     async def scan_existing_files(self, upload_existing: bool = False):
-        """Scan existing files - will check with orchestrator API before uploading each"""
+        """Scan existing files and queue them for processing (will check with orchestrator before upload)"""
         watch_dir = Path(self.watch_path)
         if not watch_dir.exists():
             print(f"[{datetime.now().isoformat()}] Watch directory does not exist, creating: {self.watch_path}")
@@ -290,23 +290,17 @@ class SiteDaemon:
             return
         
         file_count = 0
-        queued = 0
         
         for file_path in watch_dir.iterdir():
             if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_EXTENSIONS:
                 abs_path = str(file_path.absolute())
                 file_count += 1
                 self.file_detector.seen_files.add(abs_path)
-                if upload_existing:
-                    print(f"[{datetime.now().isoformat()}] Queueing: {file_path.name}")
-                    self.pending_queue.put_nowait(abs_path)
-                    queued += 1
+                # Always queue existing files - orchestrator API will determine if upload needed
+                print(f"[{datetime.now().isoformat()}] Queueing existing: {file_path.name}")
+                self.pending_queue.put_nowait(abs_path)
         
-        print(f"[{datetime.now().isoformat()}] Found {file_count} video files in watch directory")
-        if queued > 0:
-            print(f"[{datetime.now().isoformat()}] Queued {queued} files (each will be checked with server before upload)")
-        elif file_count > 0:
-            print(f"[{datetime.now().isoformat()}] Existing files skipped (use --upload-existing to process them)")
+        print(f"[{datetime.now().isoformat()}] Found {file_count} video files - all queued for orchestrator check")
     
     async def simulate_transfer(self, file_id: str, source_path: str, dest_site: str):
         print(f"[{datetime.now().isoformat()}] Simulating RaySync transfer: {source_path} -> {dest_site}")
