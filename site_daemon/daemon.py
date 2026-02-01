@@ -28,8 +28,10 @@ ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:5000")
 DAEMON_API_KEY = os.getenv("DAEMON_API_KEY", "")
 HEARTBEAT_INTERVAL = 30
 SUPPORTED_EXTENSIONS = {".mxf", ".mov", ".mp4", ".mkv", ".avi", ".ari", ".r3d", ".braw", ".dpx", ".exr", ".dng", ".prores"}
-FILE_STABILITY_CHECKS = 10  # Number of checks where file size must be stable (10 × 3 = 30 seconds)
-FILE_STABILITY_INTERVAL = 3  # Seconds between stability checks
+# File stability: wait until file hasn't changed for this long (size AND mtime)
+# Default: 60 seconds of no changes. Override with FILE_STABILITY_SECONDS env var
+FILE_STABILITY_SECONDS = int(os.getenv("FILE_STABILITY_SECONDS", "60"))
+FILE_CHECK_INTERVAL = 5  # Check every 5 seconds
 
 
 def get_auth_headers() -> dict:
@@ -90,35 +92,49 @@ class FileDetector(FileSystemEventHandler):
             return False
     
     async def wait_for_file_stability(self, file_path: str) -> bool:
-        """Wait until file size stops changing (file is completely written)"""
+        """
+        Wait until file hasn't changed for FILE_STABILITY_SECONDS.
+        Checks both file size AND modification time to detect active writes.
+        For recordings that take hours, this waits until writing stops.
+        """
         path = Path(file_path)
-        stable_count = 0
         last_size = -1
+        last_mtime = -1
+        stable_since = None
         
-        print(f"[{datetime.now().isoformat()}] Waiting for file to be complete: {path.name}")
+        print(f"[{datetime.now().isoformat()}] Waiting for file to be complete: {path.name} (stability: {FILE_STABILITY_SECONDS}s)")
         
-        while stable_count < FILE_STABILITY_CHECKS:
+        while True:
             try:
                 if not path.exists():
                     print(f"[{datetime.now().isoformat()}] File disappeared: {path.name}")
                     return False
-                    
-                current_size = path.stat().st_size
                 
-                if current_size == last_size and current_size > 0:
-                    stable_count += 1
+                stat = path.stat()
+                current_size = stat.st_size
+                current_mtime = stat.st_mtime
+                
+                # Check if file has changed (size or mtime)
+                if current_size != last_size or current_mtime != last_mtime:
+                    # File changed, reset stability timer
+                    stable_since = datetime.now()
+                    if last_size > 0 and current_size != last_size:
+                        print(f"[{datetime.now().isoformat()}] File still writing: {path.name} ({current_size:,} bytes)")
+                    last_size = current_size
+                    last_mtime = current_mtime
                 else:
-                    stable_count = 0
-                    
-                last_size = current_size
-                await asyncio.sleep(FILE_STABILITY_INTERVAL)
+                    # File unchanged, check if stable long enough
+                    if stable_since and current_size > 0:
+                        elapsed = (datetime.now() - stable_since).total_seconds()
+                        if elapsed >= FILE_STABILITY_SECONDS:
+                            print(f"[{datetime.now().isoformat()}] File complete: {path.name} ({current_size:,} bytes) - stable for {elapsed:.0f}s")
+                            return True
+                
+                await asyncio.sleep(FILE_CHECK_INTERVAL)
                 
             except Exception as e:
                 print(f"[{datetime.now().isoformat()}] Stability check error: {e}")
                 return False
-        
-        print(f"[{datetime.now().isoformat()}] File complete: {path.name} ({last_size:,} bytes)")
-        return True
     
     async def report_file(self, file_path: str, upload_file: bool = True):
         path = Path(file_path)
