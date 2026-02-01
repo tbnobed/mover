@@ -21,7 +21,9 @@ import {
   CheckCircle,
   ListPlus,
   Send,
-  CheckCheck
+  CheckCheck,
+  Trash2,
+  Lock
 } from "lucide-react";
 import type { File, AuditLog } from "@shared/schema";
 import { format } from "date-fns";
@@ -155,9 +157,23 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/files/${file.id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "File deleted" });
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast({ title: error.message || "Failed to delete file", variant: "destructive" });
+    },
+  });
+
   const isPending = assignMutation.isPending || startWorkMutation.isPending || 
     deliverMutation.isPending || rejectMutation.isPending || validateMutation.isPending ||
-    queueMutation.isPending || startTransferMutation.isPending || completeTransferMutation.isPending;
+    queueMutation.isPending || startTransferMutation.isPending || completeTransferMutation.isPending ||
+    deleteMutation.isPending;
 
   return (
     <Card className="h-full flex flex-col">
@@ -169,6 +185,12 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
           <div className="flex items-center gap-2 flex-wrap">
             <SiteBadge site={file.sourceSite} />
             <StatusBadge state={file.state} />
+            {(file as any).locked && (
+              <Badge variant="secondary" className="text-xs">
+                <Lock className="mr-1 h-3 w-3" />
+                Locked
+              </Badge>
+            )}
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-details">
@@ -257,12 +279,12 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
               )}
               {file.state === "validated" && (
                 <Button 
-                  onClick={() => queueMutation.mutate()} 
+                  onClick={() => assignMutation.mutate()} 
                   disabled={isPending}
-                  data-testid="button-queue-file"
+                  data-testid="button-assign-file"
                 >
-                  <ListPlus className="mr-2 h-4 w-4" />
-                  Queue for Transfer
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Assign to Colorist
                 </Button>
               )}
               {file.state === "queued" && (
@@ -324,6 +346,21 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                 >
                   <XCircle className="mr-2 h-4 w-4" />
                   Reject
+                </Button>
+              )}
+              {file.state === "detected" && !(file as any).locked && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    if (confirm("Are you sure you want to delete this file? This cannot be undone.")) {
+                      deleteMutation.mutate();
+                    }
+                  }} 
+                  disabled={isPending}
+                  data-testid="button-delete-file"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
                 </Button>
               )}
             </div>

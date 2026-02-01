@@ -492,10 +492,15 @@ async def validate_file(file_id: str, _user: dict = Depends(get_current_user)):
     if file["state"] != "detected":
         raise HTTPException(status_code=400, detail="File cannot be validated in current state")
     
-    updated = await storage.update_file(file_id, {"state": "validated", "validated_at": datetime.now()})
+    # Validate and LOCK the file (prevents deletion after validation)
+    updated = await storage.update_file(file_id, {
+        "state": "validated",
+        "validated_at": datetime.now(),
+        "locked": True
+    })
     await storage.create_audit_log({
         "file_id": file_id,
-        "action": "File validated",
+        "action": "File validated and locked",
         "previous_state": "detected",
         "new_state": "validated"
     })
@@ -561,8 +566,9 @@ async def assign_file(file_id: str, request: Optional[AssignRequest] = None, _us
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
-    if file["state"] != "transferred":
-        raise HTTPException(status_code=400, detail="File cannot be assigned in current state")
+    # Allow assignment from either "validated" (new workflow) or "transferred" (legacy workflow)
+    if file["state"] not in ["validated", "transferred"]:
+        raise HTTPException(status_code=400, detail="File cannot be assigned in current state (must be validated or transferred)")
     
     user_id = request.user_id if request else None
     if not user_id:
@@ -658,6 +664,15 @@ async def reject_file(file_id: str, request: Optional[RejectRequest] = None, _us
         "details": reason
     })
     return snake_to_camel(updated)
+
+@app.delete("/api/files/{file_id}")
+async def delete_file(file_id: str, _user: dict = Depends(get_current_user)):
+    """Delete a file. Only works for unlocked files (files in 'detected' state that haven't been validated yet)."""
+    result = await storage.delete_file(file_id)
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["message"])
+    
+    return {"success": True, "message": result["message"]}
 
 @app.get("/api/files/{file_id}/audit")
 async def get_file_audit(file_id: str, _user: dict = Depends(get_current_user)):

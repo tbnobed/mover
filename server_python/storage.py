@@ -124,6 +124,27 @@ async def update_file(file_id: str, updates: Dict[str, Any]) -> Optional[Dict[st
         row = await conn.fetchrow("SELECT * FROM files WHERE id = $1", file_id)
         return dict(row) if row else None
 
+async def delete_file(file_id: str) -> Dict[str, Any]:
+    """Delete a file if not locked. Returns result with success flag and message."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT * FROM files WHERE id = $1", file_id)
+        if not row:
+            return {"success": False, "message": "File not found"}
+        
+        file = dict(row)
+        if file.get("locked"):
+            return {"success": False, "message": "Cannot delete: file is locked (validated files cannot be deleted)"}
+        
+        # Delete audit logs first (foreign key constraint)
+        await conn.execute("DELETE FROM audit_logs WHERE file_id = $1", file_id)
+        # Delete transfer jobs
+        await conn.execute("DELETE FROM transfer_jobs WHERE file_id = $1", file_id)
+        # Delete the file
+        await conn.execute("DELETE FROM files WHERE id = $1", file_id)
+        
+        return {"success": True, "message": "File deleted successfully", "file": file}
+
 def sanitize_user(user: Dict[str, Any]) -> Dict[str, Any]:
     """Remove sensitive fields from user data before returning to API"""
     if user is None:

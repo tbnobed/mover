@@ -81,10 +81,13 @@ python site_daemon/daemon.py --site tustin --watch /path/to/watch
 
 ### File State Machine
 ```
-detected → validated → queued → transferring → transferred → 
-colorist_assigned → in_progress → delivered_to_mam → archived
-                                                    └→ rejected
+detected → validated → colorist_assigned → in_progress → delivered_to_mam → archived
+                                                                         └→ rejected
 ```
+
+**Note**: Files are locked after validation (cannot be deleted). Only files in "detected" state can be deleted.
+
+Legacy transfer states (queued, transferring, transferred) still exist for backwards compatibility but the new workflow skips them since files are already uploaded by the daemon.
 
 ## API Endpoints (Python FastAPI)
 

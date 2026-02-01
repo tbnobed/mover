@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, bigint, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, bigint, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -46,6 +46,7 @@ export const files = pgTable("files", {
   fileSize: bigint("file_size", { mode: "number" }).notNull(),
   sha256Hash: text("sha256_hash").notNull(),
   state: fileStateEnum("state").notNull().default("detected"),
+  locked: boolean("locked").notNull().default(false),
   assignedTo: varchar("assigned_to").references(() => users.id),
   raysyncJobId: text("raysync_job_id"),
   transferProgress: integer("transfer_progress").default(0),
