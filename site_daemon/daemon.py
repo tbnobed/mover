@@ -69,13 +69,14 @@ class FileDetector(FileSystemEventHandler):
                 except:
                     pass
     
-    async def check_file_exists_on_server(self, sha256_hash: str, filename: str) -> bool:
-        """Check with orchestrator API if file already exists (by hash or name+site)"""
+    async def check_file_exists_on_server(self, sha256_hash: str, filename: str, source_path: str) -> bool:
+        """Check with orchestrator API if file already exists (by hash or source path)"""
         try:
             params = {
                 'hash': sha256_hash,
                 'filename': filename,
-                'site': self.site_id
+                'site': self.site_id,
+                'source_path': source_path
             }
             async with aiohttp.ClientSession() as session:
                 async with session.get(
@@ -168,8 +169,9 @@ class FileDetector(FileSystemEventHandler):
         sha256_hash = await self.calculate_hash(file_path)
         
         # CHECK WITH ORCHESTRATOR API BEFORE UPLOADING
+        source_path_str = str(path.absolute())
         print(f"[{datetime.now().isoformat()}] Checking with server if file exists: {path.name}")
-        if await self.check_file_exists_on_server(sha256_hash, path.name):
+        if await self.check_file_exists_on_server(sha256_hash, path.name, source_path_str):
             print(f"[{datetime.now().isoformat()}] SKIPPED (already on server): {path.name}")
             return
         

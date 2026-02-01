@@ -295,22 +295,29 @@ async def get_active_uploads():
     return list(active_uploads.values())
 
 @app.get("/api/files/check")
-async def check_file_exists(request: Request, hash: str = None, filename: str = None, site: str = None):
+async def check_file_exists(request: Request, hash: str = None, filename: str = None, site: str = None, source_path: str = None):
     """
     Check if a file already exists in the system before uploading.
     Daemon should call this BEFORE uploading to prevent duplicate transfers.
     Checks PERMANENT history - files are never forgotten even after deletion.
+    Also checks if the same source path is already tracked (prevents re-upload).
     Returns: {"exists": true/false, "reason": "..." or null}
     """
     await get_daemon_or_user_auth(request)
     
-    if not hash and not filename:
-        raise HTTPException(status_code=400, detail="Must provide hash or filename")
+    if not hash and not filename and not source_path:
+        raise HTTPException(status_code=400, detail="Must provide hash, filename, or source_path")
     
     # Check by hash in permanent history (authoritative source)
     if hash:
         if await storage.file_exists_in_history(hash):
             return {"exists": True, "reason": "File hash already in history"}
+    
+    # Check by source path - prevents duplicate uploads from same location
+    if site and source_path:
+        existing = await storage.get_file_by_source(site, source_path)
+        if existing:
+            return {"exists": True, "reason": f"File already tracked from this path (id: {existing['id']}, state: {existing['state']})"}
     
     return {"exists": False, "reason": None}
 
