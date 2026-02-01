@@ -288,6 +288,32 @@ async def get_active_uploads():
     """Get list of currently active uploads with progress"""
     return list(active_uploads.values())
 
+@app.get("/api/files/check")
+async def check_file_exists(request: Request, hash: str = None, filename: str = None, site: str = None):
+    """
+    Check if a file already exists in the system before uploading.
+    Daemon should call this BEFORE uploading to prevent duplicate transfers.
+    Returns: {"exists": true/false, "file": {...} or null}
+    """
+    await get_daemon_or_user_auth(request)
+    
+    if not hash and not filename:
+        raise HTTPException(status_code=400, detail="Must provide hash or filename")
+    
+    # Check by hash first (most reliable)
+    if hash:
+        existing = await storage.get_file_by_hash(hash)
+        if existing:
+            return {"exists": True, "file": snake_to_camel(existing)}
+    
+    # Check by filename + site
+    if filename and site:
+        existing = await storage.get_file_by_name_and_site(filename, site)
+        if existing:
+            return {"exists": True, "file": snake_to_camel(existing)}
+    
+    return {"exists": False, "file": None}
+
 @app.post("/api/files/upload-stream")
 async def upload_file_stream(request: Request, filename: str):
     """

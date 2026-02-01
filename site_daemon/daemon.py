@@ -3,11 +3,10 @@
 Site Daemon for Color Routing System
 Runs at each site (Tustin, Nashville, Dallas) to:
 - Watch directories for new files
-- Report detected files to central orchestrator
+- Check with orchestrator API before uploading (prevents duplicates)
+- Upload files via streaming to central orchestrator
 - Validate files (size, hash)
-- Handle RaySync transfer commands
 - Send periodic heartbeats
-- Track uploaded files in local SQLite database to prevent re-uploads
 """
 
 import os
@@ -18,7 +17,6 @@ import hashlib
 import asyncio
 import argparse
 import aiohttp
-import sqlite3
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Set
@@ -33,60 +31,6 @@ FILE_STABILITY_CHECKS = 3  # Number of checks where file size must be stable
 FILE_STABILITY_INTERVAL = 2  # Seconds between stability checks
 
 
-class UploadTracker:
-    """SQLite-based tracker to remember which files have been uploaded"""
-    
-    def __init__(self, db_path: str):
-        self.db_path = db_path
-        self._init_db()
-    
-    def _init_db(self):
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS uploaded_files (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                file_path TEXT UNIQUE NOT NULL,
-                filename TEXT NOT NULL,
-                file_size INTEGER NOT NULL,
-                sha256_hash TEXT,
-                uploaded_at TEXT NOT NULL,
-                orchestrator_id TEXT
-            )
-        ''')
-        conn.commit()
-        conn.close()
-    
-    def is_uploaded(self, file_path: str) -> bool:
-        """Check if a file has already been uploaded"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute('SELECT 1 FROM uploaded_files WHERE file_path = ?', (file_path,))
-        result = cursor.fetchone() is not None
-        conn.close()
-        return result
-    
-    def mark_uploaded(self, file_path: str, filename: str, file_size: int, sha256_hash: str = None, orchestrator_id: str = None):
-        """Mark a file as successfully uploaded"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT OR REPLACE INTO uploaded_files (file_path, filename, file_size, sha256_hash, uploaded_at, orchestrator_id)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (file_path, filename, file_size, sha256_hash, datetime.now().isoformat(), orchestrator_id))
-        conn.commit()
-        conn.close()
-    
-    def get_upload_count(self) -> int:
-        """Get total number of uploaded files"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM uploaded_files')
-        count = cursor.fetchone()[0]
-        conn.close()
-        return count
-
-
 def get_auth_headers() -> dict:
     """Get authentication headers for API requests"""
     headers = {}
@@ -96,13 +40,12 @@ def get_auth_headers() -> dict:
 
 
 class FileDetector(FileSystemEventHandler):
-    def __init__(self, site_id: str, watch_path: str, orchestrator_url: str, pending_queue: asyncio.Queue, upload_tracker: UploadTracker = None):
+    def __init__(self, site_id: str, watch_path: str, orchestrator_url: str, pending_queue: asyncio.Queue):
         self.site_id = site_id
         self.watch_path = watch_path
         self.orchestrator_url = orchestrator_url
         self.detected_files = set()
         self.pending_queue = pending_queue
-        self.upload_tracker = upload_tracker
         self.seen_files: Set[str] = set()  # Files seen this session (to avoid duplicates in queue)
         
     def on_created(self, event):
@@ -113,10 +56,6 @@ class FileDetector(FileSystemEventHandler):
                 # Skip if already in queue this session
                 if abs_path in self.seen_files:
                     return
-                # Skip if already uploaded (check database)
-                if self.upload_tracker and self.upload_tracker.is_uploaded(abs_path):
-                    print(f"[{datetime.now().isoformat()}] Skipping (already uploaded): {file_path.name}")
-                    return
                 self.seen_files.add(abs_path)
                 self.detected_files.add(event.src_path)
                 print(f"[{datetime.now().isoformat()}] Detected: {file_path.name}")
@@ -124,6 +63,30 @@ class FileDetector(FileSystemEventHandler):
                     self.pending_queue.put_nowait(abs_path)
                 except:
                     pass
+    
+    async def check_file_exists_on_server(self, sha256_hash: str, filename: str) -> bool:
+        """Check with orchestrator API if file already exists (by hash or name+site)"""
+        try:
+            params = {
+                'hash': sha256_hash,
+                'filename': filename,
+                'site': self.site_id
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{self.orchestrator_url}/api/files/check",
+                    params=params,
+                    headers=get_auth_headers()
+                ) as resp:
+                    if resp.status == 200:
+                        result = await resp.json()
+                        return result.get('exists', False)
+                    else:
+                        # If check fails, proceed with upload (server will reject duplicates)
+                        return False
+        except Exception as e:
+            print(f"[{datetime.now().isoformat()}] Error checking file existence: {e}")
+            return False
     
     async def wait_for_file_stability(self, file_path: str) -> bool:
         """Wait until file size stops changing (file is completely written)"""
@@ -175,10 +138,18 @@ class FileDetector(FileSystemEventHandler):
         """Upload the actual file to the orchestrator using streaming"""
         path = Path(file_path)
         file_size = path.stat().st_size
-        print(f"[{datetime.now().isoformat()}] Uploading: {path.name} ({file_size:,} bytes / {file_size / (1024**3):.2f} GB)")
         
-        # Calculate hash before upload for verification
+        # Calculate hash FIRST for duplicate check
+        print(f"[{datetime.now().isoformat()}] Calculating hash: {path.name} ({file_size:,} bytes)")
         sha256_hash = await self.calculate_hash(file_path)
+        
+        # CHECK WITH ORCHESTRATOR API BEFORE UPLOADING
+        print(f"[{datetime.now().isoformat()}] Checking with server if file exists: {path.name}")
+        if await self.check_file_exists_on_server(sha256_hash, path.name):
+            print(f"[{datetime.now().isoformat()}] SKIPPED (already on server): {path.name}")
+            return
+        
+        print(f"[{datetime.now().isoformat()}] Uploading: {path.name} ({file_size:,} bytes / {file_size / (1024**3):.2f} GB)")
         
         # Streaming file reader generator - handles files of any size
         async def file_sender():
@@ -221,15 +192,8 @@ class FileDetector(FileSystemEventHandler):
                     result = await resp.json()
                     orchestrator_id = result.get('id', 'unknown')
                     print(f"[{datetime.now().isoformat()}] Uploaded: {path.name} ({file_size:,} bytes) -> {orchestrator_id}")
-                    # Mark as uploaded in local database
-                    if self.upload_tracker:
-                        self.upload_tracker.mark_uploaded(file_path, path.name, file_size, sha256_hash, orchestrator_id)
                 elif resp.status == 409:
-                    # Already exists on server - mark as uploaded locally too
-                    text = await resp.text()
-                    print(f"[{datetime.now().isoformat()}] Already tracked on server: {path.name}")
-                    if self.upload_tracker:
-                        self.upload_tracker.mark_uploaded(file_path, path.name, file_size, sha256_hash, None)
+                    print(f"[{datetime.now().isoformat()}] Already on server: {path.name}")
                 else:
                     text = await resp.text()
                     print(f"[{datetime.now().isoformat()}] Upload failed: {resp.status} - {text}")
@@ -280,11 +244,7 @@ class SiteDaemon:
         self.running = False
         self.observer: Optional[Observer] = None
         self.pending_queue: asyncio.Queue = asyncio.Queue()
-        
-        # Create upload tracker database in the watch directory
-        db_path = os.path.join(watch_path, f".upload_tracker_{site_id}.db")
-        self.upload_tracker = UploadTracker(db_path)
-        self.file_detector = FileDetector(site_id, watch_path, orchestrator_url, self.pending_queue, self.upload_tracker)
+        self.file_detector = FileDetector(site_id, watch_path, orchestrator_url, self.pending_queue)
         
     async def send_heartbeat(self):
         try:
@@ -321,38 +281,31 @@ class SiteDaemon:
             await asyncio.sleep(HEARTBEAT_INTERVAL)
     
     async def scan_existing_files(self, upload_existing: bool = False):
-        """Scan existing files - checks database to avoid re-uploads"""
+        """Scan existing files - will check with orchestrator API before uploading each"""
         watch_dir = Path(self.watch_path)
         if not watch_dir.exists():
             print(f"[{datetime.now().isoformat()}] Watch directory does not exist, creating: {self.watch_path}")
             watch_dir.mkdir(parents=True, exist_ok=True)
             return
         
-        already_uploaded = 0
-        new_files = 0
+        file_count = 0
         queued = 0
         
         for file_path in watch_dir.iterdir():
             if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_EXTENSIONS:
                 abs_path = str(file_path.absolute())
-                
-                # Check if already uploaded in database
-                if self.upload_tracker.is_uploaded(abs_path):
-                    already_uploaded += 1
-                    self.file_detector.seen_files.add(abs_path)
-                else:
-                    new_files += 1
-                    self.file_detector.seen_files.add(abs_path)
-                    if upload_existing:
-                        print(f"[{datetime.now().isoformat()}] Queueing: {file_path.name}")
-                        self.pending_queue.put_nowait(abs_path)
-                        queued += 1
+                file_count += 1
+                self.file_detector.seen_files.add(abs_path)
+                if upload_existing:
+                    print(f"[{datetime.now().isoformat()}] Queueing: {file_path.name}")
+                    self.pending_queue.put_nowait(abs_path)
+                    queued += 1
         
-        print(f"[{datetime.now().isoformat()}] Scan complete: {already_uploaded} already uploaded, {new_files} new files found")
+        print(f"[{datetime.now().isoformat()}] Found {file_count} video files in watch directory")
         if queued > 0:
-            print(f"[{datetime.now().isoformat()}] Queued {queued} files for upload")
-        elif new_files > 0:
-            print(f"[{datetime.now().isoformat()}] {new_files} new files skipped (use --upload-existing to upload)")
+            print(f"[{datetime.now().isoformat()}] Queued {queued} files (each will be checked with server before upload)")
+        elif file_count > 0:
+            print(f"[{datetime.now().isoformat()}] Existing files skipped (use --upload-existing to process them)")
     
     async def simulate_transfer(self, file_id: str, source_path: str, dest_site: str):
         print(f"[{datetime.now().isoformat()}] Simulating RaySync transfer: {source_path} -> {dest_site}")
@@ -374,13 +327,13 @@ class SiteDaemon:
             print(f"[{datetime.now().isoformat()}] Transfer error: {e}")
     
     def start_watcher(self):
-        event_handler = FileDetector(self.site_id, self.watch_path, self.orchestrator_url, self.pending_queue, self.upload_tracker)
+        event_handler = FileDetector(self.site_id, self.watch_path, self.orchestrator_url, self.pending_queue)
         self.file_detector = event_handler
         self.observer = PollingObserver(timeout=5)  # Poll every 5 seconds for network mount compatibility
         self.observer.schedule(event_handler, self.watch_path, recursive=False)
         self.observer.start()
         print(f"[{datetime.now().isoformat()}] File watcher started for {self.watch_path}")
-        print(f"[{datetime.now().isoformat()}] Upload tracker: {self.upload_tracker.get_upload_count()} files already uploaded")
+        print(f"[{datetime.now().isoformat()}] Duplicate check: Files will be verified with orchestrator API before upload")
     
     async def process_pending_files(self):
         while self.running:

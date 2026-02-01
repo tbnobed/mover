@@ -37,6 +37,16 @@ async def get_file_by_hash(sha256_hash: str) -> Optional[Dict[str, Any]]:
         )
         return dict(row) if row else None
 
+async def get_file_by_name_and_site(filename: str, source_site: str) -> Optional[Dict[str, Any]]:
+    """Check if a file with this name from this site already exists"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT * FROM files WHERE filename = $1 AND source_site = $2",
+            filename, source_site
+        )
+        return dict(row) if row else None
+
 async def create_file(data: Dict[str, Any]) -> Dict[str, Any]:
     pool = await get_pool()
     file_id = str(uuid.uuid4())
