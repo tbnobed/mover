@@ -31,23 +31,18 @@ export function UploadProgress() {
     refetchInterval: 1000,
   });
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (uploads.length === 0) {
-    return null;
-  }
-
   return (
     <Card data-testid="card-upload-progress">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Upload className="h-4 w-4" />
-          Active Uploads ({uploads.length})
+          {uploads.length > 0 ? `Active Uploads (${uploads.length})` : "No Active Uploads"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {uploads.length === 0 && (
+          <p className="text-sm text-muted-foreground">Waiting for uploads from site daemons...</p>
+        )}
         {uploads.map((upload) => (
           <div key={upload.id} className="space-y-2" data-testid={`upload-item-${upload.id}`}>
             <div className="flex items-center justify-between gap-2">
