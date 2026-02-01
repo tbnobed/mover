@@ -41,11 +41,21 @@ interface FileDetailsProps {
   onClose: () => void;
 }
 
-export function FileDetails({ file, onClose }: FileDetailsProps) {
+export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
   const { toast } = useToast();
+
+  // Fetch fresh file data to ensure state is current
+  const { data: freshFile } = useQuery<File>({
+    queryKey: ["/api/files", initialFile.id],
+    refetchInterval: 5000,
+  });
+  
+  // Use fresh data if available, fallback to initial
+  const file = freshFile || initialFile;
 
   const { data: auditLogs, isLoading: logsLoading } = useQuery<AuditLog[]>({
     queryKey: ["/api/files", file.id, "audit"],
+    refetchInterval: 5000,
   });
 
   const assignMutation = useMutation({
