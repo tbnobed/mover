@@ -651,7 +651,10 @@ async def delete_file_record(file_id: str) -> bool:
         await conn.execute("DELETE FROM cleanup_tasks WHERE file_id = $1", file_id)
         # Delete transfer jobs
         await conn.execute("DELETE FROM transfer_jobs WHERE file_id = $1", file_id)
-        # Note: Keep audit logs for history - don't delete them
+        # Delete retransfer tasks
+        await conn.execute("DELETE FROM retransfer_tasks WHERE file_id = $1", file_id)
+        # Delete audit logs (required due to foreign key constraint)
+        await conn.execute("DELETE FROM audit_logs WHERE file_id = $1", file_id)
         # Delete the file record
         await conn.execute("DELETE FROM files WHERE id = $1", file_id)
         return True
