@@ -644,15 +644,15 @@ async def delete_file_from_history(sha256_hash: str) -> bool:
         return True
 
 async def delete_file_record(file_id: str) -> bool:
-    """Force delete a file record (for retransfer). Removes all associated data."""
+    """Force delete a file record (for retransfer). Removes all associated data.
+    Note: Does NOT delete retransfer_tasks - those must persist for daemon to process."""
     pool = await get_pool()
     async with pool.acquire() as conn:
         # Delete cleanup tasks
         await conn.execute("DELETE FROM cleanup_tasks WHERE file_id = $1", file_id)
         # Delete transfer jobs
         await conn.execute("DELETE FROM transfer_jobs WHERE file_id = $1", file_id)
-        # Delete retransfer tasks
-        await conn.execute("DELETE FROM retransfer_tasks WHERE file_id = $1", file_id)
+        # Note: Do NOT delete retransfer_tasks - they need to persist for daemon processing
         # Delete audit logs (required due to foreign key constraint)
         await conn.execute("DELETE FROM audit_logs WHERE file_id = $1", file_id)
         # Delete the file record
