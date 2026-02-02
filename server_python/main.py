@@ -822,12 +822,14 @@ async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user))
         await storage.delete_file_from_history(file["sha256_hash"])
     
     # Create retransfer task for daemon BEFORE deleting file (no FK constraint on retransfer_tasks)
+    print(f"[retransfer] Creating task for file {file_id}, site={file['source_site']}, path={file['source_path']}")
     task = await storage.create_retransfer_task(
         file_id=file_id,
         site=file["source_site"],
         file_path=file["source_path"],
         sha256_hash=file.get("sha256_hash", "")
     )
+    print(f"[retransfer] Task created: {task}")
     
     # Mark orchestrator as done if file was deleted
     if orchestrator_deleted:
