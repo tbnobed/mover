@@ -489,7 +489,7 @@ async def get_pending_cleanup_tasks(site: str) -> List[Dict[str, Any]]:
             SELECT ct.*, f.filename 
             FROM cleanup_tasks ct
             JOIN files f ON ct.file_id = f.id
-            WHERE LOWER(ct.site) = LOWER($1) AND ct.status = 'pending'
+            WHERE LOWER(ct.site_id) = LOWER($1) AND ct.status = 'pending'
             ORDER BY ct.created_at ASC
         """, site)
         return [dict(row) for row in rows]
