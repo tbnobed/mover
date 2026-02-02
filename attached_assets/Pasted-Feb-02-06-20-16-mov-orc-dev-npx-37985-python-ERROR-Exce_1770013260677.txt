@@ -1,0 +1,75 @@
+Feb 02 06:20:16 mov-orc-dev npx[37985]: [python] ERROR:    Exception in ASGI application
+Feb 02 06:20:16 mov-orc-dev npx[37985]: Traceback (most recent call last):
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "asyncpg/protocol/prepared_stmt.pyx", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "asyncpg/protocol/codecs/base.pyx", line 251, in asyncpg.protocol.protocol.Codec.encode
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "asyncpg/protocol/codecs/base.pyx", line 153, in asyncpg.protocol.protocol.Codec.encode_scalar
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "asyncpg/pgproto/codecs/int.pyx", line 54, in asyncpg.pgproto.pgproto.int4_encode
+Feb 02 06:20:16 mov-orc-dev npx[37985]: TypeError: 'str' object cannot be interpreted as an integer
+Feb 02 06:20:16 mov-orc-dev npx[37985]: The above exception was the direct cause of the following exception:
+Feb 02 06:20:16 mov-orc-dev npx[37985]: Traceback (most recent call last):
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     result = await app(  # type: ignore[func-returns-value]
+Feb 02 06:20:16 mov-orc-dev npx[37985]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     return await self.app(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await super().__call__(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await self.middleware_stack(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     raise exc
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await self.app(scope, receive, _send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 85, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await self.app(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     raise exc
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await app(scope, receive, sender)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await self.app(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await self.middleware_stack(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await route.handle(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await self.app(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 115, in app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     raise exc
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     await app(scope, receive, sender)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 101, in app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     response = await f(request)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:                ^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 355, in app
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     raw_response = await run_endpoint_function(
+Feb 02 06:20:16 mov-orc-dev npx[37985]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     return await dependant.call(**values)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/server_python/main.py", line 916, in confirm_cleanup
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     task = await storage.mark_cleanup_daemon_done(task_id)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/server_python/storage.py", line 531, in mark_cleanup_daemon_done
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     row = await conn.fetchrow("""
+Feb 02 06:20:16 mov-orc-dev npx[37985]:           ^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 752, in fetchrow
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     data = await self._execute(
+Feb 02 06:20:16 mov-orc-dev npx[37985]:            ^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1873, in _execute
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     result, _ = await self.__execute(
+Feb 02 06:20:16 mov-orc-dev npx[37985]:                 ^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1970, in __execute
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     result, stmt = await self._do_execute(
+Feb 02 06:20:16 mov-orc-dev npx[37985]:                    ^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2033, in _do_execute
+Feb 02 06:20:16 mov-orc-dev npx[37985]:     result = await executor(stmt, None)
+Feb 02 06:20:16 mov-orc-dev npx[37985]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "asyncpg/protocol/protocol.pyx", line 184, in bind_execute
+Feb 02 06:20:16 mov-orc-dev npx[37985]:   File "asyncpg/protocol/prepared_stmt.pyx", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg
+Feb 02 06:20:16 mov-orc-dev npx[37985]: asyncpg.exceptions.DataError: invalid input for query argument $1: '4' ('str' object cannot be interpreted as an integer)

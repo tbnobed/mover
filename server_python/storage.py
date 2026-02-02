@@ -512,7 +512,7 @@ async def update_cleanup_task(task_id: str, updates: Dict[str, Any]) -> Optional
         row = await conn.fetchrow(query, *values)
         return dict(row) if row else None
 
-async def mark_cleanup_orchestrator_done(task_id: str) -> Optional[Dict[str, Any]]:
+async def mark_cleanup_orchestrator_done(task_id) -> Optional[Dict[str, Any]]:
     """Mark that orchestrator has deleted its copy"""
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -521,10 +521,10 @@ async def mark_cleanup_orchestrator_done(task_id: str) -> Optional[Dict[str, Any
             SET orchestrator_deleted = true
             WHERE id = $1 
             RETURNING *
-        """, task_id)
+        """, int(task_id))
         return dict(row) if row else None
 
-async def mark_cleanup_daemon_done(task_id: str) -> Optional[Dict[str, Any]]:
+async def mark_cleanup_daemon_done(task_id) -> Optional[Dict[str, Any]]:
     """Mark that daemon has deleted its local copy and complete the task if both done"""
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -535,10 +535,10 @@ async def mark_cleanup_daemon_done(task_id: str) -> Optional[Dict[str, Any]]:
                 completed_at = CASE WHEN orchestrator_deleted THEN NOW() ELSE completed_at END
             WHERE id = $1 
             RETURNING *
-        """, task_id)
+        """, int(task_id))
         return dict(row) if row else None
 
-async def complete_cleanup_task(task_id: str) -> Optional[Dict[str, Any]]:
+async def complete_cleanup_task(task_id) -> Optional[Dict[str, Any]]:
     """Mark cleanup task as completed"""
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -547,10 +547,10 @@ async def complete_cleanup_task(task_id: str) -> Optional[Dict[str, Any]]:
             SET status = 'completed', completed_at = NOW()
             WHERE id = $1 
             RETURNING *
-        """, task_id)
+        """, int(task_id))
         return dict(row) if row else None
 
-async def fail_cleanup_task(task_id: str, error_message: str) -> Optional[Dict[str, Any]]:
+async def fail_cleanup_task(task_id, error_message: str) -> Optional[Dict[str, Any]]:
     """Mark cleanup task as failed"""
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -559,5 +559,5 @@ async def fail_cleanup_task(task_id: str, error_message: str) -> Optional[Dict[s
             SET status = 'failed', error_message = $2
             WHERE id = $1 
             RETURNING *
-        """, task_id, error_message)
+        """, int(task_id), error_message)
         return dict(row) if row else None
