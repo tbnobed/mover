@@ -923,7 +923,7 @@ async def confirm_cleanup(task_id: str, auth: dict = Depends(get_daemon_or_user_
         "action": "Daemon cleanup completed",
         "details": json.dumps({
             "cleanup_task_id": task_id,
-            "source_path": task["source_path"],
+            "file_path": task.get("file_path"),
             "message": "Daemon deleted local file"
         })
     })
