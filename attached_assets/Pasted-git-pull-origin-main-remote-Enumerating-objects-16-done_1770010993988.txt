@@ -1,0 +1,135 @@
+git pull origin main
+remote: Enumerating objects: 16, done.
+remote: Counting objects: 100% (16/16), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 10 (delta 7), reused 10 (delta 7), pack-reused 0 (from 0)
+Unpacking objects: 100% (10/10), 2.62 KiB | 536.00 KiB/s, done.
+From https://github.com/tbnobed/mover
+ * branch            main       -> FETCH_HEAD
+   c6f6232..d9199ff  main       -> origin/main
+Updating c6f6232..d9199ff
+Fast-forward
+ attached_assets/Pasted-INFO-172-31-204-121-0-POST-api-files-303f6063-4e91-4a76_1770010909332.txt | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ server_python/storage.py                                                                         |  8 ++++----
+ shared/schema.ts                                                                                 |  9 ++++-----
+ 3 files changed, 84 insertions(+), 9 deletions(-)
+ create mode 100644 attached_assets/Pasted-INFO-172-31-204-121-0-POST-api-files-303f6063-4e91-4a76_1770010909332.txt
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo systemctl restart color-routing-orchestrator
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo journalctl -u color-routing-orchestrator -f
+Feb 02 05:42:40 mov-orc-dev systemd[1]: color-routing-orchestrator.service: Deactivated successfully.
+Feb 02 05:42:40 mov-orc-dev systemd[1]: Stopped color-routing-orchestrator.service - Color Routing System Orchestrator.
+Feb 02 05:42:40 mov-orc-dev systemd[1]: color-routing-orchestrator.service: Consumed 4.140s CPU time.
+Feb 02 05:42:40 mov-orc-dev systemd[1]: Started color-routing-orchestrator.service - Color Routing System Orchestrator.
+Feb 02 05:42:41 mov-orc-dev npx[37528]: [python] Starting with: /opt/color-routing-orchestrator/venv/bin/python3
+Feb 02 05:42:41 mov-orc-dev npx[37528]: [python] INFO:     Started server process [37540]
+Feb 02 05:42:41 mov-orc-dev npx[37528]: INFO:     Waiting for application startup.
+Feb 02 05:42:41 mov-orc-dev npx[37528]: [python] INFO:     Application startup complete.
+Feb 02 05:42:41 mov-orc-dev npx[37528]: [python] INFO:     Uvicorn running on http://0.0.0.0:5001 (Press CTRL+C to quit)
+Feb 02 05:42:43 mov-orc-dev npx[37528]: 5:42:43 AM [server] Production server running on port 5000
+Feb 02 05:42:45 mov-orc-dev npx[37528]: [python] [startup] DAEMON_API_KEY configured: True, length: 64
+Feb 02 05:42:45 mov-orc-dev npx[37528]: INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 02 05:42:45 mov-orc-dev npx[37528]: 5:42:45 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 22ms
+Feb 02 05:42:45 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 02 05:42:45 mov-orc-dev npx[37528]: 5:42:45 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 34ms
+Feb 02 05:42:45 mov-orc-dev npx[37528]: [python] INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 02 05:42:45 mov-orc-dev npx[37528]: 5:42:45 AM [server] POST /api/sites/Dallas/heartbeat 200 in 7ms
+Feb 02 05:42:47 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 05:42:47 mov-orc-dev npx[37528]: 5:42:47 AM [server] GET /api/files 200 in 6ms
+Feb 02 05:42:48 mov-orc-dev npx[37528]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 02 05:42:48 mov-orc-dev npx[37528]: 5:42:48 AM [server] POST /api/sites/Tustin/heartbeat 200 in 5ms
+Feb 02 05:42:49 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/bootstrap HTTP/1.1" 200 OK
+Feb 02 05:42:49 mov-orc-dev npx[37528]: 5:42:49 AM [server] GET /api/bootstrap 200 in 5ms
+Feb 02 05:42:49 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/auth/me HTTP/1.1" 200 OK
+Feb 02 05:42:49 mov-orc-dev npx[37528]: 5:42:49 AM [server] GET /api/auth/me 200 in 5ms
+Feb 02 05:42:49 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/sites HTTP/1.1" 200 OK
+Feb 02 05:42:49 mov-orc-dev npx[37528]: 5:42:49 AM [server] GET /api/sites 200 in 6ms
+Feb 02 05:42:49 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 05:42:49 mov-orc-dev npx[37528]: 5:42:49 AM [server] GET /api/files 200 in 10ms
+Feb 02 05:42:50 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 02 05:42:50 mov-orc-dev npx[37528]: 5:42:50 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 9ms
+Feb 02 05:42:50 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 02 05:42:50 mov-orc-dev npx[37528]: 5:42:50 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 9ms
+Feb 02 05:42:56 mov-orc-dev npx[37528]: [python] [cleanup] Orchestrator file not found (already cleaned?): /mnt/color/Dallas/2024-02-06_07-20-54.mov
+Feb 02 05:42:56 mov-orc-dev npx[37528]: INFO:     172.31.204.121:0 - "POST /api/files/303f6063-4e91-4a76-a254-54bad2289487/cleanup HTTP/1.1" 500 Internal Server Error
+Feb 02 05:42:56 mov-orc-dev npx[37528]: 5:42:56 AM [server] POST /api/files/303f6063-4e91-4a76-a254-54bad2289487/cleanup 500 in 8ms
+Feb 02 05:42:56 mov-orc-dev npx[37528]: [python] ERROR:    Exception in ASGI application
+Feb 02 05:42:56 mov-orc-dev npx[37528]: Traceback (most recent call last):
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     result = await app(  # type: ignore[func-returns-value]
+Feb 02 05:42:56 mov-orc-dev npx[37528]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     return await self.app(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await super().__call__(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await self.middleware_stack(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     raise exc
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await self.app(scope, receive, _send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await self.simple_response(scope, receive, send, request_headers=headers)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await self.app(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     raise exc
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await app(scope, receive, sender)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await self.app(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await self.middleware_stack(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await route.handle(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await self.app(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 115, in app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     raise exc
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     await app(scope, receive, sender)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 101, in app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     response = await f(request)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:                ^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 355, in app
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     raw_response = await run_endpoint_function(
+Feb 02 05:42:56 mov-orc-dev npx[37528]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     return await dependant.call(**values)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/server_python/main.py", line 716, in cleanup_file
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     cleanup_task = await storage.create_cleanup_task(file_id, source_site, daemon_source_path)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/server_python/storage.py", line 477, in create_cleanup_task
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     row = await conn.fetchrow("""
+Feb 02 05:42:56 mov-orc-dev npx[37528]:           ^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 752, in fetchrow
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     data = await self._execute(
+Feb 02 05:42:56 mov-orc-dev npx[37528]:            ^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1873, in _execute
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     result, _ = await self.__execute(
+Feb 02 05:42:56 mov-orc-dev npx[37528]:                 ^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1970, in __execute
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     result, stmt = await self._do_execute(
+Feb 02 05:42:56 mov-orc-dev npx[37528]:                    ^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2033, in _do_execute
+Feb 02 05:42:56 mov-orc-dev npx[37528]:     result = await executor(stmt, None)
+Feb 02 05:42:56 mov-orc-dev npx[37528]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 05:42:56 mov-orc-dev npx[37528]:   File "asyncpg/protocol/protocol.pyx", line 205, in bind_execute
+Feb 02 05:42:56 mov-orc-dev npx[37528]: asyncpg.exceptions.InsufficientPrivilegeError: permission denied for sequence cleanup_tasks_id_seq
+Feb 02 05:42:59 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 05:42:59 mov-orc-dev npx[37528]: 5:42:59 AM [server] GET /api/files 200 in 6ms
+Feb 02 05:43:00 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 02 05:43:00 mov-orc-dev npx[37528]: 5:43:00 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 6ms
+Feb 02 05:43:00 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 02 05:43:00 mov-orc-dev npx[37528]: 5:43:00 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 6ms
+Feb 02 05:43:04 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 05:43:04 mov-orc-dev npx[37528]: 5:43:04 AM [server] GET /api/files 200 in 4ms
+Feb 02 05:43:05 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit HTTP/1.1" 200 OK
+Feb 02 05:43:05 mov-orc-dev npx[37528]: 5:43:05 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487/audit 200 in 5ms
+Feb 02 05:43:05 mov-orc-dev npx[37528]: [python] INFO:     172.31.204.121:0 - "GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 HTTP/1.1" 200 OK
+Feb 02 05:43:05 mov-orc-dev npx[37528]: 5:43:05 AM [server] GET /api/files/303f6063-4e91-4a76-a254-54bad2289487 200 in 5ms
