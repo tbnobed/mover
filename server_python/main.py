@@ -992,16 +992,9 @@ async def complete_retransfer(task_id: str, auth: dict = Depends(get_daemon_or_u
     if not task:
         raise HTTPException(status_code=404, detail="Retransfer task not found")
     
-    # Create audit log
-    await storage.create_audit_log({
-        "file_id": task["file_id"],
-        "action": "Retransfer completed",
-        "details": json.dumps({
-            "retransfer_task_id": task_id,
-            "file_path": task.get("file_path"),
-            "message": "File re-uploaded by daemon"
-        })
-    })
+    # Note: We don't create an audit log here because the old file_id was deleted
+    # The new uploaded file has its own new ID and will have its own audit trail
+    print(f"[retransfer] Task {task_id} completed - file re-uploaded successfully")
     
     return snake_to_camel(task)
 
