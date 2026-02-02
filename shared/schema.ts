@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, bigint, pgEnum, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, bigint, pgEnum, boolean, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -115,6 +115,20 @@ export const fileHistory = pgTable("file_history", {
   sourceSite: text("source_site").notNull(),
   fileSize: bigint("file_size", { mode: "number" }).notNull(),
   firstSeenAt: timestamp("first_seen_at").defaultNow().notNull()
+});
+
+// Retransfer tasks - daemon processes these to re-upload rejected files
+export const retransferTasks = pgTable("retransfer_tasks", {
+  id: serial("id").primaryKey(),
+  fileId: varchar("file_id").notNull(),
+  siteId: varchar("site_id", { length: 255 }).notNull(),
+  filePath: varchar("file_path", { length: 1024 }).notNull(),
+  sha256Hash: text("sha256_hash").notNull(),
+  orchestratorDeleted: boolean("orchestrator_deleted").notNull().default(false),
+  daemonAcknowledged: boolean("daemon_acknowledged").notNull().default(false),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, in_progress, completed, failed
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at")
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, passwordHash: true });
