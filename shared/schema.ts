@@ -18,7 +18,7 @@ export const fileStateEnum = pgEnum("file_state", [
 
 // Site names are now dynamic - no enum restriction
 
-export const userRoleEnum = pgEnum("user_role", ["admin", "colorist", "engineer", "readonly"]);
+export const userRoleEnum = pgEnum("user_role", ["admin", "colorist", "media_manager", "engineer", "readonly"]);
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

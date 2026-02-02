@@ -30,6 +30,13 @@ from models import (
     AuditLogResponse, TransferJobResponse, StatsResponse, AssignRequest, RejectRequest
 )
 import storage
+from permissions import (
+    require_permission, has_permission, get_permissions,
+    VIEW_FILES, VIEW_AUDIT, VALIDATE_FILES, ASSIGN_COLORIST,
+    START_WORK, DELIVER_MAM, REJECT_FILES, ARCHIVE_FILES,
+    REVERT_STATE, TRIGGER_CLEANUP, TRIGGER_RETRANSFER,
+    DELETE_FILES, MANAGE_USERS
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -489,6 +496,7 @@ async def get_settings(_user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/validate")
 async def validate_file(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, VALIDATE_FILES)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -566,6 +574,7 @@ async def complete_transfer(file_id: str, _user: dict = Depends(get_current_user
 
 @app.post("/api/files/{file_id}/assign")
 async def assign_file(file_id: str, request: Optional[AssignRequest] = None, _user: dict = Depends(get_current_user)):
+    require_permission(_user, ASSIGN_COLORIST)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -609,6 +618,7 @@ async def assign_file(file_id: str, request: Optional[AssignRequest] = None, _us
 
 @app.post("/api/files/{file_id}/start")
 async def start_work(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, START_WORK)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -626,6 +636,7 @@ async def start_work(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/deliver")
 async def deliver_file(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, DELIVER_MAM)
     import shutil
     
     file = await storage.get_file(file_id)
@@ -673,6 +684,7 @@ async def deliver_file(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/archive")
 async def archive_file(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, ARCHIVE_FILES)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -691,6 +703,7 @@ async def archive_file(file_id: str, _user: dict = Depends(get_current_user)):
 @app.post("/api/files/{file_id}/cleanup")
 async def cleanup_file(file_id: str, _user: dict = Depends(get_current_user)):
     """Remove source file from storage after delivery - both orchestrator and daemon copies"""
+    require_permission(_user, TRIGGER_CLEANUP)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -748,6 +761,7 @@ async def cleanup_file(file_id: str, _user: dict = Depends(get_current_user)):
 @app.post("/api/files/{file_id}/revert")
 async def revert_file(file_id: str, _user: dict = Depends(get_current_user)):
     """Revert a file back one step in the workflow"""
+    require_permission(_user, REVERT_STATE)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -782,6 +796,7 @@ async def revert_file(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/reject")
 async def reject_file(file_id: str, request: Optional[RejectRequest] = None, _user: dict = Depends(get_current_user)):
+    require_permission(_user, REJECT_FILES)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -803,6 +818,7 @@ async def reject_file(file_id: str, request: Optional[RejectRequest] = None, _us
 @app.post("/api/files/{file_id}/retransfer")
 async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user)):
     """Trigger retransfer of a rejected file. Deletes orchestrator copy and tells daemon to re-upload."""
+    require_permission(_user, TRIGGER_RETRANSFER)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -861,6 +877,7 @@ async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user))
 @app.delete("/api/files/{file_id}")
 async def delete_file(file_id: str, _user: dict = Depends(get_current_user)):
     """Delete a file. Only works for unlocked files (files in 'detected' state that haven't been validated yet)."""
+    require_permission(_user, DELETE_FILES)
     result = await storage.delete_file(file_id)
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["message"])
@@ -879,6 +896,7 @@ async def get_users(_user: dict = Depends(get_current_user)):
 
 @app.post("/api/users")
 async def create_user(user_data: UserCreate, _user: dict = Depends(get_current_user)):
+    require_permission(_user, MANAGE_USERS)
     user = await storage.create_user({
         "username": user_data.username,
         "display_name": user_data.displayName,
@@ -890,6 +908,7 @@ async def create_user(user_data: UserCreate, _user: dict = Depends(get_current_u
 
 @app.put("/api/users/{user_id}")
 async def update_user(user_id: str, user_data: UserUpdate, _user: dict = Depends(get_current_user)):
+    require_permission(_user, MANAGE_USERS)
     data = {}
     if user_data.username is not None:
         data["username"] = user_data.username
@@ -909,6 +928,7 @@ async def update_user(user_id: str, user_data: UserUpdate, _user: dict = Depends
 
 @app.delete("/api/users/{user_id}")
 async def delete_user(user_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, MANAGE_USERS)
     success = await storage.delete_user(user_id)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
