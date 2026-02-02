@@ -1,0 +1,58 @@
+[python] [cleanup] Orchestrator file not found (already cleaned?): /mnt/color/Dallas/2024-02-06_07-20-54.mov
+Feb 02 06:01:38 mov-orc-dev npx[37713]: INFO:     172.31.204.121:0 - "POST /api/files/303f6063-4e91-4a76-a254-54bad2289487/cleanup HTTP/1.1" 500 Internal Server Error
+Feb 02 06:01:38 mov-orc-dev npx[37713]: 6:01:38 AM [server] POST /api/files/303f6063-4e91-4a76-a254-54bad2289487/cleanup 500 in 13ms
+Feb 02 06:01:38 mov-orc-dev npx[37713]: [python] ERROR:    Exception in ASGI application
+Feb 02 06:01:38 mov-orc-dev npx[37713]: Traceback (most recent call last):
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/protocols/http/h11_impl.py", line 410, in run_asgi
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     result = await app(  # type: ignore[func-returns-value]
+Feb 02 06:01:38 mov-orc-dev npx[37713]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     return await self.app(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/applications.py", line 1135, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await super().__call__(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/applications.py", line 107, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await self.middleware_stack(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     raise exc
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await self.app(scope, receive, _send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await self.simple_response(scope, receive, send, request_headers=headers)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await self.app(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     raise exc
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await app(scope, receive, sender)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await self.app(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await self.middleware_stack(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await route.handle(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await self.app(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 115, in app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     raise exc
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     await app(scope, receive, sender)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 101, in app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     response = await f(request)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:                ^^^^^^^^^^^^^^^^
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 355, in app
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     raw_response = await run_endpoint_function(
+Feb 02 06:01:38 mov-orc-dev npx[37713]:                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/venv/lib/python3.12/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     return await dependant.call(**values)
+Feb 02 06:01:38 mov-orc-dev npx[37713]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Feb 02 06:01:38 mov-orc-dev npx[37713]:   File "/opt/color-routing-orchestrator/server_python/main.py", line 727, in cleanup_file
+Feb 02 06:01:38 mov-orc-dev npx[37713]:     "details": json.dumps({
+Feb 02 06:01:38 mov-orc-dev npx[37713]:                ^^^^
+Feb 02 06:01:38 mov-orc-dev npx[37713]: NameError: name 'json' is not defined. Did you forget to import 'json'
+Feb 02 06:01:38 mov-orc-dev npx[37713]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 06:01:38 mov-orc-dev npx[37713]: 6:01:38 AM [server] GET /api/files 200 in 5ms
