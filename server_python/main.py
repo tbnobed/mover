@@ -964,6 +964,9 @@ async def site_heartbeat(site_id: str, auth: dict = Depends(get_daemon_or_user_a
         # Get pending retransfer tasks for this site
         pending_retransfers = await storage.get_pending_retransfer_tasks(site_id)
         retransfer_tasks = [snake_to_camel(t) for t in pending_retransfers]
+        
+        if retransfer_tasks:
+            print(f"[heartbeat] Site {site_id}: Returning {len(retransfer_tasks)} retransfer task(s)")
     
     result = snake_to_camel(site)
     result["cleanupTasks"] = cleanup_tasks
