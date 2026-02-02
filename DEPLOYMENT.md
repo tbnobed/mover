@@ -133,10 +133,10 @@ sudo journalctl -u color-routing-daemon -f
 
 ```sql
 -- Retransfer tasks (new)
--- Note: file_id is VARCHAR to match files.id type
+-- Note: file_id has NO foreign key - the file is deleted before the task is created
 CREATE TABLE retransfer_tasks (
   id SERIAL PRIMARY KEY,
-  file_id VARCHAR REFERENCES files(id) ON DELETE CASCADE,
+  file_id VARCHAR NOT NULL,
   site_id VARCHAR NOT NULL,
   file_path VARCHAR NOT NULL,
   sha256_hash VARCHAR NOT NULL,
@@ -146,6 +146,9 @@ CREATE TABLE retransfer_tasks (
   created_at TIMESTAMP DEFAULT NOW(),
   completed_at TIMESTAMP
 );
+
+-- If you created the table with a foreign key, drop it:
+ALTER TABLE retransfer_tasks DROP CONSTRAINT IF EXISTS retransfer_tasks_file_id_fkey;
 
 -- Cleanup tasks (should already exist)
 CREATE TABLE cleanup_tasks (
