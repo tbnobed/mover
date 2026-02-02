@@ -307,6 +307,13 @@ class SiteDaemon:
                             print(f"[{datetime.now().isoformat()}] Received {len(cleanup_tasks)} cleanup task(s)")
                             for task in cleanup_tasks:
                                 await self.process_cleanup_task(task)
+                        
+                        # Process retransfer tasks from orchestrator
+                        retransfer_tasks = data.get("retransferTasks", [])
+                        if retransfer_tasks:
+                            print(f"[{datetime.now().isoformat()}] Received {len(retransfer_tasks)} retransfer task(s)")
+                            for task in retransfer_tasks:
+                                await self.process_retransfer_task(task)
                     else:
                         text = await resp.text()
                         print(f"[{datetime.now().isoformat()}] Heartbeat failed: {resp.status} - {text}")
@@ -343,6 +350,42 @@ class SiteDaemon:
                         print(f"[{datetime.now().isoformat()}] Cleanup confirm failed: {resp.status} - {text}")
         except Exception as e:
             print(f"[{datetime.now().isoformat()}] Cleanup error for {filename}: {e}")
+    
+    async def process_retransfer_task(self, task: dict):
+        """Re-upload a file that was previously rejected"""
+        task_id = task.get("id")
+        source_path = task.get("filePath")
+        sha256_hash = task.get("sha256Hash", "")
+        
+        print(f"[{datetime.now().isoformat()}] Processing retransfer: {source_path}")
+        
+        try:
+            # Check if file exists
+            if not os.path.exists(source_path):
+                print(f"[{datetime.now().isoformat()}] Retransfer failed - file not found: {source_path}")
+                return
+            
+            # Acknowledge the retransfer task
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.orchestrator_url}/api/retransfer/{task_id}/acknowledge",
+                    headers=get_auth_headers()
+                ) as resp:
+                    if resp.status != 200:
+                        text = await resp.text()
+                        print(f"[{datetime.now().isoformat()}] Retransfer acknowledge failed: {resp.status} - {text}")
+                        return
+            
+            # Queue the file for re-upload
+            print(f"[{datetime.now().isoformat()}] Queueing file for retransfer: {source_path}")
+            self.pending_queue.put_nowait(source_path)
+            
+            # Note: The file will be uploaded through the normal process
+            # After successful upload, we need to mark the retransfer as complete
+            # Store task_id for completion callback (handled separately)
+            
+        except Exception as e:
+            print(f"[{datetime.now().isoformat()}] Retransfer error for {source_path}: {e}")
     
     def get_disk_free_gb(self) -> float:
         try:

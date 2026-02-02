@@ -796,6 +796,61 @@ async def reject_file(file_id: str, request: Optional[RejectRequest] = None, _us
     })
     return snake_to_camel(updated)
 
+@app.post("/api/files/{file_id}/retransfer")
+async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user)):
+    """Trigger retransfer of a rejected file. Deletes orchestrator copy and tells daemon to re-upload."""
+    file = await storage.get_file(file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    if file["state"] != "rejected":
+        raise HTTPException(status_code=400, detail="Only rejected files can be retransferred")
+    
+    # Delete orchestrator storage copy if it exists
+    storage_path = os.environ.get("STORAGE_PATH", "./data/incoming")
+    file_storage_path = os.path.join(storage_path, file["source_site"], file["filename"])
+    orchestrator_deleted = False
+    if os.path.exists(file_storage_path):
+        try:
+            os.remove(file_storage_path)
+            orchestrator_deleted = True
+        except Exception as e:
+            print(f"[retransfer] Failed to delete orchestrator file: {e}")
+    
+    # Remove from file_history so hash check passes on re-upload
+    if file.get("sha256_hash"):
+        await storage.delete_file_from_history(file["sha256_hash"])
+    
+    # Delete the file record from files table
+    await storage.delete_file_record(file_id)
+    
+    # Create retransfer task for daemon
+    task = await storage.create_retransfer_task(
+        file_id=file_id,
+        site=file["source_site"],
+        file_path=file["source_path"],
+        sha256_hash=file.get("sha256_hash", "")
+    )
+    
+    # Mark orchestrator as done if file was deleted
+    if orchestrator_deleted:
+        await storage.mark_retransfer_orchestrator_done(task["id"])
+    
+    # Create audit log
+    await storage.create_audit_log({
+        "file_id": file_id,
+        "action": "Retransfer initiated",
+        "previous_state": "rejected",
+        "new_state": "pending_retransfer",
+        "details": json.dumps({
+            "retransfer_task_id": task["id"],
+            "source_path": file["source_path"],
+            "site": file["source_site"]
+        })
+    })
+    
+    return {"success": True, "taskId": task["id"], "message": "Retransfer initiated - daemon will re-upload file"}
+
 @app.delete("/api/files/{file_id}")
 async def delete_file(file_id: str, _user: dict = Depends(get_current_user)):
     """Delete a file. Only works for unlocked files (files in 'detected' state that haven't been validated yet)."""
@@ -898,13 +953,56 @@ async def site_heartbeat(site_id: str, auth: dict = Depends(get_daemon_or_user_a
     
     # Get pending cleanup tasks for this site (only for daemon requests)
     cleanup_tasks = []
+    retransfer_tasks = []
     if is_daemon:
         pending = await storage.get_pending_cleanup_tasks(site_id)
         cleanup_tasks = [snake_to_camel(t) for t in pending]
+        
+        # Get pending retransfer tasks for this site
+        pending_retransfers = await storage.get_pending_retransfer_tasks(site_id)
+        retransfer_tasks = [snake_to_camel(t) for t in pending_retransfers]
     
     result = snake_to_camel(site)
     result["cleanupTasks"] = cleanup_tasks
+    result["retransferTasks"] = retransfer_tasks
     return result
+
+@app.post("/api/retransfer/{task_id}/acknowledge")
+async def acknowledge_retransfer(task_id: str, auth: dict = Depends(get_daemon_or_user_auth)):
+    """Daemon acknowledges retransfer task and will re-upload the file"""
+    is_daemon = auth.get("daemon", False)
+    if not is_daemon:
+        raise HTTPException(status_code=403, detail="Only daemons can acknowledge retransfer")
+    
+    task = await storage.mark_retransfer_acknowledged(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Retransfer task not found")
+    
+    return snake_to_camel(task)
+
+@app.post("/api/retransfer/{task_id}/complete")
+async def complete_retransfer(task_id: str, auth: dict = Depends(get_daemon_or_user_auth)):
+    """Daemon confirms file has been re-uploaded successfully"""
+    is_daemon = auth.get("daemon", False)
+    if not is_daemon:
+        raise HTTPException(status_code=403, detail="Only daemons can complete retransfer")
+    
+    task = await storage.complete_retransfer_task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Retransfer task not found")
+    
+    # Create audit log
+    await storage.create_audit_log({
+        "file_id": task["file_id"],
+        "action": "Retransfer completed",
+        "details": json.dumps({
+            "retransfer_task_id": task_id,
+            "file_path": task.get("file_path"),
+            "message": "File re-uploaded by daemon"
+        })
+    })
+    
+    return snake_to_camel(task)
 
 @app.post("/api/cleanup/{task_id}/confirm")
 async def confirm_cleanup(task_id: str, auth: dict = Depends(get_daemon_or_user_auth)):

@@ -25,7 +25,8 @@ import {
   Trash2,
   Lock,
   Undo2,
-  Eraser
+  Eraser,
+  RefreshCw
 } from "lucide-react";
 import type { File, AuditLog } from "@shared/schema";
 import { format } from "date-fns";
@@ -196,10 +197,23 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
     },
   });
 
+  const retransferMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/retransfer`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "Retransfer initiated - daemon will re-upload the file" });
+      onClose();
+    },
+    onError: () => {
+      toast({ title: "Failed to initiate retransfer", variant: "destructive" });
+    },
+  });
+
   const isPending = assignMutation.isPending || startWorkMutation.isPending || 
     deliverMutation.isPending || rejectMutation.isPending || validateMutation.isPending ||
     queueMutation.isPending || startTransferMutation.isPending || completeTransferMutation.isPending ||
-    deleteMutation.isPending || revertMutation.isPending || cleanupMutation.isPending;
+    deleteMutation.isPending || revertMutation.isPending || cleanupMutation.isPending || retransferMutation.isPending;
 
   return (
     <Card className="h-full flex flex-col">
@@ -393,6 +407,21 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                 >
                   <XCircle className="mr-2 h-4 w-4" />
                   Reject
+                </Button>
+              )}
+              {file.state === "rejected" && (
+                <Button 
+                  variant="default"
+                  onClick={() => {
+                    if (confirm("This will delete the rejected file from the orchestrator and tell the daemon to re-upload it. Continue?")) {
+                      retransferMutation.mutate();
+                    }
+                  }} 
+                  disabled={isPending}
+                  data-testid="button-retransfer-file"
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Retransfer
                 </Button>
               )}
               {file.state === "detected" && !(file as any).locked && (

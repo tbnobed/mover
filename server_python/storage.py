@@ -572,3 +572,86 @@ async def fail_cleanup_task(task_id, error_message: str) -> Optional[Dict[str, A
             RETURNING *
         """, int(task_id), error_message)
         return dict(row) if row else None
+
+# ================== Retransfer Tasks ==================
+
+async def create_retransfer_task(file_id: str, site: str, file_path: str, sha256_hash: str) -> Dict[str, Any]:
+    """Create a retransfer task for daemon to re-upload a file"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            INSERT INTO retransfer_tasks (file_id, site_id, file_path, sha256_hash, status, created_at)
+            VALUES ($1, $2, $3, $4, 'pending', NOW())
+            RETURNING *
+        """, file_id, site, file_path, sha256_hash)
+        return dict(row)
+
+async def get_pending_retransfer_tasks(site: str) -> List[Dict[str, Any]]:
+    """Get pending retransfer tasks for a specific site"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT * FROM retransfer_tasks
+            WHERE LOWER(site_id) = LOWER($1) AND status = 'pending'
+            ORDER BY created_at ASC
+        """, site)
+        return [dict(row) for row in rows]
+
+async def mark_retransfer_orchestrator_done(task_id) -> Optional[Dict[str, Any]]:
+    """Mark that orchestrator has deleted its copy"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            UPDATE retransfer_tasks 
+            SET orchestrator_deleted = true
+            WHERE id = $1 
+            RETURNING *
+        """, int(task_id))
+        return dict(row) if row else None
+
+async def mark_retransfer_acknowledged(task_id) -> Optional[Dict[str, Any]]:
+    """Mark that daemon has acknowledged the retransfer task"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            UPDATE retransfer_tasks 
+            SET daemon_acknowledged = true,
+                status = 'in_progress'
+            WHERE id = $1 
+            RETURNING *
+        """, int(task_id))
+        return dict(row) if row else None
+
+async def complete_retransfer_task(task_id) -> Optional[Dict[str, Any]]:
+    """Mark retransfer task as completed"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            UPDATE retransfer_tasks 
+            SET status = 'completed', completed_at = NOW()
+            WHERE id = $1 
+            RETURNING *
+        """, int(task_id))
+        return dict(row) if row else None
+
+async def delete_file_from_history(sha256_hash: str) -> bool:
+    """Remove a file hash from history to allow re-upload"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        result = await conn.execute("""
+            DELETE FROM file_history WHERE sha256_hash = $1
+        """, sha256_hash)
+        return True
+
+async def delete_file_record(file_id: str) -> bool:
+    """Force delete a file record (for retransfer). Removes all associated data."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        # Delete cleanup tasks
+        await conn.execute("DELETE FROM cleanup_tasks WHERE file_id = $1", file_id)
+        # Delete transfer jobs
+        await conn.execute("DELETE FROM transfer_jobs WHERE file_id = $1", file_id)
+        # Note: Keep audit logs for history - don't delete them
+        # Delete the file record
+        await conn.execute("DELETE FROM files WHERE id = $1", file_id)
+        return True
