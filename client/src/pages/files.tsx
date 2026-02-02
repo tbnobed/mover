@@ -12,13 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Filter, RefreshCw } from "lucide-react";
-import type { File, Site } from "@shared/schema";
+import type { File, Site, User } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 
 export default function FilesPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [stateFilter, setStateFilter] = useState<string>("all");
   const [siteFilter, setSiteFilter] = useState<string>("all");
+  const [coloristFilter, setColoristFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const { isRefetching, refetch } = useQuery<File[]>({
@@ -28,6 +29,11 @@ export default function FilesPage() {
   const { data: sites } = useQuery<Site[]>({
     queryKey: ["/api/sites"],
   });
+
+  const { data: users } = useQuery<User[]>({
+    queryKey: ["/api/users"],
+  });
+  const colorists = users?.filter(u => u.role === "colorist") || [];
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/files"] });
@@ -97,6 +103,20 @@ export default function FilesPage() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={coloristFilter} onValueChange={setColoristFilter}>
+            <SelectTrigger className="w-[160px]" data-testid="select-colorist-filter">
+              <SelectValue placeholder="All Colorists" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Colorists</SelectItem>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+              {colorists.map((colorist) => (
+                <SelectItem key={colorist.id} value={colorist.displayName}>
+                  {colorist.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -106,6 +126,7 @@ export default function FilesPage() {
             onFileSelect={setSelectedFile} 
             stateFilter={stateFilter}
             siteFilter={siteFilter}
+            coloristFilter={coloristFilter}
             searchQuery={searchQuery}
           />
         </div>

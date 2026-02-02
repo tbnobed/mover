@@ -102,10 +102,11 @@ interface FileListProps {
   onFileSelect?: (file: File) => void;
   stateFilter?: string;
   siteFilter?: string;
+  coloristFilter?: string;
   searchQuery?: string;
 }
 
-export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all", searchQuery = "" }: FileListProps) {
+export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all", coloristFilter = "all", searchQuery = "" }: FileListProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -128,6 +129,13 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
   const filteredFiles = rawFiles?.filter(file => {
     if (stateFilter !== "all" && file.state !== stateFilter) return false;
     if (siteFilter !== "all" && file.sourceSite !== siteFilter) return false;
+    if (coloristFilter !== "all") {
+      if (coloristFilter === "unassigned") {
+        if (file.assignedTo) return false;
+      } else {
+        if (file.assignedTo !== coloristFilter) return false;
+      }
+    }
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesFilename = file.filename.toLowerCase().includes(query);

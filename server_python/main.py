@@ -574,32 +574,37 @@ async def assign_file(file_id: str, request: Optional[AssignRequest] = None, _us
         raise HTTPException(status_code=400, detail="File cannot be assigned in current state (must be validated or transferred)")
     
     user_id = request.user_id if request else None
-    if not user_id:
-        users = await storage.get_users()
-        # Try to find a colorist first, then fall back to any non-admin user, then admin
-        colorist = next((u for u in users if u["role"] == "colorist"), None)
-        if colorist:
-            user_id = colorist["id"]
-        else:
-            # Fall back to any available user
-            any_user = next((u for u in users if u["role"] in ["colorist", "engineer", "admin"]), None)
-            if any_user:
-                user_id = any_user["id"]
+    users = await storage.get_users()
+    assigned_user = None
     
-    if not user_id:
+    if user_id:
+        # Look up the specified user
+        assigned_user = next((u for u in users if u["id"] == user_id), None)
+    
+    if not assigned_user:
+        # Try to find a colorist first, then fall back to any non-admin user, then admin
+        assigned_user = next((u for u in users if u["role"] == "colorist"), None)
+        if not assigned_user:
+            # Fall back to any available user
+            assigned_user = next((u for u in users if u["role"] in ["colorist", "engineer", "admin"]), None)
+    
+    if not assigned_user:
         raise HTTPException(status_code=400, detail="No user available for assignment")
+    
+    # Store display_name for human readability
+    display_name = assigned_user.get("display_name") or assigned_user.get("username")
     
     updated = await storage.update_file(file_id, {
         "state": "colorist_assigned",
-        "assigned_to": user_id,
+        "assigned_to": display_name,
         "assigned_at": datetime.now()
     })
     await storage.create_audit_log({
         "file_id": file_id,
-        "action": "Assigned to colorist",
-        "previous_state": "transferred",
+        "action": f"Assigned to {display_name}",
+        "previous_state": file["state"],
         "new_state": "colorist_assigned",
-        "performed_by": user_id
+        "performed_by": assigned_user["id"]
     })
     return snake_to_camel(updated)
 
