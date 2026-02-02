@@ -79,7 +79,8 @@ python site_daemon/daemon.py --site tustin --watch /path/to/watch
 - **audit_logs**: Complete audit trail
 - **transfer_jobs**: RaySync transfer job tracking
 - **cleanup_tasks**: Pending file cleanups for daemons to process
-- **file_history**: Permanent ledger of all files ever received (never deleted)
+- **retransfer_tasks**: Pending retransfers for rejected files (daemon re-uploads)
+- **file_history**: Permanent ledger of all files ever received (can be cleared for retransfer)
 
 ### File State Machine
 ```
@@ -178,6 +179,13 @@ The system uses cookie-based session authentication for users and API key authen
 - `GET /api/auth/me` - Get current user info
 
 ## Recent Changes
+- 2026-02-02: Added retransfer feature for rejected files
+  - Allows users to re-initiate file transfers for rejected files
+  - Orchestrator deletes file, removes from file_history, creates retransfer_task
+  - Daemon receives task on heartbeat, acknowledges, and re-uploads file
+  - After successful upload, daemon completes the retransfer task
+  - New table: retransfer_tasks (tracks pending/in_progress/completed retransfers)
+  - Retransfer button appears for files in "rejected" state
 - 2026-02-02: Added cleanup feature for delivered files
   - Deletes source file from orchestrator storage (STORAGE_PATH/{site}/)
   - Creates cleanup task that daemon processes on next heartbeat

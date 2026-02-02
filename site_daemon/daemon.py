@@ -162,15 +162,15 @@ class FileDetector(FileSystemEventHandler):
         except Exception as e:
             print(f"[{datetime.now().isoformat()}] Error reporting file: {e}")
     
-    async def upload_file(self, file_path: str):
-        """Upload the actual file to the orchestrator using streaming"""
+    async def upload_file(self, file_path: str) -> bool:
+        """Upload the actual file to the orchestrator using streaming. Returns True on success."""
         path = Path(file_path)
         file_size = path.stat().st_size
         
         # CRITICAL: Reject 0-byte or tiny files
         if file_size < MIN_FILE_SIZE_BYTES:
             print(f"[{datetime.now().isoformat()}] SKIPPED (too small): {path.name} ({file_size} bytes, min: {MIN_FILE_SIZE_BYTES})")
-            return
+            return False
         
         # Calculate hash FIRST for duplicate check
         print(f"[{datetime.now().isoformat()}] Calculating hash: {path.name} ({file_size:,} bytes)")
@@ -181,7 +181,7 @@ class FileDetector(FileSystemEventHandler):
         print(f"[{datetime.now().isoformat()}] Checking with server if file exists: {path.name}")
         if await self.check_file_exists_on_server(sha256_hash, path.name, source_path_str):
             print(f"[{datetime.now().isoformat()}] SKIPPED (already on server): {path.name}")
-            return
+            return True  # Consider this a success (file is already there)
         
         print(f"[{datetime.now().isoformat()}] Uploading: {path.name} ({file_size:,} bytes / {file_size / (1024**3):.2f} GB)")
         
@@ -226,11 +226,14 @@ class FileDetector(FileSystemEventHandler):
                     result = await resp.json()
                     orchestrator_id = result.get('id', 'unknown')
                     print(f"[{datetime.now().isoformat()}] Uploaded: {path.name} ({file_size:,} bytes) -> {orchestrator_id}")
+                    return True
                 elif resp.status == 409:
                     print(f"[{datetime.now().isoformat()}] Already on server: {path.name}")
+                    return True  # File already exists, considered success
                 else:
                     text = await resp.text()
                     print(f"[{datetime.now().isoformat()}] Upload failed: {resp.status} - {text}")
+                    return False
     
     async def report_metadata(self, file_path: str):
         """Report file metadata only (no file transfer)"""
@@ -283,6 +286,8 @@ class SiteDaemon:
         self.writing_files: dict = {}  # path -> {last_size, last_mtime, stable_since}
         self.uploading_file: Optional[str] = None  # Currently uploading file (only one at a time)
         self.stable_queue: asyncio.Queue = asyncio.Queue()  # Files ready for upload
+        # Track pending retransfer tasks: file_path -> task_id
+        self.pending_retransfers: dict = {}
         
     async def send_heartbeat(self):
         try:
@@ -376,16 +381,32 @@ class SiteDaemon:
                         print(f"[{datetime.now().isoformat()}] Retransfer acknowledge failed: {resp.status} - {text}")
                         return
             
-            # Queue the file for re-upload
-            print(f"[{datetime.now().isoformat()}] Queueing file for retransfer: {source_path}")
-            self.pending_queue.put_nowait(source_path)
+            # Track this retransfer task for completion after upload (normalize path for consistent matching)
+            normalized_path = os.path.abspath(source_path)
+            self.pending_retransfers[normalized_path] = task_id
             
-            # Note: The file will be uploaded through the normal process
-            # After successful upload, we need to mark the retransfer as complete
-            # Store task_id for completion callback (handled separately)
+            # Queue the file for re-upload (use normalized path)
+            print(f"[{datetime.now().isoformat()}] Queueing file for retransfer: {normalized_path}")
+            self.pending_queue.put_nowait(normalized_path)
             
         except Exception as e:
             print(f"[{datetime.now().isoformat()}] Retransfer error for {source_path}: {e}")
+    
+    async def complete_retransfer(self, task_id: str):
+        """Complete a retransfer task after successful upload"""
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.orchestrator_url}/api/retransfer/{task_id}/complete",
+                    headers=get_auth_headers()
+                ) as resp:
+                    if resp.status == 200:
+                        print(f"[{datetime.now().isoformat()}] Retransfer completed: task {task_id}")
+                    else:
+                        text = await resp.text()
+                        print(f"[{datetime.now().isoformat()}] Retransfer complete failed: {resp.status} - {text}")
+        except Exception as e:
+            print(f"[{datetime.now().isoformat()}] Retransfer complete error: {e}")
     
     def get_disk_free_gb(self) -> float:
         try:
@@ -562,10 +583,18 @@ class SiteDaemon:
             try:
                 file_path = await asyncio.wait_for(self.stable_queue.get(), timeout=1.0)
                 
+                # Normalize path for consistent retransfer matching
+                normalized_path = os.path.abspath(file_path)
+                
                 # Only upload one file at a time
                 self.uploading_file = file_path
                 try:
-                    await self.file_detector.upload_file(file_path)
+                    upload_success = await self.file_detector.upload_file(file_path)
+                    
+                    # Check if this was a retransfer and complete it (use normalized path)
+                    if upload_success and normalized_path in self.pending_retransfers:
+                        task_id = self.pending_retransfers.pop(normalized_path)
+                        await self.complete_retransfer(str(task_id))
                 finally:
                     self.uploading_file = None
                     
