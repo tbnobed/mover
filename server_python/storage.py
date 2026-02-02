@@ -8,12 +8,11 @@ from database import get_pool
 async def get_files() -> List[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
-        # Include cleanup status from cleanup_tasks table
+        # Include cleanup status from cleanup_tasks table (use EXISTS to avoid duplicates)
         rows = await conn.fetch("""
             SELECT f.*, 
-                   CASE WHEN ct.status = 'completed' THEN true ELSE false END as cleaned_up
+                   EXISTS(SELECT 1 FROM cleanup_tasks ct WHERE ct.file_id = f.id AND ct.status = 'completed') as cleaned_up
             FROM files f
-            LEFT JOIN cleanup_tasks ct ON f.id = ct.file_id AND ct.status = 'completed'
             ORDER BY f.detected_at DESC
         """)
         return [dict(row) for row in rows]
@@ -23,9 +22,8 @@ async def get_file(file_id: str) -> Optional[Dict[str, Any]]:
     async with pool.acquire() as conn:
         row = await conn.fetchrow("""
             SELECT f.*, 
-                   CASE WHEN ct.status = 'completed' THEN true ELSE false END as cleaned_up
+                   EXISTS(SELECT 1 FROM cleanup_tasks ct WHERE ct.file_id = f.id AND ct.status = 'completed') as cleaned_up
             FROM files f
-            LEFT JOIN cleanup_tasks ct ON f.id = ct.file_id AND ct.status = 'completed'
             WHERE f.id = $1
         """, file_id)
         return dict(row) if row else None
