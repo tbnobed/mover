@@ -211,6 +211,12 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
           <div className="flex items-center gap-2 flex-wrap">
             <SiteBadge site={file.sourceSite} />
             <StatusBadge state={file.state} />
+            {file.cleanedUp && (
+              <Badge variant="outline" className="text-xs border-green-500 text-green-600 dark:text-green-400">
+                <Eraser className="mr-1 h-3 w-3" />
+                Cleaned
+              </Badge>
+            )}
             {(file as any).locked && (
               <Badge variant="secondary" className="text-xs">
                 <Lock className="mr-1 h-3 w-3" />

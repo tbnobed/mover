@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge, SiteBadge } from "@/components/status-badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -355,7 +356,14 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
                       <SiteBadge site={file.sourceSite} />
                     </TableCell>
                     <TableCell onClick={() => onFileSelect?.(file)}>
-                      <StatusBadge state={file.state} />
+                      <div className="flex items-center gap-1">
+                        <StatusBadge state={file.state} />
+                        {file.cleanedUp && (
+                          <Badge variant="outline" className="text-xs border-green-500 text-green-600 dark:text-green-400">
+                            Cleaned
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell 
                       className="text-muted-foreground"
