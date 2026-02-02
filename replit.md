@@ -74,13 +74,46 @@ python site_daemon/daemon.py --site tustin --watch /path/to/watch
 
 ### Tables
 - **files**: Tracked files with state machine (9 states)
-- **users**: System users with roles (admin, colorist, engineer, readonly)
+- **users**: System users with roles (admin, colorist, media_manager, engineer, readonly)
 - **sites**: Site daemon configuration (tustin, nashville, dallas)
 - **audit_logs**: Complete audit trail
 - **transfer_jobs**: RaySync transfer job tracking
 - **cleanup_tasks**: Pending file cleanups for daemons to process
 - **retransfer_tasks**: Pending retransfers for rejected files (daemon re-uploads)
 - **file_history**: Permanent ledger of all files ever received (can be cleared for retransfer)
+
+### Role-Based Permission System
+The system uses a comprehensive role-based access control (RBAC) with 5 roles and 13 permissions:
+
+**Roles:**
+- **admin**: Full access to everything (13 permissions)
+- **colorist**: Full workflow access, cannot manage users (12 permissions)
+- **media_manager**: Full workflow except assigning colorists, cannot manage users (11 permissions)
+- **engineer**: View files, validate files, trigger retransfers only (3 permissions)
+- **readonly**: View files only (1 permission)
+
+**Permissions:**
+| Permission | Admin | Colorist | Media Manager | Engineer | Readonly |
+|------------|-------|----------|---------------|----------|----------|
+| view_files | ✓ | ✓ | ✓ | ✓ | ✓ |
+| view_audit | ✓ | ✓ | ✓ | ✗ | ✗ |
+| validate_files | ✓ | ✓ | ✓ | ✓ | ✗ |
+| assign_colorist | ✓ | ✓ | ✗ | ✗ | ✗ |
+| start_work | ✓ | ✓ | ✓ | ✗ | ✗ |
+| deliver_mam | ✓ | ✓ | ✓ | ✗ | ✗ |
+| reject_files | ✓ | ✓ | ✓ | ✗ | ✗ |
+| archive_files | ✓ | ✓ | ✓ | ✗ | ✗ |
+| revert_state | ✓ | ✓ | ✓ | ✗ | ✗ |
+| trigger_cleanup | ✓ | ✓ | ✓ | ✗ | ✗ |
+| trigger_retransfer | ✓ | ✓ | ✓ | ✓ | ✗ |
+| delete_files | ✓ | ✓ | ✓ | ✗ | ✗ |
+| manage_users | ✓ | ✗ | ✗ | ✗ | ✗ |
+
+**Implementation:**
+- Backend: `server_python/permissions.py` defines permissions and role mappings
+- All API endpoints enforce permissions via `require_permission()` middleware
+- Frontend: `useAuth` hook provides `hasPermission()` helper for conditional UI rendering
+- `/api/auth/me` returns user's permission list for frontend authorization
 
 ### File State Machine
 ```
