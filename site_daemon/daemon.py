@@ -316,7 +316,8 @@ class SiteDaemon:
     async def process_cleanup_task(self, task: dict):
         """Delete local file and confirm with orchestrator"""
         task_id = task.get("id")
-        source_path = task.get("sourcePath")
+        # Support both filePath (new) and sourcePath (legacy) field names
+        source_path = task.get("filePath") or task.get("sourcePath")
         filename = task.get("filename", "unknown")
         
         print(f"[{datetime.now().isoformat()}] Processing cleanup: {filename} at {source_path}")
