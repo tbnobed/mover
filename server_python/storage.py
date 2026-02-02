@@ -470,15 +470,15 @@ async def seed_data():
 
 # ============ CLEANUP TASKS ============
 
-async def create_cleanup_task(file_id: str, site: str, source_path: str) -> Dict[str, Any]:
+async def create_cleanup_task(file_id: str, site: str, file_path: str) -> Dict[str, Any]:
     """Create a cleanup task for a file"""
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow("""
-            INSERT INTO cleanup_tasks (id, file_id, site, source_path, status, created_at)
-            VALUES (gen_random_uuid(), $1, $2, $3, 'pending', NOW())
+            INSERT INTO cleanup_tasks (file_id, site_id, file_path, status, created_at)
+            VALUES ($1, $2, $3, 'pending', NOW())
             RETURNING *
-        """, file_id, site, source_path)
+        """, file_id, site, file_path)
         return dict(row)
 
 async def get_pending_cleanup_tasks(site: str) -> List[Dict[str, Any]]:

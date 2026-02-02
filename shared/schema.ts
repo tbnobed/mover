@@ -95,14 +95,13 @@ export const sessions = pgTable("sessions", {
 
 // Cleanup tasks - pending file deletions for site daemons
 export const cleanupTasks = pgTable("cleanup_tasks", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   fileId: varchar("file_id").references(() => files.id).notNull(),
-  site: text("site").notNull(),
-  sourcePath: text("source_path").notNull(),
-  status: text("status").notNull().default("pending"), // pending, completed, failed
+  siteId: varchar("site_id", { length: 255 }).notNull(),
+  filePath: varchar("file_path", { length: 1024 }).notNull(),
   orchestratorDeleted: boolean("orchestrator_deleted").notNull().default(false),
   daemonDeleted: boolean("daemon_deleted").notNull().default(false),
-  errorMessage: text("error_message"),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, completed, failed
   createdAt: timestamp("created_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at")
 });
