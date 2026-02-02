@@ -90,13 +90,13 @@ async def get_daemon_or_user_auth(request: Request):
     api_key = request.headers.get("X-API-Key") or request.headers.get("x-api-key")
     
     if DAEMON_API_KEY and api_key == DAEMON_API_KEY:
-        return {"type": "daemon", "daemon": True}
+        return {"type": "daemon", "daemon": True, "is_daemon": True}
     
     token = request.cookies.get("session_token")
     if token:
         session = await storage.get_session(token)
         if session:
-            return {"type": "user", **session}
+            return {"type": "user", "is_daemon": False, **session}
     
     raise HTTPException(status_code=401, detail="Authentication required")
 
@@ -186,6 +186,7 @@ async def get_me(request: Request):
 
 @app.get("/api/stats")
 async def get_stats(_user: dict = Depends(get_current_user)):
+    require_permission(_user, VIEW_FILES)
     stats = await storage.get_stats()
     # Include active uploads in transferring count
     active_upload_count = len(active_uploads)
@@ -206,6 +207,7 @@ async def get_stats(_user: dict = Depends(get_current_user)):
 
 @app.get("/api/files")
 async def get_files(_user: dict = Depends(get_current_user)):
+    require_permission(_user, VIEW_FILES)
     files = await storage.get_files()
     return [snake_to_camel(f) for f in files]
 
@@ -218,7 +220,9 @@ async def check_file_exists(request: Request, hash: str = None, filename: str = 
     Also checks if the same source path is already tracked (prevents re-upload).
     Returns: {"exists": true/false, "reason": "..." or null}
     """
-    await get_daemon_or_user_auth(request)
+    auth = await get_daemon_or_user_auth(request)
+    if not auth.get("is_daemon"):
+        require_permission(auth, VIEW_FILES)
     
     # Debug logging
     print(f"[CHECK] hash={hash}, filename={filename}, site={site}, source_path={source_path}")
@@ -245,6 +249,7 @@ async def check_file_exists(request: Request, hash: str = None, filename: str = 
 
 @app.get("/api/files/{file_id}")
 async def get_file(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, VIEW_FILES)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -340,8 +345,11 @@ async def upload_file(
     })
 
 @app.get("/api/uploads/active")
-async def get_active_uploads():
+async def get_active_uploads(request: Request):
     """Get list of currently active uploads with progress"""
+    auth = await get_daemon_or_user_auth(request)
+    if not auth.get("is_daemon"):
+        require_permission(auth, VIEW_FILES)
     return list(active_uploads.values())
 
 @app.post("/api/files/upload-stream")
@@ -493,6 +501,7 @@ async def upload_file_stream(request: Request, filename: str):
 @app.get("/api/settings")
 async def get_settings(_user: dict = Depends(get_current_user)):
     """Get current storage settings"""
+    require_permission(_user, VIEW_FILES)
     return {
         "storagePath": STORAGE_PATH,
         "sites": ["tustin", "nashville", "dallas"]
@@ -523,6 +532,7 @@ async def validate_file(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/queue")
 async def queue_file(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, VALIDATE_FILES)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -540,6 +550,7 @@ async def queue_file(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/start-transfer")
 async def start_transfer(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, VALIDATE_FILES)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -557,6 +568,7 @@ async def start_transfer(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.post("/api/files/{file_id}/complete-transfer")
 async def complete_transfer(file_id: str, _user: dict = Depends(get_current_user)):
+    require_permission(_user, VALIDATE_FILES)
     file = await storage.get_file(file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
@@ -895,8 +907,17 @@ async def get_file_audit(file_id: str, _user: dict = Depends(get_current_user)):
 
 @app.get("/api/users")
 async def get_users(_user: dict = Depends(get_current_user)):
+    require_permission(_user, MANAGE_USERS)
     users = await storage.get_users()
     return [snake_to_camel(u) for u in users]
+
+@app.get("/api/colorists")
+async def get_colorists(_user: dict = Depends(get_current_user)):
+    """Get list of users who can be assigned as colorists (only colorist role users)"""
+    require_permission(_user, ASSIGN_COLORIST)
+    users = await storage.get_users()
+    colorists = [u for u in users if u.get("role") == "colorist"]
+    return [{"id": u["id"], "displayName": u["display_name"], "username": u["username"]} for u in colorists]
 
 @app.post("/api/users")
 async def create_user(user_data: UserCreate, _user: dict = Depends(get_current_user)):
@@ -939,7 +960,10 @@ async def delete_user(user_id: str, _user: dict = Depends(get_current_user)):
     return {"message": "User deleted successfully"}
 
 @app.get("/api/sites")
-async def get_sites(_auth: dict = Depends(get_daemon_or_user_auth)):
+async def get_sites(request: Request):
+    auth = await get_daemon_or_user_auth(request)
+    if not auth.get("is_daemon"):
+        require_permission(auth, VIEW_FILES)
     sites = await storage.get_sites()
     return [snake_to_camel(s) for s in sites]
 
@@ -1057,11 +1081,13 @@ async def confirm_cleanup(task_id: str, auth: dict = Depends(get_daemon_or_user_
 
 @app.get("/api/audit")
 async def get_audit_logs(_user: dict = Depends(get_current_user)):
+    require_permission(_user, VIEW_AUDIT)
     logs = await storage.get_audit_logs()
     return [snake_to_camel(log) for log in logs]
 
 @app.get("/api/transfers")
 async def get_transfers(_user: dict = Depends(get_current_user)):
+    require_permission(_user, VIEW_FILES)
     transfers = await storage.get_transfer_jobs()
     return [snake_to_camel(t) for t in transfers]
 
@@ -1073,6 +1099,7 @@ async def seed_data():
 @app.get("/api/settings/storage")
 async def get_storage_settings(_user: dict = Depends(get_current_user)):
     """Get storage configuration and disk usage"""
+    require_permission(_user, VIEW_FILES)
     import shutil
     
     # Get dynamic site list from database

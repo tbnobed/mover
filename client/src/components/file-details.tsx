@@ -81,11 +81,11 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
     refetchInterval: 5000,
   });
 
-  // Fetch colorists for assignment
-  const { data: users } = useQuery<UserType[]>({
-    queryKey: ["/api/users"],
+  // Fetch colorists for assignment (uses dedicated endpoint that respects ASSIGN_COLORIST permission)
+  const { data: colorists } = useQuery<{ id: string; displayName: string; username: string }[]>({
+    queryKey: ["/api/colorists"],
+    enabled: hasPermission(PERMISSIONS.ASSIGN_COLORIST),
   });
-  const colorists = users?.filter(u => u.role === "colorist") || [];
 
   const assignMutation = useMutation({
     mutationFn: (userId?: string) => apiRequest("POST", `/api/files/${file.id}/assign`, userId ? { user_id: userId } : undefined),
@@ -533,7 +533,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                 <SelectValue placeholder="Select a colorist..." />
               </SelectTrigger>
               <SelectContent>
-                {colorists.map((colorist) => (
+                {(colorists || []).map((colorist) => (
                   <SelectItem 
                     key={colorist.id} 
                     value={colorist.id.toString()}

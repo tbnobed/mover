@@ -2,11 +2,11 @@
 Role-based permission system for Color Routing System.
 
 Roles:
-- admin: Full access to everything
+- admin: Full access to everything (13 permissions)
 - colorist: Full workflow access, cannot manage users
 - media_manager: Full workflow except assigning colorists, cannot manage users
-- engineer: View-only plus validate files and trigger retransfers
-- readonly: View-only (dashboard, files, status, audit logs)
+- engineer: View files, validate files, trigger retransfers only (no audit access)
+- readonly: View files only (no audit access, no file actions)
 """
 
 from typing import Set
@@ -47,10 +47,10 @@ ROLE_PERMISSIONS: dict[str, Set[str]] = {
         DELETE_FILES
     },
     "engineer": {
-        VIEW_FILES, VIEW_AUDIT, VALIDATE_FILES, TRIGGER_RETRANSFER
+        VIEW_FILES, VALIDATE_FILES, TRIGGER_RETRANSFER
     },
     "readonly": {
-        VIEW_FILES, VIEW_AUDIT
+        VIEW_FILES
     }
 }
 
