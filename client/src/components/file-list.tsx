@@ -30,12 +30,19 @@ import {
   XCircle, 
   CheckCircle,
   Trash2,
-  X
+  X,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  User
 } from "lucide-react";
 import type { File } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+type SortField = "filename" | "sourceSite" | "state" | "fileSize" | "detectedAt" | "assignedTo";
+type SortDirection = "asc" | "desc";
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -52,10 +59,42 @@ function FileRowSkeleton() {
       <TableCell><Skeleton className="h-4 w-48" /></TableCell>
       <TableCell><Skeleton className="h-5 w-20" /></TableCell>
       <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
       <TableCell><Skeleton className="h-8 w-8" /></TableCell>
     </TableRow>
+  );
+}
+
+function SortableHeader({ 
+  field, 
+  currentField, 
+  direction, 
+  onClick, 
+  children 
+}: { 
+  field: SortField; 
+  currentField: SortField | null; 
+  direction: SortDirection; 
+  onClick: (field: SortField) => void; 
+  children: React.ReactNode;
+}) {
+  const isActive = currentField === field;
+  return (
+    <Button 
+      variant="ghost" 
+      size="sm" 
+      className="-ml-3 h-8 hover:bg-transparent"
+      onClick={() => onClick(field)}
+    >
+      {children}
+      {isActive ? (
+        direction === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+      ) : (
+        <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+      )}
+    </Button>
   );
 }
 
@@ -68,6 +107,8 @@ interface FileListProps {
 
 export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all", searchQuery = "" }: FileListProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const { toast } = useToast();
   
   const { data: rawFiles, isLoading, error } = useQuery<File[]>({
@@ -75,7 +116,16 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
     refetchInterval: 5000,
   });
 
-  const files = rawFiles?.filter(file => {
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const filteredFiles = rawFiles?.filter(file => {
     if (stateFilter !== "all" && file.state !== stateFilter) return false;
     if (siteFilter !== "all" && file.sourceSite !== siteFilter) return false;
     if (searchQuery) {
@@ -85,6 +135,45 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
       if (!matchesFilename && !matchesPath) return false;
     }
     return true;
+  });
+
+  const files = filteredFiles?.slice().sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aVal: string | number | null = null;
+    let bVal: string | number | null = null;
+    
+    switch (sortField) {
+      case "filename":
+        aVal = a.filename.toLowerCase();
+        bVal = b.filename.toLowerCase();
+        break;
+      case "sourceSite":
+        aVal = a.sourceSite?.toLowerCase() || "";
+        bVal = b.sourceSite?.toLowerCase() || "";
+        break;
+      case "state":
+        aVal = a.state;
+        bVal = b.state;
+        break;
+      case "fileSize":
+        aVal = a.fileSize;
+        bVal = b.fileSize;
+        break;
+      case "detectedAt":
+        aVal = a.detectedAt ? new Date(a.detectedAt).getTime() : 0;
+        bVal = b.detectedAt ? new Date(b.detectedAt).getTime() : 0;
+        break;
+      case "assignedTo":
+        aVal = a.assignedTo?.toLowerCase() || "";
+        bVal = b.assignedTo?.toLowerCase() || "";
+        break;
+    }
+    
+    if (aVal === null || bVal === null) return 0;
+    if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+    return 0;
   });
 
   const bulkActionMutation = useMutation({
@@ -314,11 +403,36 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
                     data-testid="checkbox-select-all"
                   />
                 </TableHead>
-                <TableHead className="w-[300px]">Filename</TableHead>
-                <TableHead>Site</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Detected</TableHead>
+                <TableHead className="w-[250px]">
+                  <SortableHeader field="filename" currentField={sortField} direction={sortDirection} onClick={handleSort}>
+                    Filename
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="sourceSite" currentField={sortField} direction={sortDirection} onClick={handleSort}>
+                    Site
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="state" currentField={sortField} direction={sortDirection} onClick={handleSort}>
+                    Status
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="assignedTo" currentField={sortField} direction={sortDirection} onClick={handleSort}>
+                    Assigned To
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="fileSize" currentField={sortField} direction={sortDirection} onClick={handleSort}>
+                    Size
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="detectedAt" currentField={sortField} direction={sortDirection} onClick={handleSort}>
+                    Detected
+                  </SortableHeader>
+                </TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -364,6 +478,19 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
                           </Badge>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell 
+                      className="text-sm"
+                      onClick={() => onFileSelect?.(file)}
+                    >
+                      {file.assignedTo ? (
+                        <div className="flex items-center gap-1.5">
+                          <User className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{file.assignedTo}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell 
                       className="text-muted-foreground"
@@ -429,7 +556,7 @@ export function FileList({ onFileSelect, stateFilter = "all", siteFilter = "all"
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                     No files in queue
                   </TableCell>
                 </TableRow>
