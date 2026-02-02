@@ -81,10 +81,11 @@ DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
 echo "Creating new tables if needed..."
 
 # Create retransfer_tasks table (new in this update)
+# Note: file_id is VARCHAR to match files.id type
 PGPASSWORD=${DB_PASSWORD} psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -c "
 CREATE TABLE IF NOT EXISTS retransfer_tasks (
   id SERIAL PRIMARY KEY,
-  file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+  file_id VARCHAR NOT NULL REFERENCES files(id) ON DELETE CASCADE,
   site_id VARCHAR NOT NULL,
   file_path VARCHAR NOT NULL,
   sha256_hash VARCHAR NOT NULL,

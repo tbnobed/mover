@@ -133,9 +133,10 @@ sudo journalctl -u color-routing-daemon -f
 
 ```sql
 -- Retransfer tasks (new)
+-- Note: file_id is VARCHAR to match files.id type
 CREATE TABLE retransfer_tasks (
   id SERIAL PRIMARY KEY,
-  file_id INTEGER REFERENCES files(id),
+  file_id VARCHAR REFERENCES files(id) ON DELETE CASCADE,
   site_id VARCHAR NOT NULL,
   file_path VARCHAR NOT NULL,
   sha256_hash VARCHAR NOT NULL,
