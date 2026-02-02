@@ -78,6 +78,8 @@ python site_daemon/daemon.py --site tustin --watch /path/to/watch
 - **sites**: Site daemon configuration (tustin, nashville, dallas)
 - **audit_logs**: Complete audit trail
 - **transfer_jobs**: RaySync transfer job tracking
+- **cleanup_tasks**: Pending file cleanups for daemons to process
+- **file_history**: Permanent ledger of all files ever received (never deleted)
 
 ### File State Machine
 ```
@@ -176,6 +178,15 @@ The system uses cookie-based session authentication for users and API key authen
 - `GET /api/auth/me` - Get current user info
 
 ## Recent Changes
+- 2026-02-02: Added cleanup feature for delivered files
+  - Deletes source file from orchestrator storage (STORAGE_PATH/{site}/)
+  - Creates cleanup task that daemon processes on next heartbeat
+  - Daemon deletes its local copy and confirms with orchestrator
+  - New table: cleanup_tasks (tracks pending/completed cleanups)
+  - Cleanup button appears for files in "delivered_to_mam" state
+- 2026-02-02: Added revert functionality
+  - Files can be moved back one step in the workflow (e.g., validated→detected)
+  - Revert button available on all files except "detected" state
 - 2026-02-01: Fixed /api/files/check endpoint authentication
   - Root cause: FastAPI route order mattered - `/api/files/{file_id}` was matching "check" as file_id
   - Solution: Moved `/api/files/check` route BEFORE `/{file_id}` wildcard route

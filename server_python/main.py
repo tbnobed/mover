@@ -683,6 +683,63 @@ async def archive_file(file_id: str, _user: dict = Depends(get_current_user)):
     })
     return snake_to_camel(updated)
 
+@app.post("/api/files/{file_id}/cleanup")
+async def cleanup_file(file_id: str, _user: dict = Depends(get_current_user)):
+    """Remove source file from storage after delivery - both orchestrator and daemon copies"""
+    file = await storage.get_file(file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    if file["state"] != "delivered_to_mam":
+        raise HTTPException(status_code=400, detail="Only delivered files can be cleaned up")
+    
+    source_site = file["source_site"]
+    filename = file["filename"]
+    daemon_source_path = file["source_path"]  # Original path on the daemon
+    
+    # Delete the orchestrator's copy from STORAGE_PATH
+    storage_path = os.getenv("STORAGE_PATH", "./data/incoming")
+    orchestrator_path = os.path.join(storage_path, source_site, filename)
+    
+    orchestrator_deleted = False
+    if os.path.exists(orchestrator_path):
+        try:
+            os.remove(orchestrator_path)
+            orchestrator_deleted = True
+            print(f"[cleanup] Deleted orchestrator copy: {orchestrator_path}")
+        except Exception as e:
+            print(f"[cleanup] Error deleting {orchestrator_path}: {e}")
+    else:
+        print(f"[cleanup] Orchestrator file not found (already cleaned?): {orchestrator_path}")
+        orchestrator_deleted = True  # Consider it done if not there
+    
+    # Create a cleanup task for the daemon to delete its local copy
+    cleanup_task = await storage.create_cleanup_task(file_id, source_site, daemon_source_path)
+    
+    # Mark orchestrator as done
+    if orchestrator_deleted:
+        await storage.mark_cleanup_orchestrator_done(cleanup_task["id"])
+    
+    await storage.create_audit_log({
+        "file_id": file_id,
+        "action": "Cleanup initiated",
+        "previous_state": "delivered_to_mam",
+        "new_state": "delivered_to_mam",
+        "details": json.dumps({
+            "orchestrator_path": orchestrator_path,
+            "orchestrator_deleted": orchestrator_deleted,
+            "daemon_path": daemon_source_path,
+            "cleanup_task_id": cleanup_task["id"],
+            "message": "Cleanup task created for daemon"
+        })
+    })
+    
+    return {
+        "success": True, 
+        "orchestratorDeleted": orchestrator_deleted, 
+        "cleanupTaskId": cleanup_task["id"],
+        "message": "Orchestrator copy deleted. Daemon will delete local copy on next heartbeat."
+    }
+
 @app.post("/api/files/{file_id}/revert")
 async def revert_file(file_id: str, _user: dict = Depends(get_current_user)):
     """Revert a file back one step in the workflow"""
@@ -837,7 +894,40 @@ async def site_heartbeat(site_id: str, auth: dict = Depends(get_daemon_or_user_a
     site = await storage.update_site_heartbeat(site_id, auto_create=is_daemon)
     if not site:
         raise HTTPException(status_code=404, detail="Site not found")
-    return snake_to_camel(site)
+    
+    # Get pending cleanup tasks for this site (only for daemon requests)
+    cleanup_tasks = []
+    if is_daemon:
+        pending = await storage.get_pending_cleanup_tasks(site_id)
+        cleanup_tasks = [snake_to_camel(t) for t in pending]
+    
+    result = snake_to_camel(site)
+    result["cleanupTasks"] = cleanup_tasks
+    return result
+
+@app.post("/api/cleanup/{task_id}/confirm")
+async def confirm_cleanup(task_id: str, auth: dict = Depends(get_daemon_or_user_auth)):
+    """Daemon confirms it has deleted the local file"""
+    is_daemon = auth.get("daemon", False)
+    if not is_daemon:
+        raise HTTPException(status_code=403, detail="Only daemons can confirm cleanup")
+    
+    task = await storage.mark_cleanup_daemon_done(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Cleanup task not found")
+    
+    # Create audit log entry
+    await storage.create_audit_log({
+        "file_id": task["file_id"],
+        "action": "Daemon cleanup completed",
+        "details": json.dumps({
+            "cleanup_task_id": task_id,
+            "source_path": task["source_path"],
+            "message": "Daemon deleted local file"
+        })
+    })
+    
+    return snake_to_camel(task)
 
 @app.get("/api/audit")
 async def get_audit_logs(_user: dict = Depends(get_current_user)):

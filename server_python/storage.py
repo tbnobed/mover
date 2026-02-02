@@ -467,3 +467,97 @@ async def seed_data():
         """, str(uuid.uuid4()), file1_id, str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()), file2_id)
         
         return {"message": "Demo data seeded successfully"}
+
+# ============ CLEANUP TASKS ============
+
+async def create_cleanup_task(file_id: str, site: str, source_path: str) -> Dict[str, Any]:
+    """Create a cleanup task for a file"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            INSERT INTO cleanup_tasks (id, file_id, site, source_path, status, created_at)
+            VALUES (gen_random_uuid(), $1, $2, $3, 'pending', NOW())
+            RETURNING *
+        """, file_id, site, source_path)
+        return dict(row)
+
+async def get_pending_cleanup_tasks(site: str) -> List[Dict[str, Any]]:
+    """Get pending cleanup tasks for a specific site"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT ct.*, f.filename 
+            FROM cleanup_tasks ct
+            JOIN files f ON ct.file_id = f.id
+            WHERE LOWER(ct.site) = LOWER($1) AND ct.status = 'pending'
+            ORDER BY ct.created_at ASC
+        """, site)
+        return [dict(row) for row in rows]
+
+async def update_cleanup_task(task_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Update a cleanup task"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        set_clauses = []
+        values = []
+        i = 1
+        for key, value in updates.items():
+            # Convert camelCase to snake_case
+            snake_key = ''.join(['_' + c.lower() if c.isupper() else c for c in key]).lstrip('_')
+            set_clauses.append(f"{snake_key} = ${i}")
+            values.append(value)
+            i += 1
+        values.append(task_id)
+        query = f"UPDATE cleanup_tasks SET {', '.join(set_clauses)} WHERE id = ${i} RETURNING *"
+        row = await conn.fetchrow(query, *values)
+        return dict(row) if row else None
+
+async def mark_cleanup_orchestrator_done(task_id: str) -> Optional[Dict[str, Any]]:
+    """Mark that orchestrator has deleted its copy"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            UPDATE cleanup_tasks 
+            SET orchestrator_deleted = true
+            WHERE id = $1 
+            RETURNING *
+        """, task_id)
+        return dict(row) if row else None
+
+async def mark_cleanup_daemon_done(task_id: str) -> Optional[Dict[str, Any]]:
+    """Mark that daemon has deleted its local copy and complete the task if both done"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            UPDATE cleanup_tasks 
+            SET daemon_deleted = true,
+                status = CASE WHEN orchestrator_deleted THEN 'completed' ELSE status END,
+                completed_at = CASE WHEN orchestrator_deleted THEN NOW() ELSE completed_at END
+            WHERE id = $1 
+            RETURNING *
+        """, task_id)
+        return dict(row) if row else None
+
+async def complete_cleanup_task(task_id: str) -> Optional[Dict[str, Any]]:
+    """Mark cleanup task as completed"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            UPDATE cleanup_tasks 
+            SET status = 'completed', completed_at = NOW()
+            WHERE id = $1 
+            RETURNING *
+        """, task_id)
+        return dict(row) if row else None
+
+async def fail_cleanup_task(task_id: str, error_message: str) -> Optional[Dict[str, Any]]:
+    """Mark cleanup task as failed"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            UPDATE cleanup_tasks 
+            SET status = 'failed', error_message = $2
+            WHERE id = $1 
+            RETURNING *
+        """, task_id, error_message)
+        return dict(row) if row else None

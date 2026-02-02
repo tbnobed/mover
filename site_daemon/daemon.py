@@ -298,12 +298,50 @@ class SiteDaemon:
                     headers=get_auth_headers()
                 ) as resp:
                     if resp.status == 200:
+                        data = await resp.json()
                         print(f"[{datetime.now().isoformat()}] Heartbeat sent for {self.site_id}")
+                        
+                        # Process any cleanup tasks from orchestrator
+                        cleanup_tasks = data.get("cleanupTasks", [])
+                        if cleanup_tasks:
+                            print(f"[{datetime.now().isoformat()}] Received {len(cleanup_tasks)} cleanup task(s)")
+                            for task in cleanup_tasks:
+                                await self.process_cleanup_task(task)
                     else:
                         text = await resp.text()
                         print(f"[{datetime.now().isoformat()}] Heartbeat failed: {resp.status} - {text}")
         except Exception as e:
             print(f"[{datetime.now().isoformat()}] Heartbeat error: {e}")
+    
+    async def process_cleanup_task(self, task: dict):
+        """Delete local file and confirm with orchestrator"""
+        task_id = task.get("id")
+        source_path = task.get("sourcePath")
+        filename = task.get("filename", "unknown")
+        
+        print(f"[{datetime.now().isoformat()}] Processing cleanup: {filename} at {source_path}")
+        
+        try:
+            # Delete the local file
+            if os.path.exists(source_path):
+                os.remove(source_path)
+                print(f"[{datetime.now().isoformat()}] Deleted local file: {source_path}")
+            else:
+                print(f"[{datetime.now().isoformat()}] Local file not found (already cleaned?): {source_path}")
+            
+            # Confirm cleanup with orchestrator
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.orchestrator_url}/api/cleanup/{task_id}/confirm",
+                    headers=get_auth_headers()
+                ) as resp:
+                    if resp.status == 200:
+                        print(f"[{datetime.now().isoformat()}] Cleanup confirmed: {filename}")
+                    else:
+                        text = await resp.text()
+                        print(f"[{datetime.now().isoformat()}] Cleanup confirm failed: {resp.status} - {text}")
+        except Exception as e:
+            print(f"[{datetime.now().isoformat()}] Cleanup error for {filename}: {e}")
     
     def get_disk_free_gb(self) -> float:
         try:

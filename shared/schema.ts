@@ -93,6 +93,20 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
+// Cleanup tasks - pending file deletions for site daemons
+export const cleanupTasks = pgTable("cleanup_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fileId: varchar("file_id").references(() => files.id).notNull(),
+  site: text("site").notNull(),
+  sourcePath: text("source_path").notNull(),
+  status: text("status").notNull().default("pending"), // pending, completed, failed
+  orchestratorDeleted: boolean("orchestrator_deleted").notNull().default(false),
+  daemonDeleted: boolean("daemon_deleted").notNull().default(false),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at")
+});
+
 // Permanent file history ledger - NEVER deleted, only appended
 // Tracks every file hash ever received to prevent duplicate uploads
 export const fileHistory = pgTable("file_history", {

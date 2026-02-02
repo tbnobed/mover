@@ -24,7 +24,8 @@ import {
   CheckCheck,
   Trash2,
   Lock,
-  Undo2
+  Undo2,
+  Eraser
 } from "lucide-react";
 import type { File, AuditLog } from "@shared/schema";
 import { format } from "date-fns";
@@ -183,10 +184,22 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
     },
   });
 
+  const cleanupMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/cleanup`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({ title: "Cleanup initiated - daemon will delete local file on next heartbeat" });
+    },
+    onError: () => {
+      toast({ title: "Failed to initiate cleanup", variant: "destructive" });
+    },
+  });
+
   const isPending = assignMutation.isPending || startWorkMutation.isPending || 
     deliverMutation.isPending || rejectMutation.isPending || validateMutation.isPending ||
     queueMutation.isPending || startTransferMutation.isPending || completeTransferMutation.isPending ||
-    deleteMutation.isPending || revertMutation.isPending;
+    deleteMutation.isPending || revertMutation.isPending || cleanupMutation.isPending;
 
   return (
     <Card className="h-full flex flex-col">
@@ -348,6 +361,21 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   Deliver to MAM
+                </Button>
+              )}
+              {file.state === "delivered_to_mam" && (
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    if (confirm("This will delete the source file from the orchestrator and the site daemon's local storage. Continue?")) {
+                      cleanupMutation.mutate();
+                    }
+                  }} 
+                  disabled={isPending}
+                  data-testid="button-cleanup-file"
+                >
+                  <Eraser className="mr-2 h-4 w-4" />
+                  Cleanup Source Files
                 </Button>
               )}
               {!["delivered_to_mam", "archived", "rejected"].includes(file.state) && (
