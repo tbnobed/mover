@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatusBadge, SiteBadge } from "@/components/status-badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   X, 
   UserPlus, 
@@ -28,7 +42,7 @@ import {
   Eraser,
   RefreshCw
 } from "lucide-react";
-import type { File, AuditLog } from "@shared/schema";
+import type { File, AuditLog, User as UserType } from "@shared/schema";
 import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +62,8 @@ interface FileDetailsProps {
 
 export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
   const { toast } = useToast();
+  const [showColoristDialog, setShowColoristDialog] = useState(false);
+  const [selectedColorist, setSelectedColorist] = useState<string>("");
 
   // Fetch fresh file data to ensure state is current
   const { data: freshFile } = useQuery<File>({
@@ -63,12 +79,20 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
     refetchInterval: 5000,
   });
 
+  // Fetch colorists for assignment
+  const { data: users } = useQuery<UserType[]>({
+    queryKey: ["/api/users"],
+  });
+  const colorists = users?.filter(u => u.role === "colorist") || [];
+
   const assignMutation = useMutation({
-    mutationFn: () => apiRequest("POST", `/api/files/${file.id}/assign`),
+    mutationFn: (userId?: string) => apiRequest("POST", `/api/files/${file.id}/assign`, userId ? { user_id: userId } : undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/files"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      toast({ title: "File assigned to you" });
+      setShowColoristDialog(false);
+      setSelectedColorist("");
+      toast({ title: "File assigned successfully" });
     },
     onError: () => {
       toast({ title: "Failed to assign file", variant: "destructive" });
@@ -325,7 +349,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
               )}
               {file.state === "validated" && (
                 <Button 
-                  onClick={() => assignMutation.mutate()} 
+                  onClick={() => setShowColoristDialog(true)} 
                   disabled={isPending}
                   data-testid="button-assign-file"
                 >
@@ -355,12 +379,12 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
               )}
               {file.state === "transferred" && (
                 <Button 
-                  onClick={() => assignMutation.mutate()} 
+                  onClick={() => setShowColoristDialog(true)} 
                   disabled={isPending}
                   data-testid="button-assign-file"
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
-                  Assign to Me
+                  Assign to Colorist
                 </Button>
               )}
               {file.state === "colorist_assigned" && (
@@ -495,6 +519,51 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
           </div>
         </CardContent>
       </ScrollArea>
+
+      <Dialog open={showColoristDialog} onOpenChange={setShowColoristDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign to Colorist</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <Select value={selectedColorist} onValueChange={setSelectedColorist}>
+              <SelectTrigger data-testid="select-colorist">
+                <SelectValue placeholder="Select a colorist..." />
+              </SelectTrigger>
+              <SelectContent>
+                {colorists.map((colorist) => (
+                  <SelectItem 
+                    key={colorist.id} 
+                    value={colorist.id.toString()}
+                    data-testid={`select-colorist-${colorist.id}`}
+                  >
+                    {colorist.displayName} ({colorist.username})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowColoristDialog(false);
+                  setSelectedColorist("");
+                }}
+                data-testid="button-cancel-assign"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => assignMutation.mutate(selectedColorist)}
+                disabled={!selectedColorist || assignMutation.isPending}
+                data-testid="button-confirm-assign"
+              >
+                Assign
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
