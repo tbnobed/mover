@@ -836,16 +836,17 @@ async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user))
     if orchestrator_deleted:
         await storage.mark_retransfer_orchestrator_done(task["id"])
     
-    # Create audit log
+    # Create audit log - use None for new_state since file is deleted
     await storage.create_audit_log({
         "file_id": file_id,
         "action": "Retransfer initiated",
         "previous_state": "rejected",
-        "new_state": "pending_retransfer",
+        "new_state": None,
         "details": json.dumps({
             "retransfer_task_id": task["id"],
             "source_path": file["source_path"],
-            "site": file["source_site"]
+            "site": file["source_site"],
+            "status": "file_deleted_awaiting_reupload"
         })
     })
     
