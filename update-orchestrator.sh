@@ -95,7 +95,13 @@ CREATE TABLE IF NOT EXISTS retransfer_tasks (
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMP
 );
-" 2>/dev/null || echo "retransfer_tasks table already exists or created"
+" 2>/dev/null || echo "retransfer_tasks table already exists"
+
+# Grant permissions on the new table and sequence
+PGPASSWORD=${DB_PASSWORD} psql -h ${DB_HOST} -p ${DB_PORT} -U postgres -d ${DB_NAME} -c "
+GRANT ALL ON TABLE retransfer_tasks TO ${DB_USER};
+GRANT ALL ON SEQUENCE retransfer_tasks_id_seq TO ${DB_USER};
+" 2>/dev/null || echo "Permissions already granted or using correct user"
 
 # Ensure cleanup_tasks has required columns
 PGPASSWORD=${DB_PASSWORD} psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -c "

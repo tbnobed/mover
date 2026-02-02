@@ -1,0 +1,39 @@
+obtv-admin@mov-orc-dev:/opt/color-routing-orchestrator$ sudo journalctl -u color-routing-orchestrator -f
+Feb 02 07:26:48 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 HTTP/1.1" 404 Not Found
+Feb 02 07:26:48 mov-orc-dev npx[39050]: 7:26:48 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 404 in 6ms
+Feb 02 07:26:51 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 07:26:51 mov-orc-dev npx[39050]: 7:26:51 AM [server] GET /api/files 200 in 4ms
+Feb 02 07:26:53 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 HTTP/1.1" 404 Not Found
+Feb 02 07:26:53 mov-orc-dev npx[39050]: 7:26:53 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 404 in 6ms
+Feb 02 07:26:53 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit HTTP/1.1" 200 OK
+Feb 02 07:26:53 mov-orc-dev npx[39050]: 7:26:53 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit 200 in 6ms
+Feb 02 07:26:56 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 07:26:56 mov-orc-dev npx[39050]: 7:26:56 AM [server] GET /api/files 200 in 5ms
+Feb 02 07:26:58 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit HTTP/1.1" 200 OK
+Feb 02 07:26:58 mov-orc-dev npx[39050]: 7:26:58 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit 200 in 7ms
+Feb 02 07:26:58 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 HTTP/1.1" 404 Not Found
+Feb 02 07:26:58 mov-orc-dev npx[39050]: 7:26:58 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 404 in 8ms
+Feb 02 07:27:01 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 07:27:01 mov-orc-dev npx[39050]: 7:27:01 AM [server] GET /api/files 200 in 4ms
+Feb 02 07:27:05 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "POST /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/retransfer HTTP/1.1" 404 Not Found
+Feb 02 07:27:05 mov-orc-dev npx[39050]: 7:27:05 AM [server] POST /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/retransfer 404 in 4ms
+Feb 02 07:27:06 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit HTTP/1.1" 200 OK
+Feb 02 07:27:06 mov-orc-dev npx[39050]: 7:27:06 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit 200 in 4ms
+Feb 02 07:27:06 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 HTTP/1.1" 404 Not Found
+Feb 02 07:27:06 mov-orc-dev npx[39050]: 7:27:06 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 404 in 5ms
+Feb 02 07:27:07 mov-orc-dev npx[39050]: [python] INFO:     10.63.16.117:0 - "POST /api/sites/Dallas/heartbeat HTTP/1.1" 200 OK
+Feb 02 07:27:07 mov-orc-dev npx[39050]: 7:27:07 AM [server] POST /api/sites/Dallas/heartbeat 200 in 7ms
+Feb 02 07:27:09 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 07:27:09 mov-orc-dev npx[39050]: 7:27:09 AM [server] GET /api/files 200 in 8ms
+Feb 02 07:27:11 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit HTTP/1.1" 200 OK
+Feb 02 07:27:11 mov-orc-dev npx[39050]: 7:27:11 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit 200 in 5ms
+Feb 02 07:27:11 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 HTTP/1.1" 404 Not Found
+Feb 02 07:27:11 mov-orc-dev npx[39050]: 7:27:11 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 404 in 4ms
+Feb 02 07:27:14 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files HTTP/1.1" 200 OK
+Feb 02 07:27:14 mov-orc-dev npx[39050]: 7:27:14 AM [server] GET /api/files 200 in 5ms
+Feb 02 07:27:15 mov-orc-dev npx[39050]: [python] INFO:     10.100.4.150:0 - "POST /api/sites/Tustin/heartbeat HTTP/1.1" 200 OK
+Feb 02 07:27:15 mov-orc-dev npx[39050]: 7:27:15 AM [server] POST /api/sites/Tustin/heartbeat 200 in 7ms
+Feb 02 07:27:16 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit HTTP/1.1" 200 OK
+Feb 02 07:27:16 mov-orc-dev npx[39050]: 7:27:16 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0/audit 200 in 7ms
+Feb 02 07:27:16 mov-orc-dev npx[39050]: [python] INFO:     172.31.204.121:0 - "GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 HTTP/1.1" 404 Not Found
+Feb 02 07:27:16 mov-orc-dev npx[39050]: 7:27:16 AM [server] GET /api/files/8b8652f5-5a18-4c3e-9bf3-757f15c01ee0 404 in 7ms
