@@ -1,0 +1,57 @@
+[2026-02-02T06:08:46.088552] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:09:16.101524] Heartbeat sent for Dallas
+[2026-02-02T06:09:16.101572] Received 1 cleanup task(s)
+[2026-02-02T06:09:16.101579] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:09:16.101594] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:09:46.113316] Heartbeat sent for Dallas
+[2026-02-02T06:09:46.113357] Received 1 cleanup task(s)
+[2026-02-02T06:09:46.113365] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:09:46.113394] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:10:16.123490] Heartbeat sent for Dallas
+[2026-02-02T06:10:16.123539] Received 1 cleanup task(s)
+[2026-02-02T06:10:16.123547] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:10:16.123563] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:10:46.132988] Heartbeat sent for Dallas
+[2026-02-02T06:10:46.133029] Received 1 cleanup task(s)
+[2026-02-02T06:10:46.133037] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:10:46.133051] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:11:16.145057] Heartbeat sent for Dallas
+[2026-02-02T06:11:16.145109] Received 1 cleanup task(s)
+[2026-02-02T06:11:16.145117] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:11:16.145135] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:11:46.155524] Heartbeat sent for Dallas
+[2026-02-02T06:11:46.155562] Received 1 cleanup task(s)
+[2026-02-02T06:11:46.155570] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:11:46.155602] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:12:16.167646] Heartbeat sent for Dallas
+[2026-02-02T06:12:16.167692] Received 1 cleanup task(s)
+[2026-02-02T06:12:16.167700] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:12:16.167716] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:12:46.177875] Heartbeat sent for Dallas
+[2026-02-02T06:12:46.177930] Received 1 cleanup task(s)
+[2026-02-02T06:12:46.177938] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:12:46.177954] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:13:16.188207] Heartbeat sent for Dallas
+[2026-02-02T06:13:16.188246] Received 1 cleanup task(s)
+[2026-02-02T06:13:16.188259] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:13:16.188273] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:13:46.201501] Heartbeat sent for Dallas
+[2026-02-02T06:13:46.201542] Received 1 cleanup task(s)
+[2026-02-02T06:13:46.201551] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:13:46.201567] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:14:16.215824] Heartbeat sent for Dallas
+[2026-02-02T06:14:16.215870] Received 1 cleanup task(s)
+[2026-02-02T06:14:16.215878] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:14:16.215893] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:14:46.227757] Heartbeat sent for Dallas
+[2026-02-02T06:14:46.227800] Received 2 cleanup task(s)
+[2026-02-02T06:14:46.227807] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:14:46.227830] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:14:46.227841] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:14:46.227849] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:15:16.237703] Heartbeat sent for Dallas
+[2026-02-02T06:15:16.237763] Received 2 cleanup task(s)
+[2026-02-02T06:15:16.237775] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:15:16.237794] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
+[2026-02-02T06:15:16.237808] Processing cleanup: 2024-02-06_07-20-54.mov at None
+[2026-02-02T06:15:16.237815] Cleanup error for 2024-02-06_07-20-54.mov: stat: path should be string, bytes, os.PathLike or integer, not NoneType
