@@ -821,10 +821,7 @@ async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user))
     if file.get("sha256_hash"):
         await storage.delete_file_from_history(file["sha256_hash"])
     
-    # Delete the file record from files table
-    await storage.delete_file_record(file_id)
-    
-    # Create retransfer task for daemon
+    # Create retransfer task for daemon BEFORE deleting file (no FK constraint on retransfer_tasks)
     task = await storage.create_retransfer_task(
         file_id=file_id,
         site=file["source_site"],
@@ -836,12 +833,12 @@ async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user))
     if orchestrator_deleted:
         await storage.mark_retransfer_orchestrator_done(task["id"])
     
-    # Create audit log - use None for new_state since file is deleted
+    # Create audit log BEFORE deleting file (audit_logs has FK to files)
     await storage.create_audit_log({
         "file_id": file_id,
         "action": "Retransfer initiated",
         "previous_state": "rejected",
-        "new_state": None,
+        "new_state": "rejected",  # Keep same state since we're about to delete
         "details": json.dumps({
             "retransfer_task_id": task["id"],
             "source_path": file["source_path"],
@@ -849,6 +846,9 @@ async def retransfer_file(file_id: str, _user: dict = Depends(get_current_user))
             "status": "file_deleted_awaiting_reupload"
         })
     })
+    
+    # Delete the file record from files table LAST (after audit log is created)
+    await storage.delete_file_record(file_id)
     
     return {"success": True, "taskId": task["id"], "message": "Retransfer initiated - daemon will re-upload file"}
 
