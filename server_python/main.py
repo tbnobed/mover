@@ -591,12 +591,11 @@ async def assign_file(file_id: str, request: Optional[AssignRequest] = None, _us
     if not assigned_user:
         raise HTTPException(status_code=400, detail="No user available for assignment")
     
-    # Store display_name for human readability
     display_name = assigned_user.get("display_name") or assigned_user.get("username")
     
     updated = await storage.update_file(file_id, {
         "state": "colorist_assigned",
-        "assigned_to": display_name,
+        "assigned_to": assigned_user["id"],  # Store user ID (FK constraint)
         "assigned_at": datetime.now()
     })
     await storage.create_audit_log({

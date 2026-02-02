@@ -8,16 +8,47 @@ from database import get_pool
 async def get_files() -> List[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
-        # Include cleanup status from cleanup_tasks table (use EXISTS to avoid duplicates)
+        # Include cleanup status and resolve assigned_to user ID to display name
         rows = await conn.fetch("""
             SELECT f.*, 
+                   u.display_name as assigned_to_name,
                    EXISTS(SELECT 1 FROM cleanup_tasks ct WHERE ct.file_id = f.id AND ct.status = 'completed') as cleaned_up
             FROM files f
+            LEFT JOIN users u ON f.assigned_to = u.id
             ORDER BY f.detected_at DESC
         """)
-        return [dict(row) for row in rows]
+        result = []
+        for row in rows:
+            file_dict = dict(row)
+            # Replace user ID with display name for frontend
+            if file_dict.get("assigned_to_name"):
+                file_dict["assigned_to"] = file_dict["assigned_to_name"]
+            del file_dict["assigned_to_name"]
+            result.append(file_dict)
+        return result
 
 async def get_file(file_id: str) -> Optional[Dict[str, Any]]:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            SELECT f.*, 
+                   u.display_name as assigned_to_name,
+                   EXISTS(SELECT 1 FROM cleanup_tasks ct WHERE ct.file_id = f.id AND ct.status = 'completed') as cleaned_up
+            FROM files f
+            LEFT JOIN users u ON f.assigned_to = u.id
+            WHERE f.id = $1
+        """, file_id)
+        if not row:
+            return None
+        file_dict = dict(row)
+        if file_dict.get("assigned_to_name"):
+            file_dict["assigned_to"] = file_dict["assigned_to_name"]
+        if "assigned_to_name" in file_dict:
+            del file_dict["assigned_to_name"]
+        return file_dict
+
+async def get_file_raw(file_id: str) -> Optional[Dict[str, Any]]:
+    """Get file without joining users - returns raw assigned_to user ID"""
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow("""
@@ -28,8 +59,7 @@ async def get_file(file_id: str) -> Optional[Dict[str, Any]]:
         """, file_id)
         return dict(row) if row else None
 
-async def get_file_by_source(source_site: str, source_path: str) -> Optional[Dict[str, Any]]:
-    """Check if a file from this source already exists (case-insensitive site match)"""
+async def get_file_by_site_and_path(source_site: str, source_path: str) -> Optional[Dict[str, Any]]:
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
