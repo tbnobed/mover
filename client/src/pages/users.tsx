@@ -41,20 +41,22 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Users, UserPlus, RefreshCw, Pencil, Trash2 } from "lucide-react";
+import { Users, UserPlus, RefreshCw, Pencil, Trash2, ShieldX } from "lucide-react";
 import type { User } from "@shared/schema";
 import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, PERMISSIONS } from "@/hooks/use-auth";
 
 const roleColors: Record<string, string> = {
   admin: "bg-destructive/15 text-destructive border-destructive/30",
   colorist: "bg-chart-1/15 text-chart-1 border-chart-1/30",
+  media_manager: "bg-chart-3/15 text-chart-3 border-chart-3/30",
   engineer: "bg-chart-2/15 text-chart-2 border-chart-2/30",
   readonly: "bg-muted text-muted-foreground border-border",
 };
 
-const roles = ["admin", "colorist", "engineer", "readonly"];
+const roles = ["admin", "colorist", "media_manager", "engineer", "readonly"];
 
 function UserRowSkeleton() {
   return (
@@ -85,6 +87,7 @@ interface UserFormData {
 
 export default function UsersPage() {
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -100,6 +103,24 @@ export default function UsersPage() {
   const { data: users, isLoading, isRefetching, refetch } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
+
+  if (!hasPermission(PERMISSIONS.MANAGE_USERS)) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Card className="max-w-md w-full">
+          <CardContent className="flex flex-col items-center gap-4 py-8">
+            <ShieldX className="h-16 w-16 text-muted-foreground" />
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-semibold">Access Denied</h2>
+              <p className="text-muted-foreground">
+                You don't have permission to manage users. Only administrators can access this page.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const createMutation = useMutation({
     mutationFn: async (data: UserFormData) => {

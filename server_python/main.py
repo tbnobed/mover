@@ -163,7 +163,7 @@ async def logout(request: Request, response: Response):
     return {"message": "Logged out successfully"}
 
 @app.get("/api/auth/me")
-async def get_current_user(request: Request):
+async def get_me(request: Request):
     token = request.cookies.get("session_token")
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -172,12 +172,16 @@ async def get_current_user(request: Request):
     if not session:
         raise HTTPException(status_code=401, detail="Session expired")
     
+    role = session.get("role", "readonly")
+    permissions = list(get_permissions(role))
+    
     return {
         "id": session["user_id"],
         "username": session["username"],
         "displayName": session["display_name"],
-        "role": session["role"],
-        "email": session["email"]
+        "role": role,
+        "email": session["email"],
+        "permissions": permissions
     }
 
 @app.get("/api/stats")

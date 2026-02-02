@@ -46,6 +46,7 @@ import type { File, AuditLog, User as UserType } from "@shared/schema";
 import { format } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, PERMISSIONS } from "@/hooks/use-auth";
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -62,6 +63,7 @@ interface FileDetailsProps {
 
 export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
   const [showColoristDialog, setShowColoristDialog] = useState(false);
   const [selectedColorist, setSelectedColorist] = useState<string>("");
 
@@ -337,7 +339,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
           <div className="space-y-3">
             <h4 className="text-sm font-medium">Actions</h4>
             <div className="flex flex-wrap gap-2">
-              {file.state === "detected" && (
+              {file.state === "detected" && hasPermission(PERMISSIONS.VALIDATE_FILES) && (
                 <Button 
                   onClick={() => validateMutation.mutate()} 
                   disabled={isPending}
@@ -347,7 +349,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Validate
                 </Button>
               )}
-              {file.state === "validated" && (
+              {file.state === "validated" && hasPermission(PERMISSIONS.ASSIGN_COLORIST) && (
                 <Button 
                   onClick={() => setShowColoristDialog(true)} 
                   disabled={isPending}
@@ -377,7 +379,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Complete Transfer
                 </Button>
               )}
-              {file.state === "transferred" && (
+              {file.state === "transferred" && hasPermission(PERMISSIONS.ASSIGN_COLORIST) && (
                 <Button 
                   onClick={() => setShowColoristDialog(true)} 
                   disabled={isPending}
@@ -387,7 +389,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Assign to Colorist
                 </Button>
               )}
-              {file.state === "colorist_assigned" && (
+              {file.state === "colorist_assigned" && hasPermission(PERMISSIONS.START_WORK) && (
                 <Button 
                   onClick={() => startWorkMutation.mutate()} 
                   disabled={isPending}
@@ -397,7 +399,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Start Working
                 </Button>
               )}
-              {file.state === "in_progress" && (
+              {file.state === "in_progress" && hasPermission(PERMISSIONS.DELIVER_MAM) && (
                 <Button 
                   onClick={() => deliverMutation.mutate()} 
                   disabled={isPending}
@@ -407,7 +409,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Deliver to MAM
                 </Button>
               )}
-              {file.state === "delivered_to_mam" && (
+              {file.state === "delivered_to_mam" && hasPermission(PERMISSIONS.TRIGGER_CLEANUP) && (
                 <Button 
                   variant="outline"
                   onClick={() => {
@@ -422,7 +424,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Cleanup Source Files
                 </Button>
               )}
-              {!["delivered_to_mam", "archived", "rejected"].includes(file.state) && (
+              {!["delivered_to_mam", "archived", "rejected"].includes(file.state) && hasPermission(PERMISSIONS.REJECT_FILES) && (
                 <Button 
                   variant="destructive" 
                   onClick={() => rejectMutation.mutate()} 
@@ -433,7 +435,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Reject
                 </Button>
               )}
-              {file.state === "rejected" && (
+              {file.state === "rejected" && hasPermission(PERMISSIONS.TRIGGER_RETRANSFER) && (
                 <Button 
                   variant="default"
                   onClick={() => {
@@ -448,7 +450,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Retransfer
                 </Button>
               )}
-              {file.state === "detected" && !(file as any).locked && (
+              {file.state === "detected" && !(file as any).locked && hasPermission(PERMISSIONS.DELETE_FILES) && (
                 <Button 
                   variant="outline" 
                   onClick={() => {
@@ -463,7 +465,7 @@ export function FileDetails({ file: initialFile, onClose }: FileDetailsProps) {
                   Delete
                 </Button>
               )}
-              {file.state !== "detected" && (
+              {file.state !== "detected" && hasPermission(PERMISSIONS.REVERT_STATE) && (
                 <Button 
                   variant="outline" 
                   onClick={() => revertMutation.mutate()} 

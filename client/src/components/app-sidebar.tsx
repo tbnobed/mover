@@ -21,7 +21,7 @@ import {
   LogOut
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, PERMISSIONS } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -31,19 +31,19 @@ const mainNavItems = [
   { title: "Transfers", url: "/transfers", icon: Activity },
 ];
 
-const managementItems = [
-  { title: "Sites", url: "/sites", icon: Server },
-  { title: "Users", url: "/users", icon: Users },
-  { title: "Audit Log", url: "/audit", icon: FileCheck },
-];
-
 const settingsItems = [
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
   const [location] = useLocation();
-  const { user, logout, isLoggingOut } = useAuth();
+  const { user, logout, isLoggingOut, hasPermission } = useAuth();
+  
+  const managementItems = [
+    { title: "Sites", url: "/sites", icon: Server },
+    ...(hasPermission(PERMISSIONS.MANAGE_USERS) ? [{ title: "Users", url: "/users", icon: Users }] : []),
+    { title: "Audit Log", url: "/audit", icon: FileCheck },
+  ];
 
   const getInitials = (name: string) => {
     return name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "??";
